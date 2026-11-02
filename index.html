@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6b092b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Shakya Cosmetic POS</title>
+
+  <!-- Embedded PWA Manifest for Full-Screen App Experience -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Shakya Cosmetic & Saree Collection","short_name":"Shakya POS","start_url":".","display":"standalone","background_color":"#f8f5f2","theme_color":"#6b092b"}'>
+
+  <!-- Barcode Generator & Camera Scanner Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root { --maroon: #6b092b; --gold: #f5c542; --bg: #f8f5f2; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: #222; padding-bottom: 60px; }
+    header { background: var(--maroon); color: white; padding: 12px 14px; text-align: center; border-bottom: 4px solid var(--gold); }
+    header h1 { margin: 0; font-size: 19px; color: var(--gold); letter-spacing: 0.5px; }
+    header p { margin: 3px 0 0; font-size: 11px; opacity: 0.95; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 20; }
+    .tab { flex: 1; padding: 11px 4px; text-align: center; font-weight: 700; font-size: 12px; cursor: pointer; color: #555; }
+    .tab.active { color: var(--maroon); border-bottom: 3px solid var(--maroon); background: #fff8fa; }
+
+    .section { display: none; padding: 12px; max-width: 600px; margin: auto; }
+    .section.active { display: block; }
+
+    .card { background: white; padding: 14px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 14px; }
+    .card h3 { margin-top: 0; color: var(--maroon); font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; margin-top: 8px; color: #444; }
+    input, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    .row { display: flex; gap: 8px; align-items: flex-end; }
+    .row > div { flex: 1; }
+
+    button { background: var(--maroon); color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; font-size: 13px; }
+    button.gold { background: var(--gold); color: #222; font-size: 14px; }
+    button.dark { background: #333; color: #fff; }
+    button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    th, td { border-bottom: 1px solid #eee; padding: 7px 4px; text-align: left; }
+    th { background: #f3e8ec; color: var(--maroon); }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-box { background: #fff8fa; border-left: 4px solid var(--maroon); padding: 10px; border-radius: 6px; }
+    .stat-box span { font-size: 11px; color: #666; display: block; }
+    .stat-box strong { font-size: 17px; color: var(--maroon); }
+
+    /* Camera Scanner Modal */
+    #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
+    #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
+
+    /* Printable Receipt & Sticker Area */
+    #printZone { border: 2px dashed #333; padding: 12px; background: #fff; text-align: center; margin-top: 10px; }
+    #printZone h2 { margin: 0; font-size: 17px; }
+    #printZone p { margin: 2px 0; font-size: 11px; }
+    .receipt-total { font-size: 15px; font-weight: 800; margin: 8px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printZone, #printZone * { visibility: visible; }
+      #printZone { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>SHAKYA COSMETIC</h1>
+  <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | Pro. MAHAVEER PRASAD | Mob: 8780234760</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('billing', this)">🧾 Billing</div>
+  <div class="tab" onclick="switchTab('stock', this)">📦 Stock</div>
+  <div class="tab" onclick="switchTab('stats', this)">📊 Insights</div>
+  <div class="tab" onclick="switchTab('backup', this)">💾 Backup</div>
+</div>
+
+<!-- CAMERA BARCODE SCANNER MODAL -->
+<div id="scannerModal">
+  <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
+  <div id="reader"></div>
+  <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
+</div>
+
+<!-- 1. BILLING & ACC SECTION -->
+<div id="billing" class="section active">
+  <div class="card">
+    <h3>1. Scan / Enter Saree Code</h3>
+    <div class="row">
+      <div style="flex:2">
+        <input type="text" id="scanInput" placeholder="Ex: SC-101-R" oninput="this.value = this.value.toUpperCase()">
+      </div>
+      <div style="flex:1">
+        <button style="margin:0;" onclick="addItemToBill()">+ Add</button>
+      </div>
+      <div style="flex:1">
+        <button class="dark" style="margin:0;" onclick="startScanner('BILL')">📷 Scan</button>
+      </div>
+    </div>
+
+    <table id="cartTable">
+      <thead>
+        <tr><th>Code</th><th>Item/Colour</th><th>MRP (₹)</th><th></th></tr>
+      </thead>
+      <tbody id="cartBody"></tbody>
+    </table>
+
+    <div class="row" style="margin-top:10px;">
+      <div>
+        <label>Total Sticker Bill (₹)</label>
+        <input type="number" id="billTotalMrp" readonly value="0" style="background:#eee; font-weight:bold;">
+      </div>
+      <div>
+        <label style="color:#b30000;">ACC (Actual Cash ₹)</label>
+        <input type="number" id="accInput" placeholder="Asli mile paise" oninput="updateLiveSplit()">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Customer Name / Gaon</label>
+        <input type="text" id="custName" placeholder="Ex: Sunita - Niwari Kalan">
+      </div>
+      <div>
+        <label>Payment Mode</label>
+        <select id="payMode">
+          <option value="Cash">Cash</option>
+          <option value="AEPS Cash">Spice Money AEPS</option>
+          <option value="UPI">PhonePe / UPI</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="liveSplitBox" style="background:#fff3cd; padding:8px; border-radius:6px; margin-top:10px; font-size:12px; display:none;"></div>
+
+    <button class="gold" onclick="finalizeBill()">✅ Bill Banayein & Secret ACC Barcode Chhapein</button>
+  </div>
+
+  <!-- PRINTABLE RECEIPT / STICKER PREVIEW -->
+  <div id="printCard" class="card" style="display:none;">
+    <div id="printZone"></div>
+    <button onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+</div>
+
+<!-- 2. STOCK KEEPING SECTION -->
+<div id="stock" class="section">
+  <div class="card">
+    <h3>+ Nayi Saree / Item Stock Mein Jodein</h3>
+    <div class="row">
+      <div>
+        <label>Unique Item Code</label>
+        <input type="text" id="sCode" placeholder="Ex: SC-101-R" oninput="this.value = this.value.toUpperCase()">
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="sCat">
+          <option value="Daily Saree">Daily Wear Saree</option>
+          <option value="Fancy Saree">Fancy / Wedding Saree</option>
+          <option value="Petticoat">Petticoat</option>
+          <option value="Blouse/Fall">Blouse Piece / Fall</option>
+          <option value="Cosmetic">Cosmetic / Bangles</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Colour Name</label>
+        <input type="text" id="sColor" placeholder="Ex: Red (लाल)">
+      </div>
+      <div>
+        <label>Quantity (Pcs)</label>
+        <input type="number" id="sQty" value="1">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Landing Cost (Asli Kharid ₹)</label>
+        <input type="number" id="sCost" placeholder="Ex: 210">
+      </div>
+      <div>
+        <label>Sticker MRP (Grahak Rate ₹)</label>
+        <input type="number" id="sMrp" placeholder="Ex: 380">
+      </div>
+    </div>
+    <button onclick="saveStockItem()">💾 Stock Mein Save Karein</button>
+  </div>
+
+  <div class="card">
+    <h3>Available Stock (Tap '+Bill' ya '🏷️ Tag')</h3>
+    <table>
+      <thead><tr><th>Code</th><th>Item & Colour</th><th>Cost</th><th>MRP</th><th>Qty</th><th>Action</th></tr></thead>
+      <tbody id="stockTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 3. INSIGHTS & BARCODE DECODER SECTION -->
+<div id="stats" class="section">
+  <div class="card">
+    <h3>🔍 Verify Customer Bill (Decode Secret ACC)</h3>
+    <div class="row">
+      <div style="flex:2">
+        <input type="text" id="decodeInput" placeholder="Ex: INV101-A450-C255" oninput="decodeAcc(this.value)">
+      </div>
+      <div style="flex:1">
+        <button class="dark" style="margin:0;" onclick="startScanner('DECODE')">📷 Scan Bill</button>
+      </div>
+    </div>
+    <p id="decodeResult" style="font-weight:bold; color:var(--maroon); margin-top:8px; font-size:13px;"></p>
+  </div>
+
+  <div class="card">
+    <h3>📊 Live Business Insights (Asli Munafa)</h3>
+    <div class="stat-grid">
+      <div class="stat-box"><span>Total Sticker Billing</span><strong id="stMrp">₹0</strong></div>
+      <div class="stat-box"><span>Total ACC (Asli Cash)</span><strong id="stAcc">₹0</strong></div>
+      <div class="stat-box"><span>Total Bargaining Chhoot</span><strong id="stDisc">₹0</strong></div>
+      <div class="stat-box"><span>Shuddh Munafa (Net Profit)</span><strong id="stProfit" style="color:green;">₹0</strong></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎨 Top Bikne Wale Colours & Bill History</h3>
+    <div id="colorInsights" style="font-size:13px; margin-bottom:10px;"></div>
+    <table>
+      <thead><tr><th>Bill#</th><th>Items (Real Rate)</th><th>MRP</th><th>ACC</th><th>Profit</th></tr></thead>
+      <tbody id="salesHistoryBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 4. BACKUP & EXCEL EXPORT SECTION -->
+<div id="backup" class="section">
+  <div class="card">
+    <h3>💾 Surakshit Backup & Excel Download</h3>
+    <p style="font-size:12px; color:#555;">Har hafte apna data download karke WhatsApp ya Google Drive par rakh lein taaki phone badalne par bhi hisaab surakshit rahe.</p>
+    <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
+    <button onclick="downloadBackupJSON()">⬇️ Full App Data Backup (.JSON)</button>
+
+    <hr style="margin:16px 0;">
+    <label>Purana Backup File (.JSON) Wapas Daalein (Restore):</label>
+    <input type="file" id="restoreFile" accept=".json" onchange="restoreBackupJSON(event)">
+  </div>
+</div>
+
+<script>
+  let inventory = JSON.parse(localStorage.getItem('sc_inventory')) || [
+    { code: 'SC-101-R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
+    { code: 'SC-102-P', cat: 'Fancy Saree', color: 'Rani Pink', qty: 3, cost: 420, mrp: 750 },
+    { code: 'PT-01-R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
+  ];
+  let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
+  let cart = [];
+  let html5QrCode = null;
+
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(id).classList.add('active');
+    renderStock(); renderStats();
+  }
+
+  // Camera Barcode Scanner Logic
+  function startScanner(mode) {
+    document.getElementById('scannerModal').style.display = 'block';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 120 } },
+      (decodedText) => {
+        stopScanner();
+        if (mode === 'BILL') {
+          document.getElementById('scanInput').value = decodedText.toUpperCase();
+          addItemToBill();
+        } else if (mode === 'DECODE') {
+          document.getElementById('decodeInput').value = decodedText.toUpperCase();
+          decodeAcc(decodedText);
+        }
+      },
+      () => {}
+    ).catch(err => {
+      alert("Camera khulne mein dikkat (HTTPS ya localhost par chalayein): " + err);
+      stopScanner();
+    });
+  }
+
+  function stopScanner() {
+    if (html5QrCode) {
+      html5QrCode.stop().then(() => {
+        html5QrCode.clear();
+        document.getElementById('scannerModal').style.display = 'none';
+      }).catch(() => {
+        document.getElementById('scannerModal').style.display = 'none';
+      });
+    } else {
+      document.getElementById('scannerModal').style.display = 'none';
+    }
+  }
+
+  function saveStockItem() {
+    const code = document.getElementById('sCode').value.trim();
+    const cat = document.getElementById('sCat').value;
+    const color = document.getElementById('sColor').value.trim();
+    const qty = parseInt(document.getElementById('sQty').value) || 1;
+    const cost = parseFloat(document.getElementById('sCost').value) || 0;
+    const mrp = parseFloat(document.getElementById('sMrp').value) || 0;
+    if (!code || !cost || !mrp) return alert('Kripya Code, Cost aur MRP zaroor bharein!');
+    const existing = inventory.find(i => i.code === code);
+    if (existing) { existing.qty += qty; existing.cost = cost; existing.mrp = mrp; existing.color = color || existing.color; }
+    else { inventory.push({ code, cat, color, qty, cost, mrp }); }
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    renderStock();
+    alert('Item Stock mein jud gaya!');
+  }
+
+  function renderStock() {
+    const tbody = document.getElementById('stockTableBody');
+    tbody.innerHTML = inventory.map(item => `
+      <tr>
+        <td><b>${item.code}</b></td>
+        <td>${item.cat}<br><small>${item.color}</small></td>
+        <td>₹${item.cost}</td>
+        <td><b>₹${item.mrp}</b></td>
+        <td style="color:${item.qty <= 2 ? 'red' : 'black'}; font-weight:bold;">${item.qty}</td>
+        <td>
+          <button class="small" onclick="quickAdd('${item.code}')">+Bill</button>
+          <button class="small dark" onclick="printSareeTag('${item.code}')">🏷️Tag</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Generate Printable Saree Barcode Sticker
+  function printSareeTag(code) {
+    const item = inventory.find(i => i.code === code);
+    if (!item) return;
+    document.querySelectorAll('.tab')[0].click();
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    zone.innerHTML = `
+      <h2>SHAKYA COSMETIC</h2>
+      <p>${item.cat} - ${item.color} | Code: C${item.cost}X</p>
+      <div class="receipt-total">MRP: ₹${item.mrp}</div>
+      <svg id="tagBarcode"></svg>
+    `;
+    JsBarcode("#tagBarcode", item.code, { format: "CODE128", width: 2, height: 40, displayValue: true, fontSize: 13 });
+  }
+
+  function quickAdd(code) {
+    document.getElementById('scanInput').value = code;
+    addItemToBill();
+    document.querySelectorAll('.tab')[0].click();
+  }
+
+  function addItemToBill() {
+    const code = document.getElementById('scanInput').value.trim();
+    const item = inventory.find(i => i.code === code);
+    if (!item) return alert('Yeh Saree Code Stock mein nahi mila!');
+    if (item.qty <= 0) return alert('Yeh item Out of Stock hai!');
+    cart.push({ ...item });
+    document.getElementById('scanInput').value = '';
+    renderCart();
+  }
+
+  function removeCartItem(idx) {
+    cart.splice(idx, 1);
+    renderCart();
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartBody');
+    let totalMrp = 0;
+    tbody.innerHTML = cart.map((c, idx) => {
+      totalMrp += c.mrp;
+      return `<tr>
+        <td><b>${c.code}</b></td>
+        <td>${c.cat} (${c.color})</td>
+        <td>₹${c.mrp}</td>
+        <td><button class="small" style="background:#c00" onclick="removeCartItem(${idx})">✕</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('billTotalMrp').value = totalMrp;
+    document.getElementById('accInput').value = totalMrp;
+    updateLiveSplit();
+  }
+
+  function updateLiveSplit() {
+    const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
+    const acc = parseFloat(document.getElementById('accInput').value) || 0;
+    const box = document.getElementById('liveSplitBox');
+    if (cart.length === 0 || totalMrp === 0) { box.style.display = 'none'; return; }
+
+    let totalCost = cart.reduce((s, i) => s + i.cost, 0);
+    let totalDiscount = totalMrp - acc;
+    let netProfit = acc - totalCost;
+
+    let itemBreakup = cart.map(i => {
+      let weight = i.mrp / totalMrp;
+      let itemRealSale = Math.round(i.mrp - (totalDiscount * weight));
+      return `${i.code}: MRP ₹${i.mrp} ➔ Asli Sale <b>₹${itemRealSale}</b> (Profit: ₹${itemRealSale - i.cost})`;
+    }).join('<br>');
+
+    box.style.display = 'block';
+    box.innerHTML = `<b>🔒 Owner Internal Hisaab (Bill par nahi chhapega):</b><br>
+      Kharid Cost: ₹${totalCost} | Chhoot: ₹${totalDiscount} | <b>Net Profit: ₹${netProfit}</b><hr style="margin:4px 0">
+      ${itemBreakup}`;
+  }
+
+  function finalizeBill() {
+    if (cart.length === 0) return alert('Pehle bill mein Saree jodein!');
+    const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
+    const acc = parseFloat(document.getElementById('accInput').value) || totalMrp;
+    const totalCost = cart.reduce((s, i) => s + i.cost, 0);
+    const invId = 'INV' + (sales.length + 101);
+    const dateStr = new Date().toLocaleDateString('hi-IN');
+
+    const itemsSold = cart.map(i => {
+      const st = inventory.find(x => x.code === i.code);
+      if (st) st.qty -= 1;
+      const realSale = Math.round((i.mrp / totalMrp) * acc);
+      return { code: i.code, cat: i.cat, color: i.color, mrp: i.mrp, cost: i.cost, realSale };
+    });
+
+    const saleRecord = {
+      invId, date: dateStr,
+      cust: document.getElementById('custName').value || 'Walk-in Customer',
+      mode: document.getElementById('payMode').value,
+      totalMrp, acc, totalCost, profit: acc - totalCost,
+      items: itemsSold
+    };
+
+    sales.unshift(saleRecord);
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    localStorage.setItem('sc_sales', JSON.stringify(sales));
+
+    // Render Customer Receipt with Disguised ACC Barcode
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    zone.innerHTML = `
+      <h2>SHAKYA COSMETIC</h2>
+      <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
+      <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
+      <hr>
+      <p style="text-align:left;"><b>Bill No:</b> ${invId} | <b>Date:</b> ${dateStr}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.mode})</p>
+      <table>
+        <thead><tr><th>Code</th><th>Item</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
+        <tbody>
+          ${itemsSold.map(i => `<tr><td>${i.code}</td><td>${i.cat} (${i.color})</td><td style="text-align:right;">₹${i.mrp}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="receipt-total">TOTAL AMOUNT: ₹${totalMrp}</div>
+      <p style="font-size:10px;">धन्यवाद! एक बार बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
+      <svg id="accBarcode"></svg>
+    `;
+
+    const secretPayload = `${invId}-A${acc}-C${totalCost}`;
+    JsBarcode("#accBarcode", secretPayload, {
+      format: "CODE128",
+      width: 1.7,
+      height: 40,
+      displayValue: true,
+      text: `${invId} | SHAKYA COSMETIC`,
+      fontSize: 11
+    });
+
+    cart = [];
+    renderCart();
+  }
+
+  function decodeAcc(val) {
+    const res = document.getElementById('decodeResult');
+    const match = val.toUpperCase().match(/(INV\d+)-A(\d+)-C(\d+)/);
+    if (!match) { res.innerText = 'Sahi Bill Barcode scan ya type karein...'; return; }
+    const [_, inv, acc, cost] = match;
+    const found = sales.find(s => s.invId === inv);
+    let itemInfo = found ? `<br>Items: ` + found.items.map(i => `${i.code} (Asli Sale: ₹${i.realSale})`).join(', ') : '';
+    res.innerHTML = `✅ <b>Bill: ${inv}</b> | Grahak ne Asli Cash Diya (ACC): <b>₹${acc}</b> | Kharid: ₹${cost} | Profit: <b>₹${acc - cost}</b>${itemInfo}`;
+  }
+
+  function renderStats() {
+    let tMrp = 0, tAcc = 0, tProfit = 0;
+    let colorCount = {};
+    sales.forEach(s => {
+      tMrp += s.totalMrp; tAcc += s.acc; tProfit += s.profit;
+      s.items.forEach(i => { colorCount[i.color] = (colorCount[i.color] || 0) + 1; });
+    });
+    document.getElementById('stMrp').innerText = '₹' + tMrp;
+    document.getElementById('stAcc').innerText = '₹' + tAcc;
+    document.getElementById('stDisc').innerText = '₹' + (tMrp - tAcc);
+    document.getElementById('stProfit').innerText = '₹' + tProfit;
+
+    const topColors = Object.entries(colorCount).sort((a,b) => b[1]-a[1]).map(c => `<b>${c[0]}</b> (${c[1]} pcs)`).join(', ');
+    document.getElementById('colorInsights').innerHTML = topColors ? `🔥 Top Bikne Wale Colours: ${topColors}` : 'Abhi koi sale record nahi hai.';
+
+    document.getElementById('salesHistoryBody').innerHTML = sales.map(s => `
+      <tr>
+        <td><b>${s.invId}</b><br><small>${s.date}</small></td>
+        <td>${s.items.map(i => `${i.code} (₹${i.realSale})`).join('<br>')}</td>
+        <td>₹${s.totalMrp}</td>
+        <td><b>₹${s.acc}</b></td>
+        <td style="color:green;font-weight:bold;">₹${s.profit}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Backup & Excel Export Functions
+  function exportSalesCSV() {
+    if (sales.length === 0) return alert('Abhi koi sale nahi hui hai!');
+    let csv = 'Invoice,Date,Customer,PaymentMode,StickerMRP,ActualCash_ACC,Cost,NetProfit,Items\n';
+    sales.forEach(s => {
+      const itemsStr = s.items.map(i => `${i.code}(Rs.${i.realSale})`).join(' | ');
+      csv += `${s.invId},${s.date},"${s.cust}",${s.mode},${s.totalMrp},${s.acc},${s.totalCost},${s.profit},"${itemsStr}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Shakya_Sales_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  }
+
+  function downloadBackupJSON() {
+    const data = JSON.stringify({ inventory, sales });
+    const blob = new Blob([data], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Shakya_POS_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  }
+
+  function restoreBackupJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.inventory && parsed.sales) {
+          inventory = parsed.inventory;
+          sales = parsed.sales;
+          localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+          localStorage.setItem('sc_sales', JSON.stringify(sales));
+          renderStock(); renderStats();
+          alert('✅ Backup safaltapoorvak Restore ho gaya!');
+        }
+      } catch (err) { alert('Invalid backup file!'); }
+    };
+    reader.readAsText(file);
+  }
+
+  renderStock();
+</script>
+</body>
+</html>
