@@ -58,6 +58,10 @@
     .color-chip { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 4px 9px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
     .color-chip:active { background: var(--maroon); color: #fff; }
 
+    /* Filter Bar Styling */
+    .filter-box { background: #fdf8fa; border: 1px solid #ecdce2; padding: 8px; border-radius: 8px; margin-top: 8px; }
+    .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: #555; background: #f3e8ec; padding: 5px 8px; border-radius: 5px; margin-top: 8px; font-weight: 600; }
+
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; table-layout: auto; }
     th, td { border-bottom: 1px solid #eee; padding: 7px 3px; text-align: left; vertical-align: middle; }
     th { background: #f3e8ec; color: var(--maroon); font-size: 11px; }
@@ -81,7 +85,6 @@
     #printZone p { margin: 2px 0; font-size: 11px; }
     .receipt-total { font-size: 14px; font-weight: 800; margin: 6px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 4px 0; }
 
-    /* Neatly constrained Barcode so it never overflows */
     .barcode-box { max-width: 200px; margin: 4px auto 0; text-align: center; }
     .barcode-box svg { width: 100% !important; height: auto !important; max-height: 48px; }
 
@@ -256,10 +259,46 @@
   </div>
 
   <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
-      <h3 style="margin:0; border:none; padding:0;">Available Stock</h3>
-      <button class="gold small" style="margin:0; padding:5px 9px; font-size:11px;" onclick="printAllStockTags()">🖨️ All Tags Print</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; border:none; padding:0;">🔍 Available Stock & Filter</h3>
+      <button class="gold small" style="margin:0; padding:5px 9px; font-size:11px;" onclick="printAllStockTags()">🖨️ Filtered Tags Print</button>
     </div>
+
+    <!-- SMART FILTER CONTROLS -->
+    <div class="filter-box">
+      <div class="row">
+        <div style="flex:1.4;">
+          <input type="text" id="fSearch" placeholder="🔍 Code, Colour ya MRP khojein..." oninput="renderStock()" style="margin-top:0; padding:7px; font-size:12px;">
+        </div>
+        <div style="flex:1;">
+          <select id="fCat" onchange="renderStock()" style="margin-top:0; padding:7px; font-size:12px;">
+            <option value="ALL">All Categories</option>
+            <option value="Daily Saree">Daily Saree</option>
+            <option value="Fancy Saree">Fancy Saree</option>
+            <option value="Petticoat">Petticoat</option>
+            <option value="Blouse/Fall">Blouse/Fall</option>
+            <option value="Cosmetic">Cosmetic</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div style="flex:1.4;">
+          <select id="fStatus" onchange="renderStock()" style="margin-top:0; padding:6px; font-size:12px;">
+            <option value="ALL">📦 Sabhi Stock (All Stock)</option>
+            <option value="INSTOCK">✅ Available (Qty > 0)</option>
+            <option value="LOW">⚠️ Kam Stock (Low: 1-2 Pcs)</option>
+            <option value="OUT">❌ Khatam (Out of Stock: 0)</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <button class="dark" style="margin:0; padding:6px; font-size:11px;" onclick="resetStockFilters()">🔄 Reset Filter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE FILTER SUMMARY -->
+    <div id="stockSummaryBar" class="filter-summary"></div>
+
     <table>
       <thead>
         <tr>
@@ -330,7 +369,6 @@
 </div>
 
 <script>
-  // Helper to completely eliminate dashes and spaces from item codes
   function cleanCode(str) {
     return (str || '').toString().toUpperCase().replace(/[-\s]/g, '');
   }
@@ -342,7 +380,6 @@
   ];
   let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
 
-  // Auto-clean any old dashes in existing saved inventory and sales history
   inventory.forEach(i => { i.code = cleanCode(i.code); });
   sales.forEach(s => {
     if (s.items) s.items.forEach(i => { i.code = cleanCode(i.code); });
@@ -428,7 +465,6 @@
       if (colorRaw) {
         const upperCol = color.toUpperCase();
         const suffix = colorCodeMap[upperCol] || cleanCode(upperCol).slice(0, 2);
-        // Append colour suffix directly WITHOUT dash if not already ending with it
         if (!baseCode.endsWith(suffix)) {
           finalCode = `${baseCode}${suffix}`;
         }
@@ -460,9 +496,64 @@
     renderStock();
   }
 
+  // Returns filtered stock list based on search box, category, and stock level
+  function getFilteredInventory() {
+    const q = (document.getElementById('fSearch')?.value || '').trim().toUpperCase();
+    const cat = document.getElementById('fCat')?.value || 'ALL';
+    const status = document.getElementById('fStatus')?.value || 'ALL';
+
+    return inventory.filter(item => {
+      const matchQuery = !q ||
+        item.code.toUpperCase().includes(q) ||
+        (item.color && item.color.toUpperCase().includes(q)) ||
+        (item.cat && item.cat.toUpperCase().includes(q)) ||
+        String(item.mrp).includes(q) ||
+        String(item.cost).includes(q);
+
+      const matchCat = (cat === 'ALL') || (item.cat === cat);
+
+      let matchStatus = true;
+      if (status === 'INSTOCK') matchStatus = item.qty > 0;
+      else if (status === 'LOW') matchStatus = item.qty > 0 && item.qty <= 2;
+      else if (status === 'OUT') matchStatus = item.qty <= 0;
+
+      return matchQuery && matchCat && matchStatus;
+    });
+  }
+
+  function resetStockFilters() {
+    document.getElementById('fSearch').value = '';
+    document.getElementById('fCat').value = 'ALL';
+    document.getElementById('fStatus').value = 'ALL';
+    renderStock();
+  }
+
   function renderStock() {
+    const filtered = getFilteredInventory();
     const tbody = document.getElementById('stockTableBody');
-    tbody.innerHTML = inventory.map(item => `
+
+    let totalPcs = 0, totalCostVal = 0;
+    filtered.forEach(i => {
+      const q = Math.max(0, i.qty);
+      totalPcs += q;
+      totalCostVal += (q * i.cost);
+    });
+
+    const sumBar = document.getElementById('stockSummaryBar');
+    if (sumBar) {
+      sumBar.innerHTML = `
+        <span>📋 Items: <b>${filtered.length}</b></span>
+        <span>📦 Kul Pcs: <b>${totalPcs}</b></span>
+        <span>💰 Kharid Value: <b>₹${totalCostVal}</b></span>
+      `;
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:14px; color:#888;">Is filter mein koi item nahi mila.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(item => `
       <tr>
         <td class="code-cell">${item.code}</td>
         <td>${item.cat}<br><small style="color:var(--maroon);font-weight:600;">${item.color}</small></td>
@@ -496,13 +587,14 @@
   }
 
   function printAllStockTags() {
-    if (inventory.length === 0) return alert('Stock mein koi item nahi hai!');
+    const listToPrint = getFilteredInventory();
+    if (listToPrint.length === 0) return alert('Print karne ke liye is filter mein koi item nahi hai!');
     document.querySelectorAll('.tab')[0].click();
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
 
-    let tagsHTML = `<h3 style="margin:0 0 10px 0; color:var(--maroon);">SHAKYA COSMETIC - ALL STOCK TAGS</h3><div class="batch-tag-container">`;
-    inventory.forEach((item, idx) => {
+    let tagsHTML = `<h3 style="margin:0 0 10px 0; color:var(--maroon);">SHAKYA COSMETIC - STOCK TAGS (${listToPrint.length})</h3><div class="batch-tag-container">`;
+    listToPrint.forEach((item, idx) => {
       tagsHTML += `
         <div class="single-tag">
           <h4>SHAKYA COSMETIC</h4>
@@ -516,7 +608,7 @@
     tagsHTML += `</div>`;
     zone.innerHTML = tagsHTML;
 
-    inventory.forEach((item, idx) => {
+    listToPrint.forEach((item, idx) => {
       try {
         JsBarcode("#batchTag_" + idx, item.code, { format: "CODE128", width: 1.2, height: 26, displayValue: true, fontSize: 10, margin: 2 });
       } catch (e) {}
@@ -605,7 +697,6 @@
   }
 
   function renderBarcodeOnSvg(svgId, saleRecord) {
-    // Compact barcode payload without dashes so barcode stays small & neat
     const secretPayload = `${saleRecord.invId}A${saleRecord.acc}C${saleRecord.totalCost}`;
     JsBarcode("#" + svgId, secretPayload, {
       format: "CODE128",
@@ -690,7 +781,6 @@
     const clean = cleanCode(val);
     if (!clean) { res.innerHTML = ''; return; }
 
-    // Matches both old format (INV101-A450-C255) and new dash-free format (INV101A450C255)
     const fullMatch = clean.match(/(INV\d+)A(\d+)C(\d+)/);
     let targetInv = fullMatch ? fullMatch[1] : (clean.startsWith('INV') ? clean : 'INV' + clean);
 
