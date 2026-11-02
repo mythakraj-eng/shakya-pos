@@ -6,12 +6,16 @@
   <meta name="theme-color" content="#6b092b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Shakya Cosmetic POS</title>
+  <title>Shakya POS</title>
 
-  <!-- Embedded PWA Manifest for Full-Screen App Experience -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Shakya Cosmetic & Saree Collection","short_name":"Shakya POS","start_url":".","display":"standalone","background_color":"#f8f5f2","theme_color":"#6b092b"}'>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+  </script>
 
-  <!-- Barcode Generator & Camera Scanner Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -52,11 +56,9 @@
     .stat-box span { font-size: 11px; color: #666; display: block; }
     .stat-box strong { font-size: 17px; color: var(--maroon); }
 
-    /* Camera Scanner Modal */
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
 
-    /* Printable Receipt & Sticker Area */
     #printZone { border: 2px dashed #333; padding: 12px; background: #fff; text-align: center; margin-top: 10px; }
     #printZone h2 { margin: 0; font-size: 17px; }
     #printZone p { margin: 2px 0; font-size: 11px; }
@@ -83,14 +85,12 @@
   <div class="tab" onclick="switchTab('backup', this)">💾 Backup</div>
 </div>
 
-<!-- CAMERA BARCODE SCANNER MODAL -->
 <div id="scannerModal">
   <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
   <div id="reader"></div>
   <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
 </div>
 
-<!-- 1. BILLING & ACC SECTION -->
 <div id="billing" class="section active">
   <div class="card">
     <h3>1. Scan / Enter Saree Code</h3>
@@ -144,14 +144,12 @@
     <button class="gold" onclick="finalizeBill()">✅ Bill Banayein & Secret ACC Barcode Chhapein</button>
   </div>
 
-  <!-- PRINTABLE RECEIPT / STICKER PREVIEW -->
   <div id="printCard" class="card" style="display:none;">
     <div id="printZone"></div>
     <button onclick="window.print()">🖨️ Print / Save PDF</button>
   </div>
 </div>
 
-<!-- 2. STOCK KEEPING SECTION -->
 <div id="stock" class="section">
   <div class="card">
     <h3>+ Nayi Saree / Item Stock Mein Jodein</h3>
@@ -203,7 +201,6 @@
   </div>
 </div>
 
-<!-- 3. INSIGHTS & BARCODE DECODER SECTION -->
 <div id="stats" class="section">
   <div class="card">
     <h3>🔍 Verify Customer Bill (Decode Secret ACC)</h3>
@@ -238,7 +235,6 @@
   </div>
 </div>
 
-<!-- 4. BACKUP & EXCEL EXPORT SECTION -->
 <div id="backup" class="section">
   <div class="card">
     <h3>💾 Surakshit Backup & Excel Download</h3>
@@ -270,7 +266,6 @@
     renderStock(); renderStats();
   }
 
-  // Camera Barcode Scanner Logic
   function startScanner(mode) {
     document.getElementById('scannerModal').style.display = 'block';
     html5QrCode = new Html5Qrcode("reader");
@@ -289,7 +284,7 @@
       },
       () => {}
     ).catch(err => {
-      alert("Camera khulne mein dikkat (HTTPS ya localhost par chalayein): " + err);
+      alert("Camera permission dein: " + err);
       stopScanner();
     });
   }
@@ -340,7 +335,6 @@
     `).join('');
   }
 
-  // Generate Printable Saree Barcode Sticker
   function printSareeTag(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
@@ -443,7 +437,6 @@
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
 
-    // Render Customer Receipt with Disguised ACC Barcode
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
     zone.innerHTML = `
@@ -513,7 +506,6 @@
     `).join('');
   }
 
-  // Backup & Excel Export Functions
   function exportSalesCSV() {
     if (sales.length === 0) return alert('Abhi koi sale nahi hui hai!');
     let csv = 'Invoice,Date,Customer,PaymentMode,StickerMRP,ActualCash_ACC,Cost,NetProfit,Items\n';
