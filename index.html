@@ -47,6 +47,11 @@
     button.dark { background: #333; color: #fff; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
+    /* Quick Colour Chips */
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .color-chip { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 4px 9px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
+    .color-chip:active { background: var(--maroon); color: #fff; }
+
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
     th, td { border-bottom: 1px solid #eee; padding: 8px 4px; text-align: left; }
     th { background: #f3e8ec; color: var(--maroon); }
@@ -61,7 +66,6 @@
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
 
-    /* Bill Viewer Modal for Insights */
     #billModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 90; padding: 14px; overflow-y: auto; }
     .modal-content { background: #fff; max-width: 480px; margin: 20px auto; padding: 14px; border-radius: 10px; }
 
@@ -170,14 +174,14 @@
   </div>
 </div>
 
-<!-- 2. STOCK SECTION -->
+<!-- 2. STOCK SECTION (UPGRADED WITH MULTI-COLOUR SET SUPPORT) -->
 <div id="stock" class="section">
   <div class="card">
-    <h3>+ Nayi Saree / Item Stock Mein Jodein</h3>
+    <h3>+ Nayi Saree / Multi-Colour Set Stock Mein Jodein</h3>
     <div class="row">
       <div>
-        <label>Unique Item Code</label>
-        <input type="text" id="sCode" placeholder="Ex: SC-101-R" oninput="this.value = this.value.toUpperCase()">
+        <label>Base Design Code</label>
+        <input type="text" id="sCode" placeholder="Ex: SC-105" oninput="this.value = this.value.toUpperCase()">
       </div>
       <div>
         <label>Category</label>
@@ -190,17 +194,39 @@
         </select>
       </div>
     </div>
+
     <div class="row">
-      <div>
-        <label>Colour Name</label>
-        <input type="text" id="sColor" placeholder="Ex: Red (लाल)">
+      <div style="flex:2">
+        <label>Colours (Ek ya Poore Set ke Colours chunein)</label>
+        <input type="text" id="sColor" placeholder="Ex: Red, Yellow, Green">
       </div>
-      <div>
-        <label>Quantity (Pcs)</label>
+      <div style="flex:1">
+        <label>Qty (Har Colour)</label>
         <input type="number" id="sQty" value="1">
       </div>
     </div>
-    <div class="row">
+
+    <!-- QUICK TAP COLOUR CHIPS -->
+    <div style="margin-top:6px;">
+      <small style="color:#666; font-size:11px;">👇 Tap karke ek ya kai Colours ek saath jodein (Clear: <b style="color:#c00;cursor:pointer;" onclick="document.getElementById('sColor').value=''">✕ Saaf karein</b>):</small>
+      <div class="chip-wrap">
+        <span class="color-chip" onclick="addColorChip('Red')">🔴 Red</span>
+        <span class="color-chip" onclick="addColorChip('Rani Pink')">🩷 Rani Pink</span>
+        <span class="color-chip" onclick="addColorChip('Yellow')">🟡 Yellow</span>
+        <span class="color-chip" onclick="addColorChip('Green')">🟢 Green</span>
+        <span class="color-chip" onclick="addColorChip('Maroon')">🍷 Maroon</span>
+        <span class="color-chip" onclick="addColorChip('Royal Blue')">🔵 Royal Blue</span>
+        <span class="color-chip" onclick="addColorChip('Rama')">🩵 Rama</span>
+        <span class="color-chip" onclick="addColorChip('Orange')">🟠 Orange</span>
+        <span class="color-chip" onclick="addColorChip('Purple')">🟣 Purple</span>
+        <span class="color-chip" onclick="addColorChip('Black')">⚫ Black</span>
+        <span class="color-chip" onclick="addColorChip('White')">⚪ White</span>
+        <span class="color-chip" onclick="addColorChip('Golden')">✨ Golden</span>
+        <span class="color-chip" onclick="addColorChip('Multi')">🌈 Multi</span>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:6px;">
       <div>
         <label>Landing Cost (Asli Kharid ₹)</label>
         <input type="number" id="sCost" placeholder="Ex: 210">
@@ -210,7 +236,7 @@
         <input type="number" id="sMrp" placeholder="Ex: 380">
       </div>
     </div>
-    <button onclick="saveStockItem()">💾 Stock Mein Save Karein</button>
+    <button onclick="saveStockItem()">💾 Stock Mein Save Karein (Single / Full Set)</button>
   </div>
 
   <div class="card">
@@ -285,6 +311,22 @@
   let cart = [];
   let html5QrCode = null;
 
+  // Map colour names to short suffix codes for automatic multi-colour set creation
+  const colorCodeMap = {
+    'RED': 'R', 'RANI PINK': 'RP', 'PINK': 'P', 'YELLOW': 'Y', 'GREEN': 'G',
+    'MAROON': 'M', 'ROYAL BLUE': 'RB', 'BLUE': 'BL', 'RAMA': 'RM', 'ORANGE': 'O',
+    'PURPLE': 'PR', 'BLACK': 'BK', 'WHITE': 'W', 'GOLDEN': 'GD', 'MULTI': 'ML'
+  };
+
+  function addColorChip(colName) {
+    const inp = document.getElementById('sColor');
+    let current = inp.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (!current.includes(colName)) {
+      current.push(colName);
+    }
+    inp.value = current.join(', ');
+  }
+
   function switchTab(id, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -330,19 +372,52 @@
   }
 
   function saveStockItem() {
-    const code = document.getElementById('sCode').value.trim();
+    const baseCode = document.getElementById('sCode').value.trim().toUpperCase();
     const cat = document.getElementById('sCat').value;
-    const color = document.getElementById('sColor').value.trim();
+    const colorRaw = document.getElementById('sColor').value.trim();
     const qty = parseInt(document.getElementById('sQty').value) || 1;
     const cost = parseFloat(document.getElementById('sCost').value) || 0;
     const mrp = parseFloat(document.getElementById('sMrp').value) || 0;
-    if (!code || !cost || !mrp) return alert('Kripya Code, Cost aur MRP zaroor bharein!');
-    const existing = inventory.find(i => i.code === code);
-    if (existing) { existing.qty += qty; existing.cost = cost; existing.mrp = mrp; existing.color = color || existing.color; }
-    else { inventory.push({ code, cat, color, qty, cost, mrp }); }
+
+    if (!baseCode || !cost || !mrp) return alert('Kripya Code, Cost aur MRP zaroor bharein!');
+
+    // Split multiple colours separated by comma
+    const colors = colorRaw ? colorRaw.split(',').map(c => c.trim()).filter(Boolean) : ['Standard'];
+    let addedCodes = [];
+
+    colors.forEach(color => {
+      let finalCode = baseCode;
+      // If multiple colours are entered, or baseCode doesn't already have colour suffix, auto-append suffix when >1 colours
+      if (colors.length > 1) {
+        const upperCol = color.toUpperCase();
+        const suffix = colorCodeMap[upperCol] || upperCol.slice(0, 2);
+        finalCode = `${baseCode}-${suffix}`;
+      }
+
+      const existing = inventory.find(i => i.code === finalCode);
+      if (existing) {
+        existing.qty += qty;
+        existing.cost = cost;
+        existing.mrp = mrp;
+        existing.color = color || existing.color;
+      } else {
+        inventory.push({ code: finalCode, cat, color, qty, cost, mrp });
+      }
+      addedCodes.push(`${finalCode} (${color})`);
+    });
+
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     renderStock();
-    alert('Item Stock mein jud gaya!');
+    document.getElementById('sCode').value = '';
+    document.getElementById('sColor').value = '';
+    alert(`✅ Stock mein jud gaya:\n` + addedCodes.join('\n'));
+  }
+
+  function deleteStockItem(code) {
+    if (!confirm(`Kya aap ${code} ko Stock se hatana chahte hain?`)) return;
+    inventory = inventory.filter(i => i.code !== code);
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    renderStock();
   }
 
   function renderStock() {
@@ -350,13 +425,14 @@
     tbody.innerHTML = inventory.map(item => `
       <tr>
         <td><b>${item.code}</b></td>
-        <td>${item.cat}<br><small>${item.color}</small></td>
+        <td>${item.cat}<br><small style="color:var(--maroon);font-weight:600;">${item.color}</small></td>
         <td>₹${item.cost}</td>
         <td><b>₹${item.mrp}</b></td>
         <td style="color:${item.qty <= 2 ? 'red' : 'black'}; font-weight:bold;">${item.qty}</td>
         <td>
           <button class="small" onclick="quickAdd('${item.code}')">+Bill</button>
           <button class="small dark" onclick="printSareeTag('${item.code}')">🏷️Tag</button>
+          <button class="small" style="background:#ccc;color:#333;" onclick="deleteStockItem('${item.code}')">✕</button>
         </td>
       </tr>
     `).join('');
@@ -437,7 +513,6 @@
       ${itemBreakup}`;
   }
 
-  // Generate Receipt HTML for any Sale Record
   function buildReceiptHTML(saleRecord, svgId) {
     return `
       <h2>SHAKYA COSMETIC</h2>
@@ -505,7 +580,6 @@
     renderCart();
   }
 
-  // Open Full Bill Popup when clicking any Bill in History or Searching
   function openBillModal(invId) {
     const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
     if (!s) return alert('Bill nahi mila!');
@@ -522,7 +596,6 @@
     document.getElementById('billModal').style.display = 'block';
     renderBarcodeOnSvg('modalBarcodeSvg', s);
 
-    // Also load into printZone in case owner clicks Print
     document.getElementById('printZone').innerHTML = buildReceiptHTML(s, 'printBarcodeSvg');
     renderBarcodeOnSvg('printBarcodeSvg', s);
   }
@@ -538,13 +611,11 @@
     window.print();
   }
 
-  // Upgraded Smart Search: Supports "101", "INV101", or Full Barcode "INV101-A450-C255"
   function decodeAcc(val, openPopup = false) {
     const res = document.getElementById('decodeResult');
     const clean = val.trim().toUpperCase();
     if (!clean) { res.innerHTML = ''; return; }
 
-    // 1. Check if full secret barcode format: INV101-A450-C255
     const fullMatch = clean.match(/(INV\d+)-A(\d+)-C(\d+)/);
     let targetInv = fullMatch ? fullMatch[1] : (clean.startsWith('INV') ? clean : 'INV' + clean);
 
