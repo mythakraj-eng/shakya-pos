@@ -48,8 +48,10 @@
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-    th, td { border-bottom: 1px solid #eee; padding: 7px 4px; text-align: left; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px 4px; text-align: left; }
     th { background: #f3e8ec; color: var(--maroon); }
+    tr.clickable-row { cursor: pointer; transition: background 0.15s; }
+    tr.clickable-row:hover, tr.clickable-row:active { background: #fff0f5; }
 
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-box { background: #fff8fa; border-left: 4px solid var(--maroon); padding: 10px; border-radius: 6px; }
@@ -58,6 +60,10 @@
 
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
+
+    /* Bill Viewer Modal for Insights */
+    #billModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 90; padding: 14px; overflow-y: auto; }
+    .modal-content { background: #fff; max-width: 480px; margin: 20px auto; padding: 14px; border-radius: 10px; }
 
     #printZone { border: 2px dashed #333; padding: 12px; background: #fff; text-align: center; margin-top: 10px; }
     #printZone h2 { margin: 0; font-size: 17px; }
@@ -85,12 +91,26 @@
   <div class="tab" onclick="switchTab('backup', this)">💾 Backup</div>
 </div>
 
+<!-- CAMERA SCANNER MODAL -->
 <div id="scannerModal">
   <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
   <div id="reader"></div>
   <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
 </div>
 
+<!-- POPUP BILL VIEWER MODAL -->
+<div id="billModal">
+  <div class="modal-content">
+    <div id="modalInternalBox" style="background:#fff3cd; padding:10px; border-radius:6px; font-size:12px; margin-bottom:10px; border-left:4px solid var(--maroon);"></div>
+    <div id="modalReceiptBox"></div>
+    <div class="row" style="margin-top:10px;">
+      <div><button onclick="printFromModal()">🖨️ Print Bill</button></div>
+      <div><button class="dark" onclick="closeBillModal()">❌ Close</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 1. BILLING SECTION -->
 <div id="billing" class="section active">
   <div class="card">
     <h3>1. Scan / Enter Saree Code</h3>
@@ -150,6 +170,7 @@
   </div>
 </div>
 
+<!-- 2. STOCK SECTION -->
 <div id="stock" class="section">
   <div class="card">
     <h3>+ Nayi Saree / Item Stock Mein Jodein</h3>
@@ -201,18 +222,22 @@
   </div>
 </div>
 
+<!-- 3. INSIGHTS & BILL SEARCH SECTION -->
 <div id="stats" class="section">
   <div class="card">
-    <h3>🔍 Verify Customer Bill (Decode Secret ACC)</h3>
+    <h3>🔍 Verify Customer Bill (Bill No. ya Barcode Dalein)</h3>
     <div class="row">
       <div style="flex:2">
-        <input type="text" id="decodeInput" placeholder="Ex: INV101-A450-C255" oninput="decodeAcc(this.value)">
+        <input type="text" id="decodeInput" placeholder="Ex: INV101 ya 101" oninput="decodeAcc(this.value)">
       </div>
       <div style="flex:1">
-        <button class="dark" style="margin:0;" onclick="startScanner('DECODE')">📷 Scan Bill</button>
+        <button style="margin:0;" onclick="decodeAcc(document.getElementById('decodeInput').value, true)">🔍 Khojein</button>
+      </div>
+      <div style="flex:1">
+        <button class="dark" style="margin:0;" onclick="startScanner('DECODE')">📷 Scan</button>
       </div>
     </div>
-    <p id="decodeResult" style="font-weight:bold; color:var(--maroon); margin-top:8px; font-size:13px;"></p>
+    <div id="decodeResult" style="margin-top:10px; font-size:13px;"></div>
   </div>
 
   <div class="card">
@@ -227,7 +252,8 @@
 
   <div class="card">
     <h3>🎨 Top Bikne Wale Colours & Bill History</h3>
-    <div id="colorInsights" style="font-size:13px; margin-bottom:10px;"></div>
+    <div id="colorInsights" style="font-size:13px; margin-bottom:8px;"></div>
+    <small style="color:var(--maroon); font-weight:bold; display:block; margin-bottom:6px;">👇 Kisi bhi Bill par Tap (Click) karke poora Bill aur Barcode dekhein:</small>
     <table>
       <thead><tr><th>Bill#</th><th>Items (Real Rate)</th><th>MRP</th><th>ACC</th><th>Profit</th></tr></thead>
       <tbody id="salesHistoryBody"></tbody>
@@ -235,6 +261,7 @@
   </div>
 </div>
 
+<!-- 4. BACKUP SECTION -->
 <div id="backup" class="section">
   <div class="card">
     <h3>💾 Surakshit Backup & Excel Download</h3>
@@ -279,7 +306,7 @@
           addItemToBill();
         } else if (mode === 'DECODE') {
           document.getElementById('decodeInput').value = decodedText.toUpperCase();
-          decodeAcc(decodedText);
+          decodeAcc(decodedText, true);
         }
       },
       () => {}
@@ -410,6 +437,38 @@
       ${itemBreakup}`;
   }
 
+  // Generate Receipt HTML for any Sale Record
+  function buildReceiptHTML(saleRecord, svgId) {
+    return `
+      <h2>SHAKYA COSMETIC</h2>
+      <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
+      <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
+      <hr>
+      <p style="text-align:left;"><b>Bill No:</b> ${saleRecord.invId} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.mode})</p>
+      <table>
+        <thead><tr><th>Code</th><th>Item</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
+        <tbody>
+          ${saleRecord.items.map(i => `<tr><td>${i.code}</td><td>${i.cat} (${i.color})</td><td style="text-align:right;">₹${i.mrp}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="receipt-total">TOTAL AMOUNT: ₹${saleRecord.totalMrp}</div>
+      <p style="font-size:10px;">धन्यवाद! एक बार बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
+      <svg id="${svgId}"></svg>
+    `;
+  }
+
+  function renderBarcodeOnSvg(svgId, saleRecord) {
+    const secretPayload = `${saleRecord.invId}-A${saleRecord.acc}-C${saleRecord.totalCost}`;
+    JsBarcode("#" + svgId, secretPayload, {
+      format: "CODE128",
+      width: 1.7,
+      height: 40,
+      displayValue: true,
+      text: `${saleRecord.invId} | SHAKYA COSMETIC`,
+      fontSize: 11
+    });
+  }
+
   function finalizeBill() {
     if (cart.length === 0) return alert('Pehle bill mein Saree jodein!');
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
@@ -439,45 +498,73 @@
 
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
-    zone.innerHTML = `
-      <h2>SHAKYA COSMETIC</h2>
-      <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
-      <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
-      <hr>
-      <p style="text-align:left;"><b>Bill No:</b> ${invId} | <b>Date:</b> ${dateStr}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.mode})</p>
-      <table>
-        <thead><tr><th>Code</th><th>Item</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
-        <tbody>
-          ${itemsSold.map(i => `<tr><td>${i.code}</td><td>${i.cat} (${i.color})</td><td style="text-align:right;">₹${i.mrp}</td></tr>`).join('')}
-        </tbody>
-      </table>
-      <div class="receipt-total">TOTAL AMOUNT: ₹${totalMrp}</div>
-      <p style="font-size:10px;">धन्यवाद! एक बार बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
-      <svg id="accBarcode"></svg>
-    `;
-
-    const secretPayload = `${invId}-A${acc}-C${totalCost}`;
-    JsBarcode("#accBarcode", secretPayload, {
-      format: "CODE128",
-      width: 1.7,
-      height: 40,
-      displayValue: true,
-      text: `${invId} | SHAKYA COSMETIC`,
-      fontSize: 11
-    });
+    zone.innerHTML = buildReceiptHTML(saleRecord, 'accBarcode');
+    renderBarcodeOnSvg('accBarcode', saleRecord);
 
     cart = [];
     renderCart();
   }
 
-  function decodeAcc(val) {
+  // Open Full Bill Popup when clicking any Bill in History or Searching
+  function openBillModal(invId) {
+    const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
+    if (!s) return alert('Bill nahi mila!');
+
+    document.getElementById('modalInternalBox').innerHTML = `
+      <b>🔒 अंदरूनी हिसाब (${s.invId}):</b><br>
+      Sticker MRP: ₹${s.totalMrp} | <b>ग्राहक ने असली कैश दिया (ACC): ₹${s.acc}</b><br>
+      आपकी खरीद लागत: ₹${s.totalCost} | छूट दी: ₹${s.totalMrp - s.acc} | <b style="color:green;">शुद्ध मुनाफा: ₹${s.profit}</b><hr style="margin:5px 0;">
+      <b>Items Asli Bikri Rate:</b><br>
+      ${s.items.map(i => `• <b>${i.code}</b> (${i.color}): Sticker ₹${i.mrp} ➔ Asli Sale <b>₹${i.realSale}</b> (Cost: ₹${i.cost}, Profit: ₹${i.realSale - i.cost})`).join('<br>')}
+    `;
+
+    document.getElementById('modalReceiptBox').innerHTML = `<div style="border:2px dashed #333; padding:10px; text-align:center;">` + buildReceiptHTML(s, 'modalBarcodeSvg') + `</div>`;
+    document.getElementById('billModal').style.display = 'block';
+    renderBarcodeOnSvg('modalBarcodeSvg', s);
+
+    // Also load into printZone in case owner clicks Print
+    document.getElementById('printZone').innerHTML = buildReceiptHTML(s, 'printBarcodeSvg');
+    renderBarcodeOnSvg('printBarcodeSvg', s);
+  }
+
+  function closeBillModal() {
+    document.getElementById('billModal').style.display = 'none';
+  }
+
+  function printFromModal() {
+    closeBillModal();
+    document.querySelectorAll('.tab')[0].click();
+    document.getElementById('printCard').style.display = 'block';
+    window.print();
+  }
+
+  // Upgraded Smart Search: Supports "101", "INV101", or Full Barcode "INV101-A450-C255"
+  function decodeAcc(val, openPopup = false) {
     const res = document.getElementById('decodeResult');
-    const match = val.toUpperCase().match(/(INV\d+)-A(\d+)-C(\d+)/);
-    if (!match) { res.innerText = 'Sahi Bill Barcode scan ya type karein...'; return; }
-    const [_, inv, acc, cost] = match;
-    const found = sales.find(s => s.invId === inv);
-    let itemInfo = found ? `<br>Items: ` + found.items.map(i => `${i.code} (Asli Sale: ₹${i.realSale})`).join(', ') : '';
-    res.innerHTML = `✅ <b>Bill: ${inv}</b> | Grahak ne Asli Cash Diya (ACC): <b>₹${acc}</b> | Kharid: ₹${cost} | Profit: <b>₹${acc - cost}</b>${itemInfo}`;
+    const clean = val.trim().toUpperCase();
+    if (!clean) { res.innerHTML = ''; return; }
+
+    // 1. Check if full secret barcode format: INV101-A450-C255
+    const fullMatch = clean.match(/(INV\d+)-A(\d+)-C(\d+)/);
+    let targetInv = fullMatch ? fullMatch[1] : (clean.startsWith('INV') ? clean : 'INV' + clean);
+
+    const found = sales.find(s => s.invId.toUpperCase() === targetInv);
+    if (found) {
+      res.innerHTML = `
+        <div style="background:#fff8fa; border:1px solid var(--maroon); padding:10px; border-radius:8px;">
+          ✅ <b>${found.invId} (${found.date}) - ${found.cust}</b><br>
+          Sticker Bill: ₹${found.totalMrp} | <b style="color:#b30000;">Asli Cash (ACC): ₹${found.acc}</b> | <b style="color:green;">Profit: ₹${found.profit}</b><br>
+          ${found.items.map(i => `• ${i.code} (${i.color}): MRP ₹${i.mrp} ➔ <b>Asli Rate: ₹${i.realSale}</b>`).join('<br>')}
+          <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Poora Bill & Barcode Dekhein / Print Karein</button>
+        </div>
+      `;
+      if (openPopup) openBillModal(found.invId);
+    } else if (fullMatch) {
+      const [_, inv, acc, cost] = fullMatch;
+      res.innerHTML = `✅ <b>Bill: ${inv}</b> | Asli Cash (ACC): <b>₹${acc}</b> | Kharid: ₹${cost} | Profit: <b>₹${acc - cost}</b>`;
+    } else {
+      res.innerHTML = `<span style="color:#888;">Bill <b>${targetInv}</b> nahi mila. Neeche list mein check karein.</span>`;
+    }
   }
 
   function renderStats() {
@@ -496,8 +583,8 @@
     document.getElementById('colorInsights').innerHTML = topColors ? `🔥 Top Bikne Wale Colours: ${topColors}` : 'Abhi koi sale record nahi hai.';
 
     document.getElementById('salesHistoryBody').innerHTML = sales.map(s => `
-      <tr>
-        <td><b>${s.invId}</b><br><small>${s.date}</small></td>
+      <tr class="clickable-row" onclick="openBillModal('${s.invId}')">
+        <td><b style="color:var(--maroon); text-decoration:underline;">${s.invId} 🔍</b><br><small>${s.date}</small></td>
         <td>${s.items.map(i => `${i.code} (₹${i.realSale})`).join('<br>')}</td>
         <td>₹${s.totalMrp}</td>
         <td><b>₹${s.acc}</b></td>
