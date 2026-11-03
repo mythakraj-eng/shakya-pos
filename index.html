@@ -172,7 +172,7 @@
   <div class="closed-box">
     <div style="font-size:40px; margin-bottom:8px;">🔒</div>
     <h2 style="margin:0; color:var(--gold); font-size:20px;">SHAKYA POS BAND HAI</h2>
-    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data cloud par surakshit sync ho chuka hai.</p>
+    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data cloud par live sync ho chuka hai.</p>
     <p style="font-size:11px; color:#ffd9df; margin-bottom:18px;">Ab aap phone/tablet ka Home ya Back button dabakar bahar ja sakte hain.</p>
     <button class="gold" onclick="reopenApp()">🔓 App Dobara Chalu Karein</button>
   </div>
@@ -472,7 +472,7 @@
 <div id="backup" class="section">
   <div class="card">
     <h3>💾 Surakshit Cloud Backup & Excel Download</h3>
-    <p style="font-size:12px; color:#555;">Data automatically cloud par sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
+    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
     <div id="backupMsg" class="inline-msg"></div>
     <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
     <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
@@ -484,7 +484,7 @@
 </div>
 
 <script>
-  // --- FIREBASE CLOUD SETUP ---
+  // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH ---
   const firebaseConfig = {
     databaseURL: "https://shakya-pos-default-rtdb.firebaseio.com"
   };
@@ -500,7 +500,7 @@
   ];
   let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
 
-  // Real-time Cloud Sync Listener
+  // Instant Microsecond Real-time Cloud Sync Listener
   dbRef.on('value', (snapshot) => {
     const cloudData = snapshot.val();
     if (cloudData) {
@@ -508,6 +508,8 @@
       if (cloudData.sales) sales = cloudData.sales;
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
+      
+      // UI instant refresh across all devices
       renderStock();
       renderStats();
       renderCustomerSection();
