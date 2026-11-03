@@ -16,6 +16,10 @@
     }
   </script>
 
+  <!-- Firebase App & Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -168,7 +172,7 @@
   <div class="closed-box">
     <div style="font-size:40px; margin-bottom:8px;">🔒</div>
     <h2 style="margin:0; color:var(--gold); font-size:20px;">SHAKYA POS BAND HAI</h2>
-    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data surakshit save ho chuka hai.</p>
+    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data cloud par surakshit sync ho chuka hai.</p>
     <p style="font-size:11px; color:#ffd9df; margin-bottom:18px;">Ab aap phone/tablet ka Home ya Back button dabakar bahar ja sakte hain.</p>
     <button class="gold" onclick="reopenApp()">🔓 App Dobara Chalu Karein</button>
   </div>
@@ -467,11 +471,11 @@
 <!-- 5. BACKUP SECTION -->
 <div id="backup" class="section">
   <div class="card">
-    <h3>💾 Surakshit Backup & Excel Download</h3>
-    <p style="font-size:12px; color:#555;">Har hafte apna data download karke WhatsApp ya Google Drive par rakh lein.</p>
+    <h3>💾 Surakshit Cloud Backup & Excel Download</h3>
+    <p style="font-size:12px; color:#555;">Data automatically cloud par sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
     <div id="backupMsg" class="inline-msg"></div>
     <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
-    <button onclick="downloadBackupJSON()">⬇️ Full App Data Backup (.JSON)</button>
+    <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
 
     <hr style="margin:16px 0;">
     <label>Purana Backup File (.JSON) Wapas Daalein (Restore):</label>
@@ -480,6 +484,42 @@
 </div>
 
 <script>
+  // --- FIREBASE CLOUD SETUP ---
+  const firebaseConfig = {
+    databaseURL: "https://shakya-pos-default-rtdb.firebaseio.com"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const dbRef = firebase.database().ref('shakya_pos_data');
+
+  let inventory = JSON.parse(localStorage.getItem('sc_inventory')) || [
+    { code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
+    { code: 'SC102P', cat: 'Fancy Saree', color: 'Rani Pink', qty: 3, cost: 420, mrp: 750 },
+    { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
+  ];
+  let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
+
+  // Real-time Cloud Sync Listener
+  dbRef.on('value', (snapshot) => {
+    const cloudData = snapshot.val();
+    if (cloudData) {
+      if (cloudData.inventory) inventory = cloudData.inventory;
+      if (cloudData.sales) sales = cloudData.sales;
+      localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+      localStorage.setItem('sc_sales', JSON.stringify(sales));
+      renderStock();
+      renderStats();
+      renderCustomerSection();
+    }
+  });
+
+  function syncToCloud() {
+    dbRef.set({ inventory, sales });
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    localStorage.setItem('sc_sales', JSON.stringify(sales));
+  }
+
   let isAppClosed = false;
   let backGuardArmed = false;
 
@@ -518,8 +558,7 @@
     closeShutdownModal();
     isAppClosed = true;
     backGuardArmed = false;
-    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
-    localStorage.setItem('sc_sales', JSON.stringify(sales));
+    syncToCloud();
     document.getElementById('appClosedScreen').style.display = 'flex';
     try { window.close(); } catch (err) {}
   }
@@ -601,19 +640,10 @@
     }, 3500);
   }
 
-  let inventory = JSON.parse(localStorage.getItem('sc_inventory')) || [
-    { code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
-    { code: 'SC102P', cat: 'Fancy Saree', color: 'Rani Pink', qty: 3, cost: 420, mrp: 750 },
-    { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
-  ];
-  let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
-
   inventory.forEach(i => { i.code = cleanCode(i.code); });
   sales.forEach(s => {
     if (s.items) s.items.forEach(i => { i.code = cleanCode(i.code); });
   });
-  localStorage.setItem('sc_inventory', JSON.stringify(inventory));
-  localStorage.setItem('sc_sales', JSON.stringify(sales));
 
   let cart = [];
   let html5QrCode = null;
@@ -793,11 +823,11 @@
       addedCodes.push(`${finalCode} (${color})`);
     });
 
-    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    syncToCloud();
     renderStock();
     document.getElementById('sCode').value = '';
     document.getElementById('sColor').value = '';
-    showInlineMsg('stockMsg', `✅ Stock jud gaya: ` + addedCodes.join(', '), 'success');
+    showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
   function deleteStockItem(code, btnEl) {
@@ -810,7 +840,7 @@
       return;
     }
     inventory = inventory.filter(i => i.code !== code);
-    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    syncToCloud();
     renderStock();
   }
 
@@ -1098,8 +1128,7 @@
 
     sales.unshift(saleRecord);
     lastSavedSale = saleRecord;
-    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
-    localStorage.setItem('sc_sales', JSON.stringify(sales));
+    syncToCloud();
 
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
@@ -1112,7 +1141,7 @@
     document.getElementById('custVillage').value = '';
     document.getElementById('custMobile').value = '';
 
-    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya! WhatsApp par photo bhi bhej sakte hain.`, 'success');
+    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Cloud par sync ho gaya!`, 'success');
   }
 
   function sendWhatsAppLastBill() {
@@ -1149,7 +1178,7 @@
     closeWaModal();
     if (lastSavedSale) {
       lastSavedSale.mobile = mob;
-      localStorage.setItem('sc_sales', JSON.stringify(sales));
+      syncToCloud();
     }
     generateAndDownloadBillImage(mob);
   }
@@ -1366,10 +1395,9 @@
         if (parsed.inventory && parsed.sales) {
           inventory = parsed.inventory;
           sales = parsed.sales;
-          localStorage.setItem('sc_inventory', JSON.stringify(inventory));
-          localStorage.setItem('sc_sales', JSON.stringify(sales));
+          syncToCloud();
           renderStock(); renderStats(); renderCustomerSection();
-          showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore ho gaya!', 'success');
+          showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore aur Cloud par sync ho gaya!', 'success');
         }
       } catch (err) {
         showInlineMsg('backupMsg', '❌ Invalid backup file!', 'error');
