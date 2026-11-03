@@ -27,8 +27,7 @@
     header .header-info { text-align: left; }
     header h1 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; }
     header p { margin: 2px 0 0; font-size: 10px; opacity: 0.95; }
-    
-    /* Header Control Buttons */
+
     .header-actions { display: flex; gap: 5px; align-items: center; }
     .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
     .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
@@ -57,6 +56,10 @@
     /* Custom Shutdown Confirmation Modal */
     #shutdownModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; padding: 20px; align-items: center; justify-content: center; }
     .shutdown-dialog { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+    /* Full-Screen Safe Shutdown Screen (Replaces about:blank) */
+    #appClosedScreen { display: none; position: fixed; inset: 0; background: var(--maroon); color: #fff; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+    .closed-box { background: rgba(255,255,255,0.08); border: 2px solid var(--gold); border-radius: 16px; padding: 24px 18px; max-width: 340px; width: 100%; }
 
     .suggest-wrap { position: relative; }
     .suggest-box { display: none; position: absolute; left: 0; right: 0; top: 100%; background: #fff; border: 1.5px solid var(--maroon); border-radius: 0 0 8px 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.18); z-index: 50; max-height: 210px; overflow-y: auto; }
@@ -139,11 +142,22 @@
 <div id="shutdownModal">
   <div class="shutdown-dialog">
     <h3 style="color:var(--maroon); margin-top:0;">⚠️ App Band Karein?</h3>
-    <p style="font-size:13px; color:#555; margin:10px 0 18px 0;">Kya aap Shakya POS app ko band karna chahte hain?</p>
+    <p style="font-size:13px; color:#555; margin:10px 0 18px 0;">Kya aap Shakya POS app ko surakshit band karna chahte hain?</p>
     <div class="row">
       <div><button class="dark" style="margin:0;" onclick="closeShutdownModal()">Rukiye (Cancel)</button></div>
       <div><button style="margin:0; background:#b30000;" onclick="confirmShutdown()">Haan, Band Karein</button></div>
     </div>
+  </div>
+</div>
+
+<!-- SAFE SHUTDOWN SCREEN (NO MORE WHITE ABOUT:BLANK) -->
+<div id="appClosedScreen">
+  <div class="closed-box">
+    <div style="font-size:40px; margin-bottom:8px;">🔒</div>
+    <h2 style="margin:0; color:var(--gold); font-size:20px;">SHAKYA POS BAND HAI</h2>
+    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data surakshit save ho chuka hai.</p>
+    <p style="font-size:11px; color:#ffd9df; margin-bottom:18px;">Ab aap phone/tablet ka Home ya Back button dabakar bahar ja sakte hain.</p>
+    <button class="gold" onclick="reopenApp()">🔓 App Dobara Chalu Karein</button>
   </div>
 </div>
 
@@ -453,13 +467,36 @@
 </div>
 
 <script>
-  // --- BLOCK SYSTEM BACK GESTURE COMPLETELY ---
-  window.history.pushState(null, '', window.location.href);
+  // --- STRONG BACK GESTURE LOCK & SAFE SHUTDOWN SYSTEM ---
+  let isAppClosed = false;
+  let backGuardArmed = false;
+
+  function armBackGuard() {
+    if (isAppClosed || backGuardArmed) return;
+    window.history.pushState({ shakyaLock: true }, '', window.location.href);
+    backGuardArmed = true;
+  }
+
+  // Arm on load and on any touch/click so Chrome Android respects the history lock
+  window.history.pushState({ shakyaLock: true }, '', window.location.href);
+  document.addEventListener('touchstart', armBackGuard, { passive: true });
+  document.addEventListener('click', armBackGuard, true);
+
   window.addEventListener('popstate', function(e) {
-    window.history.pushState(null, '', window.location.href);
+    if (isAppClosed) return; // Allow normal back exit when app is in shutdown state
+
+    // If any modal is open, close it instead of exiting
+    const billMod = document.getElementById('billModal');
+    const scanMod = document.getElementById('scannerModal');
+    const shutMod = document.getElementById('shutdownModal');
+    if (billMod && billMod.style.display === 'block') { closeBillModal(); }
+    else if (scanMod && scanMod.style.display === 'block') { stopScanner(); }
+    else if (shutMod && shutMod.style.display === 'flex') { closeShutdownModal(); }
+
+    // Re-push lock state immediately so app never closes accidentally
+    window.history.pushState({ shakyaLock: true }, '', window.location.href);
   });
 
-  // --- SHUTDOWN MODAL CONTROLS ---
   function openShutdownModal() {
     document.getElementById('shutdownModal').style.display = 'flex';
   }
@@ -469,8 +506,25 @@
   }
 
   function confirmShutdown() {
-    window.close();
-    window.location.href = "about:blank";
+    closeShutdownModal();
+    isAppClosed = true;
+    backGuardArmed = false;
+
+    // Save current state safely
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    localStorage.setItem('sc_sales', JSON.stringify(sales));
+
+    // Show clean Maroon/Gold Shutdown Screen (never navigate to about:blank)
+    document.getElementById('appClosedScreen').style.display = 'flex';
+
+    // Try native window close for WebView/APK wrappers that support it
+    try { window.close(); } catch (err) {}
+  }
+
+  function reopenApp() {
+    isAppClosed = false;
+    document.getElementById('appClosedScreen').style.display = 'none';
+    armBackGuard();
   }
 
   // --- SAFE SWIPE / SLIDE GESTURE WITH LOCK & VERTICAL SCROLL GUARD ---
@@ -495,9 +549,8 @@
   updateSwipeBtnUI();
 
   document.addEventListener('touchstart', e => {
-    if (!swipeEnabled) return;
-    // Do NOT trigger tab slide when touching inputs, tables, buttons, colour chips, or modals
-    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal')) {
+    if (!swipeEnabled || isAppClosed) return;
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #appClosedScreen')) {
       ignoreSwipe = true;
       return;
     }
@@ -507,7 +560,7 @@
   }, { passive: true });
 
   document.addEventListener('touchend', e => {
-    if (!swipeEnabled || ignoreSwipe) return;
+    if (!swipeEnabled || ignoreSwipe || isAppClosed) return;
     touchEndX = e.changedTouches[0].clientX;
     touchEndY = e.changedTouches[0].clientY;
     handleSwipeGesture();
@@ -517,7 +570,6 @@
     const diffX = touchEndX - touchStartX;
     const diffY = Math.abs(touchEndY - touchStartY);
 
-    // Require a long, deliberate horizontal swipe (>= 135px) and minimal vertical movement (<= 35px)
     if (Math.abs(diffX) < 135 || diffY > 35) return;
 
     const activeSec = document.querySelector('.section.active');
@@ -526,9 +578,9 @@
     if (idx === -1) return;
 
     if (diffX > 0 && idx > 0) {
-      idx--; // Slide Right -> Previous Tab
+      idx--;
     } else if (diffX < 0 && idx < tabOrder.length - 1) {
-      idx++; // Slide Left -> Next Tab
+      idx++;
     } else {
       return;
     }
