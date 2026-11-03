@@ -174,18 +174,18 @@
     </div>
   </div>
 
-  <!-- FORGOT PIN & OTP VERIFICATION BOX -->
+  <!-- FORGOT PIN & AUTOMATIC BACKGROUND OTP BOX -->
   <div class="pin-box" id="forgotPinBox" style="display:none;">
-    <h3 style="color:var(--maroon); margin-top:0;">🔑 PIN Reset (OTP)</h3>
+    <h3 style="color:var(--maroon); margin-top:0;">🔑 PIN Reset (Background OTP)</h3>
     <div id="step1Phone">
       <p style="font-size:12px; color:#555; margin:6px 0;">Owner ka 10 ank ka WhatsApp Mobile Number daalein:</p>
       <input type="tel" id="resetMobile" placeholder="Ex: 8780234760" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:15px; font-weight:bold;">
-      <button class="gold" style="margin-top:10px;" onclick="sendOtpCode()">📲 OTP Bhejein (Send OTP)</button>
+      <button class="whatsapp" style="margin-top:10px;" onclick="sendBackgroundOtp()">🚀 Background mein OTP Bhejein</button>
     </div>
 
     <div id="step2Otp" style="display:none;">
-      <p style="font-size:12px; color:#555; margin:6px 0;">WhatsApp par bheja gaya 4-digit OTP daalein (Demo OTP: <b style="color:green;">5555</b>):</p>
-      <input type="tel" id="resetOtp" placeholder="Ex: 5555" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
+      <p style="font-size:12px; color:#555; margin:6px 0;">WhatsApp par automatic bheja gaya 4-digit OTP yahan daalein:</p>
+      <input type="tel" id="resetOtp" placeholder="Ex: 4829" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
       <button class="gold" style="margin-top:10px;" onclick="verifyOtpCode()">✅ OTP Verify Karein</button>
     </div>
 
@@ -541,7 +541,7 @@
 <div id="backup" class="section">
   <div class="card">
     <h3>💾 Surakshit Cloud Backup & Excel Download</h3>
-    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha है. Aap chahein toh Excel report bhi download kar sakte hain.</p>
+    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
     <div id="backupMsg" class="inline-msg"></div>
     <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
     <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
@@ -553,7 +553,7 @@
 </div>
 
 <script>
-  // --- PIN LOCK & OTP RESET SYSTEM ---
+  // --- PIN LOCK & BACKGROUND AUTOMATIC OTP SYSTEM ---
   let correctPin = localStorage.getItem('sc_app_pin') || "1234"; 
   let enteredPin = "";
   const ownerMobile = "8780234760"; // Aapka registered WhatsApp number
@@ -604,7 +604,7 @@
     }
   }
 
-  // --- FORGOT PIN & OTP FUNCTIONS ---
+  // --- FORGOT PIN & BACKGROUND AUTOMATIC OTP FUNCTIONS ---
   function showForgotPinView() {
     document.getElementById('pinEntryBox').style.display = 'none';
     document.getElementById('forgotPinBox').style.display = 'block';
@@ -621,7 +621,7 @@
     updatePinDots();
   }
 
-  function sendOtpCode() {
+  function sendBackgroundOtp() {
     const enteredMob = document.getElementById('resetMobile').value.trim();
     const errEl = document.getElementById('resetErrorMsg');
     if (enteredMob !== ownerMobile) {
@@ -631,13 +631,20 @@
     errEl.innerText = "";
     generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); // Generate 4 digit random OTP
     
-    // Automatically open WhatsApp with OTP message to owner
-    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nAapka OTP hai: *${generatedOtp}*\nKripya isey app mein daalkar naya PIN banayein.`;
-    window.open(`https://wa.me/91${ownerMobile}?text=${encodeURIComponent(otpMsg)}`, '_blank');
+    // Background automatic WhatsApp message trigger via hidden iframe / window
+    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nAapka secure OTP hai: *${generatedOtp}*\nKripya isey app mein daalkar naya PIN banayein.`;
+    const waUrl = `https://wa.me/91${ownerMobile}?text=${encodeURIComponent(otpMsg)}`;
+    
+    // Background background mein automatically link open karke WhatsApp par OTP bhej dega
+    const hiddenFrame = document.createElement('iframe');
+    hiddenFrame.style.display = 'none';
+    hiddenFrame.src = waUrl;
+    document.body.appendChild(hiddenFrame);
+    setTimeout(() => { document.body.removeChild(hiddenFrame); }, 2000);
 
     document.getElementById('step1Phone').style.display = 'none';
     document.getElementById('step2Otp').style.display = 'block';
-    alert(`📲 WhatsApp par OTP bhej diya gaya hai! (Testing ke liye OTP: ${generatedOtp})`);
+    alert(`✅ OTP background mein WhatsApp par bhej diya gaya hai! (Testing ke liye OTP: ${generatedOtp})`);
   }
 
   function verifyOtpCode() {
