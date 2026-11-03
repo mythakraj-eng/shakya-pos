@@ -58,8 +58,8 @@
     button.whatsapp { background: #25d366; color: #fff; font-size: 13px; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
-    /* PIN LOCK SCREEN OVERLAY */
-    #pinLockScreen { display: flex; position: fixed; inset: 0; background: var(--maroon); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+    /* PIN LOCK & FORGOT SCREEN OVERLAY */
+    #pinLockScreen { display: flex; position: fixed; inset: 0; background: var(--maroon); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .pin-box { background: #fff; width: 100%; max-width: 320px; padding: 24px; border-radius: 14px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border-top: 5px solid var(--gold); }
     .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 15px 0; }
     .pin-dot { width: 14px; height: 14px; border: 2px solid var(--maroon); border-radius: 50%; background: #fff; transition: 0.2s; }
@@ -143,9 +143,9 @@
 </head>
 <body>
 
-<!-- 4-DIGIT PIN LOCK OVERLAY (Default PIN: 1234) -->
+<!-- PIN LOCK & FORGOT SCREEN OVERLAY -->
 <div id="pinLockScreen">
-  <div class="pin-box">
+  <div class="pin-box" id="pinEntryBox">
     <h3 style="color:var(--maroon); margin-top:0;">🔒 SHAKYA POS LOCKED</h3>
     <p style="font-size:12px; color:#555; margin:5px 0;">App kholne ke liye 4-digit PIN daalein:</p>
     <div class="pin-dots">
@@ -168,6 +168,36 @@
       <button class="pin-key" onclick="clearPin()" style="background:#ddd; font-size:14px;">C</button>
       <button class="pin-key" onclick="pressPin('0')">0</button>
       <button class="pin-key" onclick="backPin()" style="background:#b30000; color:#fff; font-size:14px;">⌫</button>
+    </div>
+    <div style="margin-top:12px;">
+      <span style="font-size:11px; color:var(--maroon); text-decoration:underline; cursor:pointer; font-weight:bold;" onclick="showForgotPinView()">🔑 PIN Bhool Gaye? (Forgot PIN)</span>
+    </div>
+  </div>
+
+  <!-- FORGOT PIN & OTP VERIFICATION BOX -->
+  <div class="pin-box" id="forgotPinBox" style="display:none;">
+    <h3 style="color:var(--maroon); margin-top:0;">🔑 PIN Reset (OTP)</h3>
+    <div id="step1Phone">
+      <p style="font-size:12px; color:#555; margin:6px 0;">Owner ka 10 ank ka WhatsApp Mobile Number daalein:</p>
+      <input type="tel" id="resetMobile" placeholder="Ex: 8780234760" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:15px; font-weight:bold;">
+      <button class="gold" style="margin-top:10px;" onclick="sendOtpCode()">📲 OTP Bhejein (Send OTP)</button>
+    </div>
+
+    <div id="step2Otp" style="display:none;">
+      <p style="font-size:12px; color:#555; margin:6px 0;">WhatsApp par bheja gaya 4-digit OTP daalein (Demo OTP: <b style="color:green;">5555</b>):</p>
+      <input type="tel" id="resetOtp" placeholder="Ex: 5555" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
+      <button class="gold" style="margin-top:10px;" onclick="verifyOtpCode()">✅ OTP Verify Karein</button>
+    </div>
+
+    <div id="step3NewPin" style="display:none;">
+      <p style="font-size:12px; color:#555; margin:6px 0;">Naya 4-digit PIN daalein:</p>
+      <input type="password" id="newPinInput" placeholder="Ex: 5678" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
+      <button style="margin-top:10px;" onclick="saveNewPin()">💾 Naya PIN Save Karein</button>
+    </div>
+
+    <div id="resetErrorMsg" style="color:#b30000; font-size:11px; margin-top:8px; font-weight:bold;"></div>
+    <div style="margin-top:12px;">
+      <span style="font-size:11px; color:#555; text-decoration:underline; cursor:pointer;" onclick="backToPinLogin()">⬅️ Wapas Login Par Jayein</span>
     </div>
   </div>
 </div>
@@ -511,7 +541,7 @@
 <div id="backup" class="section">
   <div class="card">
     <h3>💾 Surakshit Cloud Backup & Excel Download</h3>
-    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
+    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha है. Aap chahein toh Excel report bhi download kar sakte hain.</p>
     <div id="backupMsg" class="inline-msg"></div>
     <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
     <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
@@ -523,9 +553,11 @@
 </div>
 
 <script>
-  // --- PIN LOCK SYSTEM (Default PIN: 1234) ---
-  const correctPin = "1234"; // Aap chahein toh yahan apna naya 4-digit PIN daal sakte hain
+  // --- PIN LOCK & OTP RESET SYSTEM ---
+  let correctPin = localStorage.getItem('sc_app_pin') || "1234"; 
   let enteredPin = "";
+  const ownerMobile = "8780234760"; // Aapka registered WhatsApp number
+  let generatedOtp = "";
 
   function pressPin(digit) {
     if (enteredPin.length < 4) {
@@ -570,6 +602,67 @@
       updatePinDots();
       setTimeout(() => { document.getElementById('pinErrorMsg').innerText = ""; }, 2000);
     }
+  }
+
+  // --- FORGOT PIN & OTP FUNCTIONS ---
+  function showForgotPinView() {
+    document.getElementById('pinEntryBox').style.display = 'none';
+    document.getElementById('forgotPinBox').style.display = 'block';
+    document.getElementById('step1Phone').style.display = 'block';
+    document.getElementById('step2Otp').style.display = 'none';
+    document.getElementById('step3NewPin').style.display = 'none';
+    document.getElementById('resetErrorMsg').innerText = "";
+  }
+
+  function backToPinLogin() {
+    document.getElementById('forgotPinBox').style.display = 'none';
+    document.getElementById('pinEntryBox').style.display = 'block';
+    enteredPin = "";
+    updatePinDots();
+  }
+
+  function sendOtpCode() {
+    const enteredMob = document.getElementById('resetMobile').value.trim();
+    const errEl = document.getElementById('resetErrorMsg');
+    if (enteredMob !== ownerMobile) {
+      errEl.innerText = "❌ Yeh number registered owner ka nahi hai!";
+      return;
+    }
+    errEl.innerText = "";
+    generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); // Generate 4 digit random OTP
+    
+    // Automatically open WhatsApp with OTP message to owner
+    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nAapka OTP hai: *${generatedOtp}*\nKripya isey app mein daalkar naya PIN banayein.`;
+    window.open(`https://wa.me/91${ownerMobile}?text=${encodeURIComponent(otpMsg)}`, '_blank');
+
+    document.getElementById('step1Phone').style.display = 'none';
+    document.getElementById('step2Otp').style.display = 'block';
+    alert(`📲 WhatsApp par OTP bhej diya gaya hai! (Testing ke liye OTP: ${generatedOtp})`);
+  }
+
+  function verifyOtpCode() {
+    const userOtp = document.getElementById('resetOtp').value.trim();
+    const errEl = document.getElementById('resetErrorMsg');
+    if (userOtp !== generatedOtp && userOtp !== "5555") {
+      errEl.innerText = "❌ Galat OTP! Dobara koshish karein.";
+      return;
+    }
+    errEl.innerText = "";
+    document.getElementById('step2Otp').style.display = 'none';
+    document.getElementById('step3NewPin').style.display = 'block';
+  }
+
+  function saveNewPin() {
+    const newPin = document.getElementById('newPinInput').value.trim();
+    const errEl = document.getElementById('resetErrorMsg');
+    if (newPin.length !== 4) {
+      errEl.innerText = "⚠️ Kripya 4 ank ka naya PIN daalein!";
+      return;
+    }
+    correctPin = newPin;
+    localStorage.setItem('sc_app_pin', correctPin);
+    alert('✅ Naya PIN safaltapoorvak save ho gaya hai!');
+    backToPinLogin();
   }
 
   // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH ---
@@ -655,8 +748,8 @@
   function reopenApp() {
     isAppClosed = false;
     document.getElementById('appClosedScreen').style.display = 'none';
-    // Lock app again with PIN when reopened
     document.getElementById('pinLockScreen').style.display = 'flex';
+    backToPinLogin();
     armBackGuard();
   }
 
