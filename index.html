@@ -59,7 +59,7 @@
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
     /* PIN LOCK & FORGOT SCREEN OVERLAY */
-    #pinLockScreen { display: flex; position: fixed; inset: 0; background: var(--maroon); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+    #pinLockScreen { display: none; position: fixed; inset: 0; background: var(--maroon); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .pin-box { background: #fff; width: 100%; max-width: 320px; padding: 24px; border-radius: 14px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border-top: 5px solid var(--gold); }
     .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 15px 0; }
     .pin-dot { width: 14px; height: 14px; border: 2px solid var(--maroon); border-radius: 50%; background: #fff; transition: 0.2s; }
@@ -143,7 +143,7 @@
 </head>
 <body>
 
-<!-- PIN LOCK & FORGOT SCREEN OVERLAY -->
+<!-- PIN LOCK & SECURE OTP RESET SYSTEM -->
 <div id="pinLockScreen">
   <div class="pin-box" id="pinEntryBox">
     <h3 style="color:var(--maroon); margin-top:0;">🔒 SHAKYA POS LOCKED</h3>
@@ -174,19 +174,19 @@
     </div>
   </div>
 
-  <!-- FORGOT PIN & AUTOMATIC BACKGROUND OTP BOX -->
+  <!-- SECURE FORGOT PIN & OWNER OTP BOX -->
   <div class="pin-box" id="forgotPinBox" style="display:none;">
-    <h3 style="color:var(--maroon); margin-top:0;">🔑 PIN Reset (Background OTP)</h3>
+    <h3 style="color:var(--maroon); margin-top:0;">🔑 Secure PIN Reset</h3>
     <div id="step1Phone">
-      <p style="font-size:12px; color:#555; margin:6px 0;">Owner ka 10 ank ka WhatsApp Mobile Number daalein:</p>
+      <p style="font-size:12px; color:#555; margin:6px 0;">Sirf Registered Owner ka WhatsApp Number daalein:</p>
       <input type="tel" id="resetMobile" placeholder="Ex: 8780234760" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:15px; font-weight:bold;">
-      <button class="whatsapp" style="margin-top:10px;" onclick="sendBackgroundOtp()">🚀 Background mein OTP Bhejein</button>
+      <button class="whatsapp" style="margin-top:10px;" onclick="sendOwnerOtp()">📲 Owner Number par OTP Bhejein</button>
     </div>
 
     <div id="step2Otp" style="display:none;">
-      <p style="font-size:12px; color:#555; margin:6px 0;">WhatsApp par automatic bheja gaya 4-digit OTP yahan daalein:</p>
+      <p style="font-size:12px; color:#555; margin:6px 0;">Owner WhatsApp par bheja gaya 4-digit OTP yahan daalein:</p>
       <input type="tel" id="resetOtp" placeholder="Ex: 4829" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
-      <button class="gold" style="margin-top:10px;" onclick="verifyOtpCode()">✅ OTP Verify Karein</button>
+      <button class="gold" style="margin-top:10px;" onclick="verifyOwnerOtp()">✅ OTP Verify Karein</button>
     </div>
 
     <div id="step3NewPin" style="display:none;">
@@ -553,11 +553,20 @@
 </div>
 
 <script>
-  // --- PIN LOCK & BACKGROUND AUTOMATIC OTP SYSTEM ---
+  // --- SECURE PIN LOCK & SESSION CHECK ---
   let correctPin = localStorage.getItem('sc_app_pin') || "1234"; 
   let enteredPin = "";
-  const ownerMobile = "8780234760"; // Aapka registered WhatsApp number
+  const ownerMobile = "8780234760"; // Registered Owner Mobile Number
   let generatedOtp = "";
+
+  // Check if session is already unlocked during this browser session
+  window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('sc_unlocked') === 'true') {
+      document.getElementById('pinLockScreen').style.display = 'none';
+    } else {
+      document.getElementById('pinLockScreen').style.display = 'flex';
+    }
+  });
 
   function pressPin(digit) {
     if (enteredPin.length < 4) {
@@ -593,6 +602,7 @@
 
   function verifyPin() {
     if (enteredPin === correctPin) {
+      sessionStorage.setItem('sc_unlocked', 'true'); // Keeps unlocked on manual refresh
       document.getElementById('pinLockScreen').style.display = 'none';
       enteredPin = "";
       updatePinDots();
@@ -604,7 +614,7 @@
     }
   }
 
-  // --- FORGOT PIN & BACKGROUND AUTOMATIC OTP FUNCTIONS ---
+  // --- SECURE OWNER OTP FUNCTIONS ---
   function showForgotPinView() {
     document.getElementById('pinEntryBox').style.display = 'none';
     document.getElementById('forgotPinBox').style.display = 'block';
@@ -621,21 +631,22 @@
     updatePinDots();
   }
 
-  function sendBackgroundOtp() {
+  function sendOwnerOtp() {
     const enteredMob = document.getElementById('resetMobile').value.trim();
     const errEl = document.getElementById('resetErrorMsg');
+    
+    // Strict Owner Mobile Validation
     if (enteredMob !== ownerMobile) {
-      errEl.innerText = "❌ Yeh number registered owner ka nahi hai!";
+      errEl.innerText = "❌ Yeh number authorized owner ka nahi hai! OTP nahi bheja jayega.";
       return;
     }
     errEl.innerText = "";
-    generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); // Generate 4 digit random OTP
+    generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); // Generate secure 4 digit random OTP
     
-    // Background automatic WhatsApp message trigger via hidden iframe / window
-    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nAapka secure OTP hai: *${generatedOtp}*\nKripya isey app mein daalkar naya PIN banayein.`;
+    // Trigger background WhatsApp message to owner only
+    const otpMsg = `*SHAKYA POS - SECURE PIN RESET*\nAapka OTP hai: *${generatedOtp}*\nKripya ise kisi ke sath share na karein.`;
     const waUrl = `https://wa.me/91${ownerMobile}?text=${encodeURIComponent(otpMsg)}`;
     
-    // Background background mein automatically link open karke WhatsApp par OTP bhej dega
     const hiddenFrame = document.createElement('iframe');
     hiddenFrame.style.display = 'none';
     hiddenFrame.src = waUrl;
@@ -644,14 +655,16 @@
 
     document.getElementById('step1Phone').style.display = 'none';
     document.getElementById('step2Otp').style.display = 'block';
-    alert(`✅ OTP background mein WhatsApp par bhej diya gaya hai! (Testing ke liye OTP: ${generatedOtp})`);
+    alert(`✅ OTP sirf registered owner (${ownerMobile}) ke WhatsApp par bhej diya gaya hai!`);
   }
 
-  function verifyOtpCode() {
+  function verifyOwnerOtp() {
     const userOtp = document.getElementById('resetOtp').value.trim();
     const errEl = document.getElementById('resetErrorMsg');
-    if (userOtp !== generatedOtp && userOtp !== "5555") {
-      errEl.innerText = "❌ Galat OTP! Dobara koshish karein.";
+    
+    // Strict validation: No bypass allowed, must match generated OTP
+    if (userOtp !== generatedOtp) {
+      errEl.innerText = "❌ Galat OTP! Verification fail ho gayi.";
       return;
     }
     errEl.innerText = "";
@@ -747,6 +760,7 @@
     closeShutdownModal();
     isAppClosed = true;
     backGuardArmed = false;
+    sessionStorage.removeItem('sc_unlocked'); // Clear session lock on complete exit
     syncToCloud();
     document.getElementById('appClosedScreen').style.display = 'flex';
     try { window.close(); } catch (err) {}
@@ -755,6 +769,7 @@
   function reopenApp() {
     isAppClosed = false;
     document.getElementById('appClosedScreen').style.display = 'none';
+    sessionStorage.removeItem('sc_unlocked');
     document.getElementById('pinLockScreen').style.display = 'flex';
     backToPinLogin();
     armBackGuard();
