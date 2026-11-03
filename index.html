@@ -57,7 +57,7 @@
     #shutdownModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; padding: 20px; align-items: center; justify-content: center; }
     .shutdown-dialog { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-    /* Full-Screen Safe Shutdown Screen (Replaces about:blank) */
+    /* Full-Screen Safe Shutdown Screen */
     #appClosedScreen { display: none; position: fixed; inset: 0; background: var(--maroon); color: #fff; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
     .closed-box { background: rgba(255,255,255,0.08); border: 2px solid var(--gold); border-radius: 16px; padding: 24px 18px; max-width: 340px; width: 100%; }
 
@@ -150,7 +150,7 @@
   </div>
 </div>
 
-<!-- SAFE SHUTDOWN SCREEN (NO MORE WHITE ABOUT:BLANK) -->
+<!-- SAFE SHUTDOWN SCREEN -->
 <div id="appClosedScreen">
   <div class="closed-box">
     <div style="font-size:40px; margin-bottom:8px;">🔒</div>
@@ -467,7 +467,6 @@
 </div>
 
 <script>
-  // --- STRONG BACK GESTURE LOCK & SAFE SHUTDOWN SYSTEM ---
   let isAppClosed = false;
   let backGuardArmed = false;
 
@@ -477,23 +476,18 @@
     backGuardArmed = true;
   }
 
-  // Arm on load and on any touch/click so Chrome Android respects the history lock
   window.history.pushState({ shakyaLock: true }, '', window.location.href);
   document.addEventListener('touchstart', armBackGuard, { passive: true });
   document.addEventListener('click', armBackGuard, true);
 
   window.addEventListener('popstate', function(e) {
-    if (isAppClosed) return; // Allow normal back exit when app is in shutdown state
-
-    // If any modal is open, close it instead of exiting
+    if (isAppClosed) return;
     const billMod = document.getElementById('billModal');
     const scanMod = document.getElementById('scannerModal');
     const shutMod = document.getElementById('shutdownModal');
     if (billMod && billMod.style.display === 'block') { closeBillModal(); }
     else if (scanMod && scanMod.style.display === 'block') { stopScanner(); }
     else if (shutMod && shutMod.style.display === 'flex') { closeShutdownModal(); }
-
-    // Re-push lock state immediately so app never closes accidentally
     window.history.pushState({ shakyaLock: true }, '', window.location.href);
   });
 
@@ -509,15 +503,9 @@
     closeShutdownModal();
     isAppClosed = true;
     backGuardArmed = false;
-
-    // Save current state safely
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
-
-    // Show clean Maroon/Gold Shutdown Screen (never navigate to about:blank)
     document.getElementById('appClosedScreen').style.display = 'flex';
-
-    // Try native window close for WebView/APK wrappers that support it
     try { window.close(); } catch (err) {}
   }
 
@@ -527,7 +515,6 @@
     armBackGuard();
   }
 
-  // --- SAFE SWIPE / SLIDE GESTURE WITH LOCK & VERTICAL SCROLL GUARD ---
   const tabOrder = ['billing', 'stock', 'stats', 'cust', 'backup'];
   let swipeEnabled = JSON.parse(localStorage.getItem('sc_swipe_enabled') ?? 'true');
   let touchStartX = 0, touchStartY = 0;
@@ -569,27 +556,17 @@
   function handleSwipeGesture() {
     const diffX = touchEndX - touchStartX;
     const diffY = Math.abs(touchEndY - touchStartY);
-
     if (Math.abs(diffX) < 135 || diffY > 35) return;
-
     const activeSec = document.querySelector('.section.active');
     if (!activeSec) return;
     let idx = tabOrder.indexOf(activeSec.id);
     if (idx === -1) return;
-
-    if (diffX > 0 && idx > 0) {
-      idx--;
-    } else if (diffX < 0 && idx < tabOrder.length - 1) {
-      idx++;
-    } else {
-      return;
-    }
-
+    if (diffX > 0 && idx > 0) { idx--; }
+    else if (diffX < 0 && idx < tabOrder.length - 1) { idx++; }
+    else { return; }
     const nextTabId = tabOrder[idx];
     const tabEl = document.getElementById('tab-' + nextTabId);
-    if (tabEl) {
-      switchTab(nextTabId, tabEl);
-    }
+    if (tabEl) { switchTab(nextTabId, tabEl); }
   }
 
   function cleanCode(str) {
@@ -644,7 +621,6 @@
     const q = inp.value.toUpperCase().trim();
     const box = document.getElementById('villageSuggestBox');
     const villages = getUniqueVillages();
-    
     if (!q) { box.style.display = 'none'; return; }
     const matches = villages.filter(v => v.includes(q));
     if (matches.length === 0) { box.style.display = 'none'; return; }
@@ -961,7 +937,7 @@
     if (!code) {
       const inp = document.getElementById('scanInput');
       if (inp) onScanInputType(inp);
-      showInlineMsg('billMsg', '👆 Upar Saree Code type karein ya list se chunein!', 'error');
+      showInlineMsg('billMsg', '⚠️ Pehle Saree Code jodein!', 'error');
       return;
     }
     const item = inventory.find(i => cleanCode(i.code) === code);
@@ -969,13 +945,23 @@
       showInlineMsg('billMsg', `❌ Code "${code}" Stock mein nahi mila!`, 'error');
       return;
     }
-    if (item.qty <= 0) {
-      showInlineMsg('billMsg', `⚠️ "${item.code} (${item.color})" Out of Stock hai!`, 'error');
+
+    const existingCartItem = cart.find(c => c.code === item.code);
+    const currentCartQty = existingCartItem ? existingCartItem.qty : 0;
+
+    if (item.qty <= currentCartQty) {
+      showInlineMsg('billMsg', `⚠️ Stock khatam! Sirf ${item.qty} piece hi available hain.`, 'error');
       return;
     }
-    cart.push({ ...item });
+
+    if (existingCartItem) {
+      existingCartItem.qty += 1;
+    } else {
+      cart.push({ ...item, qty: 1 });
+    }
+
     document.getElementById('scanInput').value = '';
-    showInlineMsg('billMsg', `✅ ${item.code} (${item.color}) - ₹${item.mrp} Bill mein jud gaya!`, 'success');
+    showInlineMsg('billMsg', `✅ ${item.code} (${item.color}) bill mein jud gaya!`, 'success');
     renderCart();
   }
 
@@ -988,11 +974,12 @@
     const tbody = document.getElementById('cartBody');
     let totalMrp = 0;
     tbody.innerHTML = cart.map((c, idx) => {
-      totalMrp += c.mrp;
+      let itemTotalMrp = c.mrp * c.qty;
+      totalMrp += itemTotalMrp;
       return `<tr>
         <td class="code-cell">${c.code}</td>
-        <td>${c.cat} (${c.color})</td>
-        <td>₹${c.mrp}</td>
+        <td>${c.cat} (${c.color})<br><small style="color:var(--maroon);font-weight:bold;">Qty: ${c.qty} pcs</small></td>
+        <td>₹${itemTotalMrp}</td>
         <td><button class="small" style="background:#c00" onclick="removeCartItem(${idx})">✕</button></td>
       </tr>`;
     }).join('');
@@ -1007,14 +994,16 @@
     const box = document.getElementById('liveSplitBox');
     if (cart.length === 0 || totalMrp === 0) { box.style.display = 'none'; return; }
 
-    let totalCost = cart.reduce((s, i) => s + i.cost, 0);
+    let totalCost = cart.reduce((s, i) => s + (i.cost * i.qty), 0);
     let totalDiscount = totalMrp - acc;
     let netProfit = acc - totalCost;
 
     let itemBreakup = cart.map(i => {
-      let weight = i.mrp / totalMrp;
-      let itemRealSale = Math.round(i.mrp - (totalDiscount * weight));
-      return `${i.code}: MRP ₹${i.mrp} ➔ Asli Sale <b>₹${itemRealSale}</b> (Profit: ₹${itemRealSale - i.cost})`;
+      let itemTotalMrp = i.mrp * i.qty;
+      let weight = itemTotalMrp / totalMrp;
+      let itemRealSale = Math.round(itemTotalMrp - (totalDiscount * weight));
+      let itemCostTotal = i.cost * i.qty;
+      return `${i.code} (Qty ${i.qty}): MRP ₹${itemTotalMrp} ➔ Asli Sale <b>₹${itemRealSale}</b> (Profit: ₹${itemRealSale - itemCostTotal})`;
     }).join('<br>');
 
     box.style.display = 'block';
@@ -1031,9 +1020,9 @@
       <hr>
       <p style="text-align:left;"><b>Bill No:</b> ${saleRecord.invId} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.village || 'Niwari Kalan'})<br><b>Mobile:</b> ${saleRecord.mobile || 'N/A'} | <b>Mode:</b> ${saleRecord.mode}</p>
       <table>
-        <thead><tr><th>Code</th><th>Item</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
+        <thead><tr><th>Code</th><th>Item & Qty</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
         <tbody>
-          ${saleRecord.items.map(i => `<tr><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color})</td><td style="text-align:right;">₹${i.mrp}</td></tr>`).join('')}
+          ${saleRecord.items.map(i => `<tr><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color})<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
         </tbody>
       </table>
       <div class="receipt-total">TOTAL AMOUNT: ₹${saleRecord.totalMrp}</div>
@@ -1069,15 +1058,17 @@
     }
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
     const acc = parseFloat(document.getElementById('accInput').value) || totalMrp;
-    const totalCost = cart.reduce((s, i) => s + i.cost, 0);
+    let totalCost = 0;
+    cart.forEach(i => { totalCost += (i.cost * i.qty); });
     const invId = 'INV' + (sales.length + 101);
     const dateStr = new Date().toLocaleDateString('hi-IN');
 
     const itemsSold = cart.map(i => {
       const st = inventory.find(x => x.code === i.code);
-      if (st) st.qty -= 1;
-      const realSale = Math.round((i.mrp / totalMrp) * acc);
-      return { code: i.code, cat: i.cat, color: i.color, mrp: i.mrp, cost: i.cost, realSale };
+      if (st) st.qty -= i.qty;
+      let itemTotalMrp = i.mrp * i.qty;
+      const realSale = Math.round((itemTotalMrp / totalMrp) * acc);
+      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale };
     });
 
     const saleRecord = {
@@ -1119,7 +1110,7 @@
       mob = prompt('Customer ka 10 ank ka Mobile Number daalein:', '');
       if (!mob || mob.length < 10) return;
     }
-    const itemsText = lastSavedSale.items.map(i => `• ${i.code} (${i.color}): ₹${i.mrp}`).join('\n');
+    const itemsText = lastSavedSale.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty}`).join('\n');
     const msg = `*SHAKYA COSMETIC & SAREE COLLECTION*
 Ram Dara Road, Niwari Kalan, Etawah
 Mob: 8780234760
@@ -1148,7 +1139,7 @@ ${itemsText}
       Sticker MRP: ₹${s.totalMrp} | <b>Asli Cash (ACC): ₹${s.acc}</b><br>
       Kharid: ₹${s.totalCost} | Chhoot: ₹${s.totalMrp - s.acc} | <b style="color:green;">Profit: ₹${s.profit}</b><hr style="margin:5px 0;">
       <b>Items Asli Bikri Rate:</b><br>
-      ${s.items.map(i => `• <b>${i.code}</b> (${i.color}): Sticker ₹${i.mrp} ➔ Asli Sale <b>₹${i.realSale}</b>`).join('<br>')}
+      ${s.items.map(i => `• <b>${i.code}</b> (${i.color}) [${i.qty} pcs]: Sticker ₹${i.mrp * i.qty} ➔ Asli Sale <b>₹${i.realSale}</b>`).join('<br>')}
     `;
 
     document.getElementById('modalReceiptBox').innerHTML = `<div style="border:2px dashed #333; padding:10px; text-align:center;">` + buildReceiptHTML(s, 'modalBarcodeSvg') + `</div>`;
@@ -1185,7 +1176,7 @@ ${itemsText}
         <div style="background:#fff8fa; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
           ✅ <b>${found.invId} (${found.date}) - ${found.cust}</b><br>
           Sticker Bill: ₹${found.totalMrp} | <b style="color:#b30000;">ACC: ₹${found.acc}</b> | <b style="color:green;">Profit: ₹${found.profit}</b><br>
-          ${found.items.map(i => `• ${i.code} (${i.color}): ₹${i.mrp}`).join('<br>')}
+          ${found.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty}`).join('<br>')}
           <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Bill Dekhein / Print</button>
         </div>
       `;
@@ -1264,7 +1255,7 @@ ${itemsText}
     let colorCount = {};
     sales.forEach(s => {
       tMrp += s.totalMrp; tAcc += s.acc; tProfit += s.profit;
-      s.items.forEach(i => { colorCount[i.color] = (colorCount[i.color] || 0) + 1; });
+      s.items.forEach(i => { colorCount[i.color] = (colorCount[i.color] || 0) + i.qty; });
     });
     document.getElementById('stMrp').innerText = '₹' + tMrp;
     document.getElementById('stAcc').innerText = '₹' + tAcc;
@@ -1277,7 +1268,7 @@ ${itemsText}
     document.getElementById('salesHistoryBody').innerHTML = sales.map(s => `
       <tr class="clickable-row" onclick="openBillModal('${s.invId}')">
         <td><b style="color:var(--maroon); text-decoration:underline;">${s.invId} 🔍</b><br><small>${s.date}</small></td>
-        <td>${s.items.map(i => `${i.code} (₹${i.realSale})`).join('<br>')}</td>
+        <td>${s.items.map(i => `${i.code} [${i.qty}p] (₹${i.realSale})`).join('<br>')}</td>
         <td>₹${s.totalMrp}</td>
         <td><b>₹${s.acc}</b></td>
         <td style="color:green;font-weight:bold;">₹${s.profit}</td>
@@ -1292,7 +1283,7 @@ ${itemsText}
     }
     let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualCash_ACC,Cost,NetProfit,Items\n';
     sales.forEach(s => {
-      const itemsStr = s.items.map(i => `${i.code}(Rs.${i.realSale})`).join(' | ');
+      const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale})`).join(' | ');
       csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${s.totalCost},${s.profit},"${itemsStr}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
