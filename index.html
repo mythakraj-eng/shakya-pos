@@ -65,7 +65,7 @@
     .pin-dot { width: 14px; height: 14px; border: 2px solid var(--maroon); border-radius: 50%; background: #fff; transition: 0.2s; }
     .pin-dot.filled { background: var(--maroon); }
     .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-    .pin-key { background: #f3e8ec; color: var(--maroon); border: none; font-size: 18px; font-weight: bold; padding: 12px; border-radius: 8px; cursor: pointer; }
+    .pin-key { background: #f3e8ec; color: var(--maroon); border: none; font-size: 18px; font-weight: bold; padding: 12px; border-radius: 8px; cursor: pointer; margin: 0; }
     .pin-key:active { background: var(--maroon); color: #fff; }
 
     #shutdownModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; padding: 20px; align-items: center; justify-content: center; }
@@ -143,7 +143,7 @@
 </head>
 <body>
 
-<!-- PIN LOCK & SECURE OTP RESET SYSTEM -->
+<!-- PIN LOCK & SECURE RECOVERY SYSTEM -->
 <div id="pinLockScreen">
   <div class="pin-box" id="pinEntryBox">
     <h3 style="color:var(--maroon); margin-top:0;">🔒 SHAKYA POS LOCKED</h3>
@@ -169,7 +169,7 @@
       <button class="pin-key" onclick="pressPin('0')">0</button>
       <button class="pin-key" onclick="backPin()" style="background:#b30000; color:#fff; font-size:14px;">⌫</button>
     </div>
-    <div style="margin-top:12px;">
+    <div style="margin-top:14px;">
       <span style="font-size:11px; color:var(--maroon); text-decoration:underline; cursor:pointer; font-weight:bold;" onclick="showForgotPinView()">🔑 PIN Bhool Gaye? (Forgot PIN)</span>
     </div>
   </div>
@@ -177,21 +177,21 @@
   <!-- SECURE FORGOT PIN & MASKED OWNER NUMBER BOX -->
   <div class="pin-box" id="forgotPinBox" style="display:none;">
     <h3 style="color:var(--maroon); margin-top:0;">🔑 Secure PIN Reset</h3>
+    
     <div id="step1Phone">
-      <p style="font-size:12px; color:#555; margin:6px 0;">Authorized Owner WhatsApp Number:</p>
-      <!-- Masked Number Displayed Readonly -->
-      <input type="text" id="maskedOwnerDisplay" value="87******60" readonly style="text-align:center; font-size:16px; font-weight:bold; background:#eee; color:#333; cursor:not-allowed;">
-      <button class="whatsapp" style="margin-top:10px;" onclick="sendOwnerOtp()">📲 OTP Bhejein</button>
-    </div>
-
-    <div id="step2Otp" style="display:none;">
-      <p style="font-size:12px; color:#555; margin:6px 0;">WhatsApp par bheja gaya 4-digit OTP yahan daalein:</p>
-      <input type="tel" id="resetOtp" placeholder="Ex: 4829" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
-      <button class="gold" style="margin-top:10px;" onclick="verifyOwnerOtp()">✅ OTP Verify Karein</button>
+      <p style="font-size:11px; color:#555; margin:4px 0;">Registered Owner Number:</p>
+      <input type="text" value="87******60" readonly style="text-align:center; font-size:15px; font-weight:bold; background:#f3e8ec; color:var(--maroon); border:1px solid #d9b8c4; cursor:not-allowed;">
+      
+      <p style="font-size:11px; color:#333; margin:12px 0 4px 0; font-weight:600;">Owner Secret Recovery Code ya OTP daalein:</p>
+      <input type="password" id="resetOtp" placeholder="4-Digit Secret Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
+      
+      <button class="gold" style="margin-top:10px;" onclick="verifyOwnerOtp()">✅ Verify & Reset PIN</button>
+      <button class="whatsapp" style="margin-top:6px; font-size:11px; padding:8px;" onclick="sendOwnerOtp()">📲 WhatsApp Par Code Mangwayein</button>
     </div>
 
     <div id="step3NewPin" style="display:none;">
-      <p style="font-size:12px; color:#555; margin:6px 0;">Naya 4-digit PIN daalein:</p>
+      <p style="font-size:12px; color:#0f6b2f; font-weight:bold; margin:6px 0;">✅ Verification Successful!</p>
+      <p style="font-size:12px; color:#555; margin:6px 0;">Ab apna Naya 4-digit PIN set karein:</p>
       <input type="password" id="newPinInput" placeholder="Ex: 5678" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
       <button style="margin-top:10px;" onclick="saveNewPin()">💾 Naya PIN Save Karein</button>
     </div>
@@ -554,13 +554,14 @@
 </div>
 
 <script>
-  // --- SECURE PIN LOCK & SESSION CHECK ---
+  // --- SECURE PIN LOCK, CLOUD PIN SYNC & MASTER RECOVERY ---
   let correctPin = localStorage.getItem('sc_app_pin') || "1234"; 
   let enteredPin = "";
-  const ownerMobile = "8780234760"; // Authorized Owner Mobile Number
+  const ownerMobile = "8780234760"; 
+  const masterRecoveryKey = "2008"; // Secret Owner Recovery Code (Bina OTP ke bhi hamesha kaam karega)
   let generatedOtp = "";
 
-  // Check if session is already unlocked during this browser session (prevents lock on manual refresh)
+  // Check if session is already unlocked (prevents lock on manual refresh)
   window.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('sc_unlocked') === 'true') {
       document.getElementById('pinLockScreen').style.display = 'none';
@@ -615,13 +616,13 @@
     }
   }
 
-  // --- SECURE MASKED OWNER OTP FUNCTIONS ---
+  // --- SECURE MASKED OWNER RECOVERY FUNCTIONS ---
   function showForgotPinView() {
     document.getElementById('pinEntryBox').style.display = 'none';
     document.getElementById('forgotPinBox').style.display = 'block';
     document.getElementById('step1Phone').style.display = 'block';
-    document.getElementById('step2Otp').style.display = 'none';
     document.getElementById('step3NewPin').style.display = 'none';
+    document.getElementById('resetOtp').value = "";
     document.getElementById('resetErrorMsg').innerText = "";
   }
 
@@ -634,49 +635,58 @@
 
   function sendOwnerOtp() {
     const errEl = document.getElementById('resetErrorMsg');
-    errEl.innerText = "";
-    
-    // Automatically uses the secure owner mobile number without manual entry
     generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); 
     
-    const otpMsg = `*SHAKYA POS - SECURE PIN RESET*\nAapka OTP hai: *${generatedOtp}*\nKripya ise kisi ke sath share na karein.`;
-    const waUrl = `https://wa.me/91${ownerMobile}?text=${encodeURIComponent(otpMsg)}`;
-    
-    const hiddenFrame = document.createElement('iframe');
-    hiddenFrame.style.display = 'none';
-    hiddenFrame.src = waUrl;
-    document.body.appendChild(hiddenFrame);
-    setTimeout(() => { document.body.removeChild(hiddenFrame); }, 2000);
+    // Save OTP to Firebase Cloud so Owner can also see it in database
+    firebase.database().ref('shakya_pos_data/latest_otp').set(generatedOtp);
 
-    document.getElementById('step1Phone').style.display = 'none';
-    document.getElementById('step2Otp').style.display = 'block';
-    alert(`✅ OTP authorized owner (${ownerMobile}) ke WhatsApp par bhej diya gaya hai!`);
+    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nRegistered Mobile: 87******60\nAapka OTP Code hai: *${generatedOtp}*`;
+    const waUrl = `https://api.whatsapp.com/send?phone=91${ownerMobile}&text=${encodeURIComponent(otpMsg)}`;
+    
+    // Direct open because browsers block hidden iframes for WhatsApp
+    window.open(waUrl, '_blank');
+    errEl.style.color = "#0f6b2f";
+    errEl.innerText = "📲 WhatsApp khul gaya hai, wahan se OTP dekh kar yahan daalein (Ya apna Secret Code daalein).";
   }
 
   function verifyOwnerOtp() {
-    const userOtp = document.getElementById('resetOtp').value.trim();
+    const userCode = document.getElementById('resetOtp').value.trim();
     const errEl = document.getElementById('resetErrorMsg');
-    
-    if (userOtp !== generatedOtp) {
-      errEl.innerText = "❌ Galat OTP! Verification fail ho gayi.";
+    errEl.style.color = "#b30000";
+
+    if (!userCode) {
+      errEl.innerText = "⚠️ Kripya 4-digit Code daalein!";
       return;
     }
-    errEl.innerText = "";
-    document.getElementById('step2Otp').style.display = 'none';
-    document.getElementById('step3NewPin').style.display = 'block';
+    
+    // Works with EITHER the generated WhatsApp OTP OR your secret Master Recovery Key (2008)
+    if (userCode === masterRecoveryKey || (generatedOtp !== "" && userCode === generatedOtp)) {
+      errEl.innerText = "";
+      document.getElementById('step1Phone').style.display = 'none';
+      document.getElementById('step3NewPin').style.display = 'block';
+    } else {
+      errEl.innerText = "❌ Galat Code! Sirf Owner hi PIN reset kar sakta hai.";
+    }
   }
 
   function saveNewPin() {
     const newPin = document.getElementById('newPinInput').value.trim();
     const errEl = document.getElementById('resetErrorMsg');
+    errEl.style.color = "#b30000";
     if (newPin.length !== 4) {
       errEl.innerText = "⚠️ Kripya 4 ank ka naya PIN daalein!";
       return;
     }
     correctPin = newPin;
     localStorage.setItem('sc_app_pin', correctPin);
-    alert('✅ Naya PIN safaltapoorvak save ho gaya hai!');
+    syncToCloud(); // Sync new PIN across Phone & Tablet
     backToPinLogin();
+    document.getElementById('pinErrorMsg').style.color = "#0f6b2f";
+    document.getElementById('pinErrorMsg').innerText = "✅ Naya PIN save ho gaya! Ab login karein.";
+    setTimeout(() => {
+      document.getElementById('pinErrorMsg').innerText = "";
+      document.getElementById('pinErrorMsg').style.color = "#b30000";
+    }, 3000);
   }
 
   // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH ---
@@ -701,6 +711,10 @@
     if (cloudData) {
       if (cloudData.inventory) inventory = cloudData.inventory;
       if (cloudData.sales) sales = cloudData.sales;
+      if (cloudData.appPin) {
+        correctPin = cloudData.appPin;
+        localStorage.setItem('sc_app_pin', correctPin);
+      }
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
       
@@ -711,7 +725,7 @@
   });
 
   function syncToCloud() {
-    dbRef.set({ inventory, sales });
+    dbRef.set({ inventory, sales, appPin: correctPin });
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
   }
@@ -1402,8 +1416,6 @@
           link.href = URL.createObjectURL(blob);
           link.download = `Shakya_Bill_${lastSavedSale.invId}.png`;
           link.click();
-          
-          alert('📥 Bill ka Photo download ho gaya hai! Ab WhatsApp khulega, wahan chat mein photo select karke bhej dein.');
           window.open(`https://wa.me/91${mob}?text=${encodeURIComponent('Shakya Cosmetic Bill Photo: ' + lastSavedSale.invId)}`, '_blank');
         }
       });
