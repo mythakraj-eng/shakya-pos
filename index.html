@@ -23,13 +23,15 @@
     :root { --maroon: #6b092b; --gold: #f5c542; --bg: #f8f5f2; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: #222; padding-bottom: 60px; user-select: none; }
-    header { background: var(--maroon); color: white; padding: 12px 14px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+    header { background: var(--maroon); color: white; padding: 10px 12px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     header .header-info { text-align: left; }
-    header h1 { margin: 0; font-size: 17px; color: var(--gold); letter-spacing: 0.5px; }
+    header h1 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; }
     header p { margin: 2px 0 0; font-size: 10px; opacity: 0.95; }
     
-    /* Shutdown Header Button */
-    .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    /* Header Control Buttons */
+    .header-actions { display: flex; gap: 5px; align-items: center; }
+    .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
+    .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
 
     .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 20; }
     .tab { flex: 1; padding: 11px 4px; text-align: center; font-weight: 700; font-size: 11px; cursor: pointer; color: #555; }
@@ -127,8 +129,9 @@
     <h1>SHAKYA COSMETIC</h1>
     <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | Mob: 8780234760</p>
   </div>
-  <div>
-    <button class="shutdown-btn" onclick="openShutdownModal()">🛑 Exit App</button>
+  <div class="header-actions">
+    <button id="swipeLockBtn" class="slide-lock-btn" onclick="toggleSwipeLock()">👆 Slide: ON</button>
+    <button class="shutdown-btn" onclick="openShutdownModal()">🛑 Exit</button>
   </div>
 </header>
 
@@ -138,7 +141,7 @@
     <h3 style="color:var(--maroon); margin-top:0;">⚠️ App Band Karein?</h3>
     <p style="font-size:13px; color:#555; margin:10px 0 18px 0;">Kya aap Shakya POS app ko band karna chahte hain?</p>
     <div class="row">
-      <div><button class="dark" style="margin:0;" onclick="closeShutdownModal()">Rukie (Cancel)</button></div>
+      <div><button class="dark" style="margin:0;" onclick="closeShutdownModal()">Rukiye (Cancel)</button></div>
       <div><button style="margin:0; background:#b30000;" onclick="confirmShutdown()">Haan, Band Karein</button></div>
     </div>
   </div>
@@ -164,7 +167,7 @@
     <div id="modalReceiptBox"></div>
     <div class="row" style="margin-top:10px;">
       <div><button onclick="printFromModal()">🖨️ Print Bill</button></div>
-      <div><button class="whatsapp" onclick="sendWhatsAppFromModal()">💬 WhatsApp Bhejein</button></div>
+      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bhejein</button></div>
       <div><button class="dark" onclick="closeBillModal()">❌ Close</button></div>
     </div>
   </div>
@@ -281,7 +284,7 @@
     </div>
 
     <div style="margin-top:6px;">
-      <small style="color:#666; font-size:11px;">👇 Tap karke Colours jodein:</small>
+      <small style="color:#666; font-size:11px;">👇 Tap karke Colours jodein (Clear: <b style="color:#c00;cursor:pointer;" onclick="document.getElementById('sColor').value=''">✕ Saaf karein</b>):</small>
       <div class="chip-wrap">
         <span class="color-chip" onclick="addColorChip('Red')">🔴 Red</span>
         <span class="color-chip" onclick="addColorChip('Rani Pink')">🩷 Rani Pink</span>
@@ -466,39 +469,68 @@
   }
 
   function confirmShutdown() {
-    // Attempt to close window or redirect to blank/home page
     window.close();
     window.location.href = "about:blank";
   }
 
-  // --- SWIPE / SLIDE GESTURE TO SWITCH TABS ---
+  // --- SAFE SWIPE / SLIDE GESTURE WITH LOCK & VERTICAL SCROLL GUARD ---
   const tabOrder = ['billing', 'stock', 'stats', 'cust', 'backup'];
-  let touchStartX = 0;
-  let touchEndX = 0;
+  let swipeEnabled = JSON.parse(localStorage.getItem('sc_swipe_enabled') ?? 'true');
+  let touchStartX = 0, touchStartY = 0;
+  let touchEndX = 0, touchEndY = 0;
+  let ignoreSwipe = false;
+
+  function updateSwipeBtnUI() {
+    const btn = document.getElementById('swipeLockBtn');
+    if (!btn) return;
+    btn.innerHTML = swipeEnabled ? '👆 Slide: ON' : '🔒 Slide: OFF';
+    btn.style.background = swipeEnabled ? '#2e6b3e' : '#555';
+  }
+
+  function toggleSwipeLock() {
+    swipeEnabled = !swipeEnabled;
+    localStorage.setItem('sc_swipe_enabled', JSON.stringify(swipeEnabled));
+    updateSwipeBtnUI();
+  }
+  updateSwipeBtnUI();
 
   document.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, false);
+    if (!swipeEnabled) return;
+    // Do NOT trigger tab slide when touching inputs, tables, buttons, colour chips, or modals
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal')) {
+      ignoreSwipe = true;
+      return;
+    }
+    ignoreSwipe = false;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
 
   document.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
+    if (!swipeEnabled || ignoreSwipe) return;
+    touchEndX = e.changedTouches[0].clientX;
+    touchEndY = e.changedTouches[0].clientY;
     handleSwipeGesture();
-  }, false);
+  }, { passive: true });
 
   function handleSwipeGesture() {
-    let diff = touchEndX - touchStartX;
-    if (Math.abs(diff) < 70) return;
-    
+    const diffX = touchEndX - touchStartX;
+    const diffY = Math.abs(touchEndY - touchStartY);
+
+    // Require a long, deliberate horizontal swipe (>= 135px) and minimal vertical movement (<= 35px)
+    if (Math.abs(diffX) < 135 || diffY > 35) return;
+
     const activeSec = document.querySelector('.section.active');
     if (!activeSec) return;
-    const currentId = activeSec.id;
-    let idx = tabOrder.indexOf(currentId);
+    let idx = tabOrder.indexOf(activeSec.id);
     if (idx === -1) return;
 
-    if (diff > 0) {
-      idx = (idx - 1 + tabOrder.length) % tabOrder.length;
+    if (diffX > 0 && idx > 0) {
+      idx--; // Slide Right -> Previous Tab
+    } else if (diffX < 0 && idx < tabOrder.length - 1) {
+      idx++; // Slide Left -> Next Tab
     } else {
-      idx = (idx + 1) % tabOrder.length;
+      return;
     }
 
     const nextTabId = tabOrder[idx];
@@ -1036,7 +1068,7 @@
       if (!mob || mob.length < 10) return;
     }
     const itemsText = lastSavedSale.items.map(i => `• ${i.code} (${i.color}): ₹${i.mrp}`).join('\n');
-    const msg = `*SHAKYA COSMETIC & SAREE COLLECTION*[span_0](start_span)[span_0](end_span)
+    const msg = `*SHAKYA COSMETIC & SAREE COLLECTION*
 Ram Dara Road, Niwari Kalan, Etawah
 Mob: 8780234760
 
@@ -1053,8 +1085,6 @@ ${itemsText}
 
     window.open(`https://wa.me/91${mob}?text=${encodeURIComponent(msg)}`, '_blank');
   }
-
-  function sendWhatsAppFromModal() {}
 
   function openBillModal(invId) {
     const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
