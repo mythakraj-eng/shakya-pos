@@ -18,6 +18,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- HTML2Canvas for Bill Image Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     :root { --maroon: #6b092b; --gold: #f5c542; --bg: #f8f5f2; }
@@ -53,11 +55,12 @@
     button.whatsapp { background: #25d366; color: #fff; font-size: 13px; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
-    /* Custom Shutdown Confirmation Modal */
     #shutdownModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; padding: 20px; align-items: center; justify-content: center; }
     .shutdown-dialog { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-    /* Full-Screen Safe Shutdown Screen */
+    #waPromptModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; align-items: center; justify-content: center; }
+    .wa-dialog { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
     #appClosedScreen { display: none; position: fixed; inset: 0; background: var(--maroon); color: #fff; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
     .closed-box { background: rgba(255,255,255,0.08); border: 2px solid var(--gold); border-radius: 16px; padding: 24px 18px; max-width: 340px; width: 100%; }
 
@@ -138,7 +141,6 @@
   </div>
 </header>
 
-<!-- CUSTOM SHUTDOWN CONFIRMATION DIALOG -->
 <div id="shutdownModal">
   <div class="shutdown-dialog">
     <h3 style="color:var(--maroon); margin-top:0;">⚠️ App Band Karein?</h3>
@@ -150,7 +152,18 @@
   </div>
 </div>
 
-<!-- SAFE SHUTDOWN SCREEN -->
+<div id="waPromptModal">
+  <div class="wa-dialog">
+    <h3 style="color:var(--maroon); margin-top:0;">💬 WhatsApp Number</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0 10px 0;">Customer ka 10 ank ka Mobile Number daalein:</p>
+    <input type="tel" id="waInputNumber" placeholder="Ex: 9876543210" maxlength="10" style="text-align:center; font-size:16px; font-weight:bold;">
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closeWaModal()">Cancel</button></div>
+      <div><button class="whatsapp" style="margin:0;" onclick="submitWaNumber()">Bill Image Bhejein</button></div>
+    </div>
+  </div>
+</div>
+
 <div id="appClosedScreen">
   <div class="closed-box">
     <div style="font-size:40px; margin-bottom:8px;">🔒</div>
@@ -181,7 +194,7 @@
     <div id="modalReceiptBox"></div>
     <div class="row" style="margin-top:10px;">
       <div><button onclick="printFromModal()">🖨️ Print Bill</button></div>
-      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bhejein</button></div>
+      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill Photo</button></div>
       <div><button class="dark" onclick="closeBillModal()">❌ Close</button></div>
     </div>
   </div>
@@ -260,7 +273,7 @@
     <div id="printZone"></div>
     <div class="row" style="margin-top:10px;">
       <div><button onclick="window.print()">🖨️ Print / Save PDF</button></div>
-      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill Bhejein</button></div>
+      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill Photo Bhejein</button></div>
     </div>
   </div>
 </div>
@@ -485,9 +498,11 @@
     const billMod = document.getElementById('billModal');
     const scanMod = document.getElementById('scannerModal');
     const shutMod = document.getElementById('shutdownModal');
+    const waMod = document.getElementById('waPromptModal');
     if (billMod && billMod.style.display === 'block') { closeBillModal(); }
     else if (scanMod && scanMod.style.display === 'block') { stopScanner(); }
     else if (shutMod && shutMod.style.display === 'flex') { closeShutdownModal(); }
+    else if (waMod && waMod.style.display === 'flex') { closeWaModal(); }
     window.history.pushState({ shakyaLock: true }, '', window.location.href);
   });
 
@@ -537,7 +552,7 @@
 
   document.addEventListener('touchstart', e => {
     if (!swipeEnabled || isAppClosed) return;
-    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #appClosedScreen')) {
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #appClosedScreen')) {
       ignoreSwipe = true;
       return;
     }
@@ -1097,7 +1112,7 @@
     document.getElementById('custVillage').value = '';
     document.getElementById('custMobile').value = '';
 
-    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya! WhatsApp par bhi bhej sakte hain.`, 'success');
+    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya! WhatsApp par photo bhi bhej sakte hain.`, 'success');
   }
 
   function sendWhatsAppLastBill() {
@@ -1107,26 +1122,60 @@
     }
     let mob = lastSavedSale.mobile;
     if (!mob || mob.length < 10) {
-      mob = prompt('Customer ka 10 ank ka Mobile Number daalein:', '');
-      if (!mob || mob.length < 10) return;
+      document.getElementById('waInputNumber').value = '';
+      document.getElementById('waPromptModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('waInputNumber').focus(), 100);
+      return;
     }
-    const itemsText = lastSavedSale.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty}`).join('\n');
-    const msg = `*SHAKYA COSMETIC & SAREE COLLECTION*
-Ram Dara Road, Niwari Kalan, Etawah
-Mob: 8780234760
+    generateAndDownloadBillImage(mob);
+  }
 
-*Bill No:* ${lastSavedSale.invId} | *Date:* ${lastSavedSale.date}
-*Customer:* ${lastSavedSale.cust} (${lastSavedSale.village})
+  function closeWaModal() {
+    document.getElementById('waPromptModal').style.display = 'none';
+  }
 
-*Items:*
-${itemsText}
+  function submitWaNumber() {
+    const mob = document.getElementById('waInputNumber').value.trim();
+    if (!mob || mob.length < 10) {
+      alert('Kripya sahi 10 ank ka mobile number daalein!');
+      return;
+    }
+    closeWaModal();
+    if (lastSavedSale) {
+      lastSavedSale.mobile = mob;
+      localStorage.setItem('sc_sales', JSON.stringify(sales));
+    }
+    generateAndDownloadBillImage(mob);
+  }
 
-*TOTAL AMOUNT:* ₹${lastSavedSale.totalMrp}
-(Payment: ${lastSavedSale.mode})
+  function generateAndDownloadBillImage(mob) {
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
 
-धन्यवाद! एक बार बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।`;
+    // Generate canvas from printZone element so customer gets exact bill image
+    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+      canvas.toBlob(blob => {
+        const file = new File([blob], `Shakya_Bill_${lastSavedSale.invId}.png`, { type: 'image/png' });
 
-    window.open(`https://wa.me/91${mob}?text=${encodeURIComponent(msg)}`, '_blank');
+        // Check if Web Share API is supported (Supported in mobile Chrome/Android for direct image sharing to WhatsApp)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: `Bill ${lastSavedSale.invId}`,
+            text: `Shakya Cosmetic - Bill #${lastSavedSale.invId}`
+          }).catch(() => {});
+        } else {
+          // Fallback: Download image and open WhatsApp chat
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `Shakya_Bill_${lastSavedSale.invId}.png`;
+          link.click();
+          
+          alert('📥 Bill ka Photo download ho gaya hai! Ab WhatsApp khulega, wahan chat mein photo select karke bhej dein.');
+          window.open(`https://wa.me/91${mob}?text=${encodeURIComponent('Shakya Cosmetic Bill Photo: ' + lastSavedSale.invId)}`, '_blank');
+        }
+      });
+    });
   }
 
   function openBillModal(invId) {
