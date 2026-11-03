@@ -58,16 +58,6 @@
     button.whatsapp { background: #25d366; color: #fff; font-size: 13px; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
-    /* PIN LOCK & FORGOT SCREEN OVERLAY */
-    #pinLockScreen { display: none; position: fixed; inset: 0; background: var(--maroon); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-    .pin-box { background: #fff; width: 100%; max-width: 320px; padding: 24px; border-radius: 14px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border-top: 5px solid var(--gold); }
-    .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 15px 0; }
-    .pin-dot { width: 14px; height: 14px; border: 2px solid var(--maroon); border-radius: 50%; background: #fff; transition: 0.2s; }
-    .pin-dot.filled { background: var(--maroon); }
-    .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-    .pin-key { background: #f3e8ec; color: var(--maroon); border: none; font-size: 18px; font-weight: bold; padding: 12px; border-radius: 8px; cursor: pointer; margin: 0; }
-    .pin-key:active { background: var(--maroon); color: #fff; }
-
     #shutdownModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; padding: 20px; align-items: center; justify-content: center; }
     .shutdown-dialog { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
@@ -142,66 +132,6 @@
   </style>
 </head>
 <body>
-
-<!-- PIN LOCK & SECURE RECOVERY SYSTEM -->
-<div id="pinLockScreen">
-  <div class="pin-box" id="pinEntryBox">
-    <h3 style="color:var(--maroon); margin-top:0;">🔒 SHAKYA POS LOCKED</h3>
-    <p style="font-size:12px; color:#555; margin:5px 0;">App kholne ke liye 4-digit PIN daalein:</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="dot1"></div>
-      <div class="pin-dot" id="dot2"></div>
-      <div class="pin-dot" id="dot3"></div>
-      <div class="pin-dot" id="dot4"></div>
-    </div>
-    <div id="pinErrorMsg" style="color:#b30000; font-size:11px; font-weight:bold; height:16px;"></div>
-    <div class="pin-pad">
-      <button class="pin-key" onclick="pressPin('1')">1</button>
-      <button class="pin-key" onclick="pressPin('2')">2</button>
-      <button class="pin-key" onclick="pressPin('3')">3</button>
-      <button class="pin-key" onclick="pressPin('4')">4</button>
-      <button class="pin-key" onclick="pressPin('5')">5</button>
-      <button class="pin-key" onclick="pressPin('6')">6</button>
-      <button class="pin-key" onclick="pressPin('7')">7</button>
-      <button class="pin-key" onclick="pressPin('8')">8</button>
-      <button class="pin-key" onclick="pressPin('9')">9</button>
-      <button class="pin-key" onclick="clearPin()" style="background:#ddd; font-size:14px;">C</button>
-      <button class="pin-key" onclick="pressPin('0')">0</button>
-      <button class="pin-key" onclick="backPin()" style="background:#b30000; color:#fff; font-size:14px;">⌫</button>
-    </div>
-    <div style="margin-top:14px;">
-      <span style="font-size:11px; color:var(--maroon); text-decoration:underline; cursor:pointer; font-weight:bold;" onclick="showForgotPinView()">🔑 PIN Bhool Gaye? (Forgot PIN)</span>
-    </div>
-  </div>
-
-  <!-- SECURE FORGOT PIN & MASKED OWNER NUMBER BOX -->
-  <div class="pin-box" id="forgotPinBox" style="display:none;">
-    <h3 style="color:var(--maroon); margin-top:0;">🔑 Secure PIN Reset</h3>
-    
-    <div id="step1Phone">
-      <p style="font-size:11px; color:#555; margin:4px 0;">Registered Owner Number:</p>
-      <input type="text" value="87******60" readonly style="text-align:center; font-size:15px; font-weight:bold; background:#f3e8ec; color:var(--maroon); border:1px solid #d9b8c4; cursor:not-allowed;">
-      
-      <p style="font-size:11px; color:#333; margin:12px 0 4px 0; font-weight:600;">Owner Secret Recovery Code ya OTP daalein:</p>
-      <input type="password" id="resetOtp" placeholder="4-Digit Secret Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
-      
-      <button class="gold" style="margin-top:10px;" onclick="verifyOwnerOtp()">✅ Verify & Reset PIN</button>
-      <button class="whatsapp" style="margin-top:6px; font-size:11px; padding:8px;" onclick="sendOwnerOtp()">📲 WhatsApp Par Code Mangwayein</button>
-    </div>
-
-    <div id="step3NewPin" style="display:none;">
-      <p style="font-size:12px; color:#0f6b2f; font-weight:bold; margin:6px 0;">✅ Verification Successful!</p>
-      <p style="font-size:12px; color:#555; margin:6px 0;">Ab apna Naya 4-digit PIN set karein:</p>
-      <input type="password" id="newPinInput" placeholder="Ex: 5678" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
-      <button style="margin-top:10px;" onclick="saveNewPin()">💾 Naya PIN Save Karein</button>
-    </div>
-
-    <div id="resetErrorMsg" style="color:#b30000; font-size:11px; margin-top:8px; font-weight:bold;"></div>
-    <div style="margin-top:12px;">
-      <span style="font-size:11px; color:#555; text-decoration:underline; cursor:pointer;" onclick="backToPinLogin()">⬅️ Wapas Login Par Jayein</span>
-    </div>
-  </div>
-</div>
 
 <header>
   <div class="header-info">
@@ -554,142 +484,7 @@
 </div>
 
 <script>
-  // --- SECURE PIN LOCK, CLOUD PIN SYNC & MASTER RECOVERY ---
-  let correctPin = localStorage.getItem('sc_app_pin') || "1234"; 
-  let enteredPin = "";
-  const ownerMobile = "8780234760"; 
-  const masterRecoveryKey = "2008"; // Secret Owner Recovery Code (Bina OTP ke bhi hamesha kaam karega)
-  let generatedOtp = "";
-
-  // Check if session is already unlocked (prevents lock on manual refresh)
-  window.addEventListener('DOMContentLoaded', () => {
-    if (sessionStorage.getItem('sc_unlocked') === 'true') {
-      document.getElementById('pinLockScreen').style.display = 'none';
-    } else {
-      document.getElementById('pinLockScreen').style.display = 'flex';
-    }
-  });
-
-  function pressPin(digit) {
-    if (enteredPin.length < 4) {
-      enteredPin += digit;
-      updatePinDots();
-      if (enteredPin.length === 4) {
-        verifyPin();
-      }
-    }
-  }
-
-  function backPin() {
-    enteredPin = enteredPin.slice(0, -1);
-    updatePinDots();
-  }
-
-  function clearPin() {
-    enteredPin = "";
-    updatePinDots();
-    document.getElementById('pinErrorMsg').innerText = "";
-  }
-
-  function updatePinDots() {
-    for (let i = 1; i <= 4; i++) {
-      const dot = document.getElementById('dot' + i);
-      if (i <= enteredPin.length) {
-        dot.classList.add('filled');
-      } else {
-        dot.classList.remove('filled');
-      }
-    }
-  }
-
-  function verifyPin() {
-    if (enteredPin === correctPin) {
-      sessionStorage.setItem('sc_unlocked', 'true');
-      document.getElementById('pinLockScreen').style.display = 'none';
-      enteredPin = "";
-      updatePinDots();
-    } else {
-      document.getElementById('pinErrorMsg').innerText = "❌ Galat PIN! Dobara koshish karein.";
-      enteredPin = "";
-      updatePinDots();
-      setTimeout(() => { document.getElementById('pinErrorMsg').innerText = ""; }, 2000);
-    }
-  }
-
-  // --- SECURE MASKED OWNER RECOVERY FUNCTIONS ---
-  function showForgotPinView() {
-    document.getElementById('pinEntryBox').style.display = 'none';
-    document.getElementById('forgotPinBox').style.display = 'block';
-    document.getElementById('step1Phone').style.display = 'block';
-    document.getElementById('step3NewPin').style.display = 'none';
-    document.getElementById('resetOtp').value = "";
-    document.getElementById('resetErrorMsg').innerText = "";
-  }
-
-  function backToPinLogin() {
-    document.getElementById('forgotPinBox').style.display = 'none';
-    document.getElementById('pinEntryBox').style.display = 'block';
-    enteredPin = "";
-    updatePinDots();
-  }
-
-  function sendOwnerOtp() {
-    const errEl = document.getElementById('resetErrorMsg');
-    generatedOtp = String(Math.floor(1000 + Math.random() * 9000)); 
-    
-    // Save OTP to Firebase Cloud so Owner can also see it in database
-    firebase.database().ref('shakya_pos_data/latest_otp').set(generatedOtp);
-
-    const otpMsg = `*SHAKYA POS - PIN RESET OTP*\nRegistered Mobile: 87******60\nAapka OTP Code hai: *${generatedOtp}*`;
-    const waUrl = `https://api.whatsapp.com/send?phone=91${ownerMobile}&text=${encodeURIComponent(otpMsg)}`;
-    
-    // Direct open because browsers block hidden iframes for WhatsApp
-    window.open(waUrl, '_blank');
-    errEl.style.color = "#0f6b2f";
-    errEl.innerText = "📲 WhatsApp khul gaya hai, wahan se OTP dekh kar yahan daalein (Ya apna Secret Code daalein).";
-  }
-
-  function verifyOwnerOtp() {
-    const userCode = document.getElementById('resetOtp').value.trim();
-    const errEl = document.getElementById('resetErrorMsg');
-    errEl.style.color = "#b30000";
-
-    if (!userCode) {
-      errEl.innerText = "⚠️ Kripya 4-digit Code daalein!";
-      return;
-    }
-    
-    // Works with EITHER the generated WhatsApp OTP OR your secret Master Recovery Key (2008)
-    if (userCode === masterRecoveryKey || (generatedOtp !== "" && userCode === generatedOtp)) {
-      errEl.innerText = "";
-      document.getElementById('step1Phone').style.display = 'none';
-      document.getElementById('step3NewPin').style.display = 'block';
-    } else {
-      errEl.innerText = "❌ Galat Code! Sirf Owner hi PIN reset kar sakta hai.";
-    }
-  }
-
-  function saveNewPin() {
-    const newPin = document.getElementById('newPinInput').value.trim();
-    const errEl = document.getElementById('resetErrorMsg');
-    errEl.style.color = "#b30000";
-    if (newPin.length !== 4) {
-      errEl.innerText = "⚠️ Kripya 4 ank ka naya PIN daalein!";
-      return;
-    }
-    correctPin = newPin;
-    localStorage.setItem('sc_app_pin', correctPin);
-    syncToCloud(); // Sync new PIN across Phone & Tablet
-    backToPinLogin();
-    document.getElementById('pinErrorMsg').style.color = "#0f6b2f";
-    document.getElementById('pinErrorMsg').innerText = "✅ Naya PIN save ho gaya! Ab login karein.";
-    setTimeout(() => {
-      document.getElementById('pinErrorMsg').innerText = "";
-      document.getElementById('pinErrorMsg').style.color = "#b30000";
-    }, 3000);
-  }
-
-  // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH ---
+  // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH (NO PIN LOCK) ---
   const firebaseConfig = {
     databaseURL: "https://shakya-pos-default-rtdb.firebaseio.com"
   };
@@ -711,10 +506,6 @@
     if (cloudData) {
       if (cloudData.inventory) inventory = cloudData.inventory;
       if (cloudData.sales) sales = cloudData.sales;
-      if (cloudData.appPin) {
-        correctPin = cloudData.appPin;
-        localStorage.setItem('sc_app_pin', correctPin);
-      }
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
       
@@ -725,7 +516,7 @@
   });
 
   function syncToCloud() {
-    dbRef.set({ inventory, sales, appPin: correctPin });
+    dbRef.set({ inventory, sales });
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
   }
@@ -768,7 +559,6 @@
     closeShutdownModal();
     isAppClosed = true;
     backGuardArmed = false;
-    sessionStorage.removeItem('sc_unlocked');
     syncToCloud();
     document.getElementById('appClosedScreen').style.display = 'flex';
     try { window.close(); } catch (err) {}
@@ -777,9 +567,6 @@
   function reopenApp() {
     isAppClosed = false;
     document.getElementById('appClosedScreen').style.display = 'none';
-    sessionStorage.removeItem('sc_unlocked');
-    document.getElementById('pinLockScreen').style.display = 'flex';
-    backToPinLogin();
     armBackGuard();
   }
 
@@ -805,7 +592,7 @@
 
   document.addEventListener('touchstart', e => {
     if (!swipeEnabled || isAppClosed) return;
-    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #appClosedScreen, #pinLockScreen')) {
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #appClosedScreen')) {
       ignoreSwipe = true;
       return;
     }
