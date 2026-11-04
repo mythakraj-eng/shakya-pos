@@ -30,8 +30,10 @@
     body { margin: 0; background: var(--bg); color: #222; padding-bottom: 60px; user-select: none; }
     header { background: var(--maroon); color: white; padding: 10px 12px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
     header .header-info { text-align: left; }
-    header h1 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; }
+    header h1 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
     header p { margin: 2px 0 0; font-size: 10px; opacity: 0.95; }
+
+    .sync-badge { font-size: 9px; padding: 2px 6px; border-radius: 10px; background: rgba(0,0,0,0.35); color: #fff; font-weight: 600; letter-spacing: 0; }
 
     .header-actions { display: flex; gap: 5px; align-items: center; }
     .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
@@ -134,7 +136,7 @@
 
 <header>
   <div class="header-info">
-    <h1>SHAKYA COSMETIC</h1>
+    <h1>SHAKYA COSMETIC <span id="syncStatusBadge" class="sync-badge">🔄 Connecting...</span></h1>
     <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | Mob: 8780234760</p>
   </div>
   <div class="header-actions">
@@ -184,7 +186,7 @@
   <div class="closed-box">
     <div style="font-size:40px; margin-bottom:8px;">🔒</div>
     <h2 style="margin:0; color:var(--gold); font-size:20px;">SHAKYA POS BAND HAI</h2>
-    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data cloud par live sync ho chuka hai.</p>
+    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data Local + Cloud par surakshit save ho chuka hai.</p>
     <p style="font-size:11px; color:#ffd9df; margin-bottom:18px;">Ab aap phone/tablet ka Home ya Back button dabakar bahar ja sakte hain.</p>
     <button class="gold" onclick="reopenApp()">🔓 App Dobara Chalu Karein</button>
   </div>
@@ -508,8 +510,8 @@
 <!-- 5. BACKUP SECTION -->
 <div id="backup" class="section">
   <div class="card">
-    <h3>💾 Surakshit Cloud Backup & Excel Download</h3>
-    <p style="font-size:12px; color:#555;">Data automatically cloud par live sync ho raha hai. Aap chahein toh Excel report bhi download kar sakte hain.</p>
+    <h3>💾 Surakshit Hybrid Backup (Local + Cloud) & Excel</h3>
+    <p style="font-size:12px; color:#555;">Data pehle aapke phone/browser (Local Storage) mein turant save hota hai aur internet milte hi Firebase Cloud (`shakyapos-default-rtdb`) par live sync ho jata hai.</p>
     <div id="backupMsg" class="inline-msg"></div>
     <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
     <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
@@ -521,14 +523,15 @@
 </div>
 
 <script>
-  // --- FIREBASE CLOUD SETUP WITH INSTANT LIVE REFRESH ---
+  // --- FIREBASE REALTIME DATABASE & HYBRID LOCAL+CLOUD SETUP ---
   const firebaseConfig = {
-    databaseURL: "https://shakya-pos-default-rtdb.firebaseio.com"
+    databaseURL: "https://shakyapos-default-rtdb.firebaseio.com/"
   };
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
   }
   const dbRef = firebase.database().ref('shakya_pos_data');
+  const connectedRef = firebase.database().ref('.info/connected');
 
   let inventory = JSON.parse(localStorage.getItem('sc_inventory')) || [
     { code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
@@ -536,8 +539,37 @@
     { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
   ];
   let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
-  let statsFilterMode = 'TODAY'; 
+  let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
+  let statsFilterMode = 'TODAY';
 
+  function updateSyncBadge(status) {
+    const badge = document.getElementById('syncStatusBadge');
+    if (!badge) return;
+    if (status === 'ONLINE') {
+      badge.innerText = '🟢 Cloud Live';
+      badge.style.background = '#0f6b2f';
+    } else if (status === 'SYNCING') {
+      badge.innerText = '🔄 Syncing...';
+      badge.style.background = '#b8860b';
+    } else {
+      badge.innerText = '🟠 Offline (Local)';
+      badge.style.background = '#555';
+    }
+  }
+
+  // Monitor live connection status & push pending offline changes when back online
+  connectedRef.on('value', (snap) => {
+    if (snap.val() === true) {
+      updateSyncBadge('ONLINE');
+      if (hasUnsyncedChanges) {
+        syncToCloud();
+      }
+    } else {
+      updateSyncBadge('OFFLINE');
+    }
+  });
+
+  // Listen to real-time updates from Firebase Cloud
   dbRef.on('value', (snapshot) => {
     const cloudData = snapshot.val();
     if (cloudData) {
@@ -545,18 +577,45 @@
       if (cloudData.sales) sales = cloudData.sales;
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
-      
+      localStorage.setItem('sc_unsynced', 'false');
+      hasUnsyncedChanges = false;
+      updateSyncBadge('ONLINE');
+
       renderStock();
       renderStats();
       renderCustomerSection();
+    } else if (inventory.length > 0 || sales.length > 0) {
+      // Initial seed to new Firebase database if cloud is empty
+      syncToCloud();
     }
   });
 
   function syncToCloud() {
-    dbRef.set({ inventory, sales });
+    // 1. Always save locally first so zero data is ever lost offline
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
+    hasUnsyncedChanges = true;
+    localStorage.setItem('sc_unsynced', 'true');
+    updateSyncBadge('SYNCING');
+
+    // 2. Sync to Firebase Realtime Database
+    dbRef.set({
+      inventory,
+      sales,
+      lastUpdated: new Date().toISOString()
+    }).then(() => {
+      hasUnsyncedChanges = false;
+      localStorage.setItem('sc_unsynced', 'false');
+      updateSyncBadge('ONLINE');
+    }).catch(() => {
+      updateSyncBadge('OFFLINE');
+    });
   }
+
+  window.addEventListener('online', () => {
+    if (hasUnsyncedChanges) syncToCloud();
+  });
+  window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
 
   let isAppClosed = false;
   let backGuardArmed = false;
@@ -1202,7 +1261,7 @@
     document.getElementById('custVillage').value = '';
     document.getElementById('custMobile').value = '';
 
-    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Cloud par sync ho gaya!`, 'success');
+    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Local + Cloud par sync ho gaya!`, 'success');
   }
 
   function sendWhatsAppLastBill() {
