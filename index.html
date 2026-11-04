@@ -28,16 +28,16 @@
     :root { --maroon: #6b092b; --gold: #f5c542; --bg: #f8f5f2; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: #222; padding-bottom: 60px; user-select: none; }
-    header { background: var(--maroon); color: white; padding: 10px 12px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    header { background: var(--maroon); color: white; padding: 10px 10px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap; }
     header .header-info { text-align: left; }
-    header h1 { margin: 0; font-size: 16px; color: var(--gold); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    header h1 { margin: 0; font-size: 15px; color: var(--gold); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
     header p { margin: 2px 0 0; font-size: 10px; opacity: 0.95; }
 
     .sync-badge { font-size: 9px; padding: 2px 6px; border-radius: 10px; background: rgba(0,0,0,0.35); color: #fff; font-weight: 600; letter-spacing: 0; }
 
-    .header-actions { display: flex; gap: 5px; align-items: center; }
-    .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
-    .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
+    .header-actions { display: flex; gap: 4px; align-items: center; }
+    .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
+    .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
 
     .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 20; }
     .tab { flex: 1; padding: 11px 4px; text-align: center; font-weight: 700; font-size: 11px; cursor: pointer; color: #555; }
@@ -58,10 +58,11 @@
     button.gold { background: var(--gold); color: #222; font-size: 14px; }
     button.dark { background: #333; color: #fff; }
     button.whatsapp { background: #25d366; color: #fff; font-size: 13px; }
+    button.thermal { background: #0056b3; color: #fff; font-size: 13px; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
-    #shutdownModal, #waPromptModal, #udhaarModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; align-items: center; justify-content: center; }
-    .dialog-box { background: #fff; width: 100%; max-width: 320px; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; align-items: center; justify-content: center; }
+    .dialog-box { background: #fff; width: 100%; max-width: 340px; padding: 18px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
     #appClosedScreen { display: none; position: fixed; inset: 0; background: var(--maroon); color: #fff; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
     .closed-box { background: rgba(255,255,255,0.08); border: 2px solid var(--gold); border-radius: 16px; padding: 24px 18px; max-width: 340px; width: 100%; }
@@ -79,6 +80,7 @@
     .btn-action { padding: 5px 6px; font-size: 10px; border-radius: 4px; font-weight: 700; border: none; cursor: pointer; width: auto; margin: 0; line-height: 1; }
     .btn-bill { background: var(--maroon); color: #fff; }
     .btn-tag { background: #333; color: #fff; }
+    .btn-edit { background: var(--gold); color: #222; }
     .btn-del { background: #e5e5e5; color: #333; padding: 5px 5px; }
     .btn-del.confirming { background: #d00000; color: #fff; }
 
@@ -101,7 +103,7 @@
     .stat-box span { font-size: 11px; color: #666; display: block; }
     .stat-box strong { font-size: 16px; color: var(--maroon); }
 
-    .galla-bar { display: flex; justify-content: space-between; background: #f3e8ec; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; font-weight: 700; color: #333; }
+    .galla-bar { display: flex; justify-content: space-between; background: #f3e8ec; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; font-weight: 700; color: #333; flex-wrap: wrap; gap: 4px; }
 
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
@@ -109,25 +111,50 @@
     #billModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 90; padding: 12px; overflow-y: auto; }
     .modal-content { background: #fff; max-width: 460px; margin: 15px auto; padding: 12px; border-radius: 10px; }
 
-    #printZone { border: 2px dashed #333; padding: 10px; background: #fff; text-align: center; margin-top: 10px; overflow: hidden; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
-    #printZone h2 { margin: 0; font-size: 15px; }
-    #printZone p { margin: 2px 0; font-size: 10px; }
-    .receipt-total { font-size: 13px; font-weight: 800; margin: 5px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; }
+    .exchange-item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 12px; background: #fdf8fa; border-radius: 4px; margin-bottom: 4px; }
+    .exchange-item-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0 8px 0 0; accent-color: var(--maroon); }
 
-    .barcode-box { max-width: 180px; margin: 4px auto 0; text-align: center; }
+    /* 80MM THERMAL RECEIPT CONTAINER */
+    #printZone { border: 2px dashed #333; padding: 8px; background: #fff; text-align: center; margin-top: 10px; overflow: hidden; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; color: #000; }
+    #printZone h2 { margin: 0; font-size: 16px; font-weight: 900; color: #000; }
+    #printZone p { margin: 2px 0; font-size: 10px; color: #000; }
+    .receipt-total { font-size: 13px; font-weight: 800; margin: 5px 0; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 3px 0; color: #000; }
+
+    .barcode-box { max-width: 190px; margin: 4px auto 0; text-align: center; }
     .barcode-box svg { width: 100% !important; height: auto !important; max-height: 42px; }
 
-    .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .single-tag { border: 1.5px dashed #444; padding: 6px; background: #fff; text-align: center; border-radius: 6px; page-break-inside: avoid; overflow: hidden; }
-    .single-tag h4 { margin: 0; font-size: 12px; color: var(--maroon); }
-    .single-tag p { margin: 1px 0; font-size: 10px; }
-    .single-tag .tag-mrp { font-size: 12px; font-weight: bold; margin: 3px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2px 0; }
+    .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .single-tag { border: 1.5px dashed #000; padding: 5px; background: #fff; text-align: center; border-radius: 4px; page-break-inside: avoid; overflow: hidden; color: #000; }
+    .single-tag h4 { margin: 0; font-size: 11px; color: #000; font-weight: 900; }
+    .single-tag p { margin: 1px 0; font-size: 9px; color: #000; }
+    .single-tag .tag-mrp { font-size: 12px; font-weight: 900; margin: 2px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; }
 
+    /* DEDICATED 80MM THERMAL PRINTER PAGE RULES */
+    @page {
+      size: 80mm auto;
+      margin: 0mm;
+    }
     @media print {
+      html, body {
+        width: 80mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
       body * { visibility: hidden; }
       #printZone, #printZone * { visibility: visible; }
-      #printZone { position: absolute; left: 0; top: 0; width: 100%; border: none; }
-      .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      #printZone {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 76mm !important;
+        max-width: 76mm !important;
+        margin: 0 auto !important;
+        padding: 2mm !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; width: 74mm; }
       .single-tag { border: 1px solid #000; }
     }
   </style>
@@ -140,10 +167,73 @@
     <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | Mob: 8780234760</p>
   </div>
   <div class="header-actions">
+    <button id="ownerLockBtn" class="slide-lock-btn" onclick="toggleOwnerMode()">🔒 Cost: OFF</button>
     <button id="swipeLockBtn" class="slide-lock-btn" onclick="toggleSwipeLock()">👆 Slide: ON</button>
     <button class="shutdown-btn" onclick="openShutdownModal()">🛑 Exit</button>
   </div>
 </header>
+
+<!-- OWNER PIN MODAL -->
+<div id="pinModal">
+  <div class="dialog-box">
+    <h3 style="color:var(--maroon); margin-top:0;">🔐 Owner PIN Daalein</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0;">Asli Kharid (Cost) aur Munafa (Profit) dekhne ke liye 4-ank ka PIN daalein:</p>
+    <input type="password" id="ownerPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:6px;">
+    <div id="pinErrorMsg" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;">❌ Galat PIN! Dobara koshish karein.</div>
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closePinModal()">Cancel</button></div>
+      <div><button class="gold" style="margin:0;" onclick="verifyOwnerPin()">🔓 Unlock</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK EDIT STOCK MODAL -->
+<div id="editStockModal">
+  <div class="dialog-box" style="text-align:left;">
+    <h3 style="color:var(--maroon); margin-top:0; text-align:center;">✏️ Edit Stock Item</h3>
+    <input type="hidden" id="editOrigCode">
+    <div class="row">
+      <div>
+        <label>Item Code</label>
+        <input type="text" id="editCode" oninput="this.value = cleanCode(this.value)">
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="editCat">
+          <option value="Daily Saree">Daily Saree</option>
+          <option value="Fancy Saree">Fancy Saree</option>
+          <option value="Petticoat">Petticoat</option>
+          <option value="Blouse/Fall">Blouse/Fall</option>
+          <option value="Cosmetic">Cosmetic</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Colour</label>
+        <input type="text" id="editColor">
+      </div>
+      <div>
+        <label>Available Qty</label>
+        <input type="number" id="editQty">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Landing Cost (₹)</label>
+        <input type="number" id="editCost">
+      </div>
+      <div>
+        <label>Sticker MRP (₹)</label>
+        <input type="number" id="editMrp">
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closeEditStockModal()">Cancel</button></div>
+      <div><button class="gold" style="margin:0;" onclick="saveEditedStock()">💾 Update</button></div>
+    </div>
+  </div>
+</div>
 
 <div id="shutdownModal">
   <div class="dialog-box">
@@ -169,16 +259,24 @@
   </div>
 </div>
 
-<!-- UDHAAR JAMA MODAL -->
+<!-- UDHAAR JAMA MODAL WITH PASSBOOK MODE & WHATSAPP -->
 <div id="udhaarModal">
   <div class="dialog-box">
     <h3 style="color:var(--maroon); margin-top:0;">💰 Udhaar Jama Karein</h3>
     <p id="udhaarCustInfo" style="font-size:12px; color:#555; margin:6px 0; font-weight:bold;"></p>
-    <input type="number" id="udhaarReceiveInput" placeholder="Kitne rupaye mile?" style="text-align:center; font-size:16px; font-weight:bold;">
-    <div class="row" style="margin-top:14px;">
-      <div><button class="dark" style="margin:0;" onclick="closeUdhaarModal()">Cancel</button></div>
-      <div><button class="gold" style="margin:0;" onclick="confirmUdhaarPayment()">✅ Jama Karein</button></div>
+    <label style="text-align:left;">Kitne Rupaye Mile?</label>
+    <input type="number" id="udhaarReceiveInput" placeholder="Amount (₹)" style="text-align:center; font-size:16px; font-weight:bold;">
+    <label style="text-align:left;">Payment Mode</label>
+    <select id="udhaarPayMode">
+      <option value="Cash">💵 Cash (Nagad)</option>
+      <option value="UPI">📱 PhonePe / UPI</option>
+      <option value="AEPS Cash">🏦 Spice Money AEPS</option>
+    </select>
+    <div class="row" style="margin-top:12px;">
+      <div><button class="gold" style="margin:0;" onclick="confirmUdhaarPayment(false)">✅ Sirf Jama</button></div>
+      <div><button class="whatsapp" style="margin:0;" onclick="confirmUdhaarPayment(true)">💬 Jama + WA Raseed</button></div>
     </div>
+    <button class="dark" style="margin-top:8px; padding:7px;" onclick="closeUdhaarModal()">Cancel</button>
   </div>
 </div>
 
@@ -206,16 +304,28 @@
   <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
 </div>
 
+<!-- BILL DETAILS & SINGLE-ITEM EXCHANGE MODAL -->
 <div id="billModal">
   <div class="modal-content">
     <div id="modalInternalBox" style="background:#fff3cd; padding:10px; border-radius:6px; font-size:12px; margin-bottom:10px; border-left:4px solid var(--maroon);"></div>
     <div id="modalReceiptBox"></div>
-    <div class="row" style="margin-top:10px;">
-      <div><button onclick="printFromModal()">🖨️ Print Bill</button></div>
-      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill</button></div>
-      <div><button class="dark" onclick="closeBillModal()">❌ Close</button></div>
+
+    <!-- ITEM-WISE SELECTION FOR EXCHANGE -->
+    <div id="exchangeSectionBox" style="background:#fdf2f4; border:1px solid #e2b4c0; padding:10px; border-radius:8px; margin-top:10px;">
+      <b style="color:var(--maroon); font-size:12px; display:block; margin-bottom:6px;">🔄 Saree Return / Exchange (Item chunein):</b>
+      <div id="exchangeItemsList"></div>
+      <div class="row" style="margin-top:8px;">
+        <div><button style="background:#b30000; margin:0; font-size:11px; padding:8px;" onclick="exchangeSelectedItems()">🔄 Chune Hue Item Return Karein</button></div>
+        <div><button class="dark" style="margin:0; font-size:11px; padding:8px;" onclick="exchangeReturnBill()">🔄 Poora Bill Return</button></div>
+      </div>
     </div>
-    <button id="exchangeBtn" style="background:#b30000; margin-top:8px;" onclick="exchangeReturnBill()">🔄 Exchange / Return (Saree Wapas Stock Mein Jodein)</button>
+
+    <div class="row" style="margin-top:10px;">
+      <div><button onclick="printFromModal()">🖨️ Print</button></div>
+      <div><button class="thermal" onclick="printDirect80mmFromModal()">⚡ 80mm RawBT</button></div>
+      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WA Bill</button></div>
+    </div>
+    <button class="dark" style="margin-top:6px; padding:8px;" onclick="closeBillModal()">❌ Band Karein (Close)</button>
   </div>
 </div>
 
@@ -302,9 +412,10 @@
   <div id="printCard" class="card" style="display:none;">
     <div id="printZone"></div>
     <div class="row" style="margin-top:10px;">
-      <div><button onclick="window.print()">🖨️ Print / Bluetooth Thermal</button></div>
-      <div><button class="whatsapp" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill Photo Bhejein</button></div>
+      <div><button onclick="window.print()">🖨️ Browser 80mm Print</button></div>
+      <div><button class="thermal" onclick="printDirect80mm()">⚡ 80mm Direct (RawBT)</button></div>
     </div>
+    <button class="whatsapp" style="margin-top:6px;" onclick="sendWhatsAppLastBill()">💬 WhatsApp Bill Photo Bhejein</button>
   </div>
 </div>
 
@@ -449,12 +560,22 @@
   </div>
 
   <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px; margin-bottom:8px; flex-wrap:wrap; gap:4px;">
       <h3 style="margin:0; border:none; padding:0;">📊 Galla & Business Insights</h3>
       <div>
         <button id="btnFilterToday" class="small" style="background:var(--maroon); color:#fff;" onclick="setStatsFilter('TODAY')">📅 Aaj</button>
-        <button id="btnFilterAll" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('ALL')">📊 Kul (All)</button>
+        <button id="btnFilterDate" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('DATE')">📆 Date</button>
+        <button id="btnFilterMonth" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('MONTH')">🗓️ Month</button>
+        <button id="btnFilterAll" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('ALL')">📊 Kul</button>
       </div>
+    </div>
+
+    <!-- DATE & MONTH PICKERS -->
+    <div id="statsDatePickerWrap" style="display:none; margin-bottom:10px;">
+      <input type="date" id="statsDateInput" onchange="renderStats()" style="padding:7px; font-size:13px; margin:0;">
+    </div>
+    <div id="statsMonthPickerWrap" style="display:none; margin-bottom:10px;">
+      <input type="month" id="statsMonthInput" onchange="renderStats()" style="padding:7px; font-size:13px; margin:0;">
     </div>
 
     <div class="stat-grid">
@@ -474,7 +595,7 @@
   <div class="card">
     <h3>🎨 Top Bikne Wale Colours & Bill History</h3>
     <div id="colorInsights" style="font-size:13px; margin-bottom:8px;"></div>
-    <small style="color:var(--maroon); font-weight:bold; display:block; margin-bottom:6px;">👇 Kisi bhi Bill par Tap karke dekhein ya Exchange karein:</small>
+    <small style="color:var(--maroon); font-weight:bold; display:block; margin-bottom:6px;">👇 Kisi bhi Bill par Tap karke dekhein ya Single Saree Exchange karein:</small>
     <table>
       <thead><tr><th>Bill#</th><th>Items (Real Rate)</th><th>ACC</th><th>Udhaar</th><th>Profit</th></tr></thead>
       <tbody id="salesHistoryBody"></tbody>
@@ -485,7 +606,7 @@
 <!-- 4. CUSTOMER LEDGER & KHATA SECTION -->
 <div id="cust" class="section">
   <div class="card">
-    <h3>📓 Customer Khata Book & Udhaar Check</h3>
+    <h3>📓 Customer Khata Book & Passbook History</h3>
     <label>Mobile Number Ya Naam Dalein</label>
     <div class="row">
       <div style="flex:2">
@@ -507,8 +628,25 @@
   </div>
 </div>
 
-<!-- 5. BACKUP SECTION -->
+<!-- 5. BACKUP & SECURITY SECTION -->
 <div id="backup" class="section">
+  <div class="card">
+    <h3>🔐 Owner Security PIN Badlein</h3>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0;">Default Owner PIN <b>1234</b> hai. Aap apna naya 4-ank ka PIN yahan set kar sakte hain:</p>
+    <div class="row">
+      <div>
+        <input type="password" id="oldPinChange" placeholder="Purana PIN" maxlength="4" inputmode="numeric">
+      </div>
+      <div>
+        <input type="password" id="newPinChange" placeholder="Naya 4-ank PIN" maxlength="4" inputmode="numeric">
+      </div>
+      <div>
+        <button style="margin:0;" onclick="changeOwnerPin()">🔑 Save PIN</button>
+      </div>
+    </div>
+    <div id="pinChangeMsg" class="inline-msg"></div>
+  </div>
+
   <div class="card">
     <h3>💾 Surakshit Hybrid Backup (Local + Cloud) & Excel</h3>
     <p style="font-size:12px; color:#555;">Data pehle aapke phone/browser (Local Storage) mein turant save hota hai aur internet milte hi Firebase Cloud (`shakyapos-default-rtdb`) par live sync ho jata hai.</p>
@@ -539,8 +677,21 @@
     { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
   ];
   let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
+  let udhaarLogs = JSON.parse(localStorage.getItem('sc_udhaar_logs')) || [];
+  let ownerPin = localStorage.getItem('sc_owner_pin') || '1234';
+  let ownerUnlocked = false;
   let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
   let statsFilterMode = 'TODAY';
+
+  // Set default values for Date & Month pickers
+  window.addEventListener('DOMContentLoaded', () => {
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const dInp = document.getElementById('statsDateInput');
+    const mInp = document.getElementById('statsMonthInput');
+    if (dInp) dInp.value = todayIso;
+    if (mInp) mInp.value = todayIso.slice(0, 7);
+    updateOwnerLockUI();
+  });
 
   function updateSyncBadge(status) {
     const badge = document.getElementById('syncStatusBadge');
@@ -557,7 +708,6 @@
     }
   }
 
-  // Monitor live connection status & push pending offline changes when back online
   connectedRef.on('value', (snap) => {
     if (snap.val() === true) {
       updateSyncBadge('ONLINE');
@@ -569,14 +719,19 @@
     }
   });
 
-  // Listen to real-time updates from Firebase Cloud
   dbRef.on('value', (snapshot) => {
     const cloudData = snapshot.val();
     if (cloudData) {
       if (cloudData.inventory) inventory = cloudData.inventory;
       if (cloudData.sales) sales = cloudData.sales;
+      if (cloudData.udhaarLogs) udhaarLogs = cloudData.udhaarLogs;
+      if (cloudData.ownerPin) {
+        ownerPin = String(cloudData.ownerPin);
+        localStorage.setItem('sc_owner_pin', ownerPin);
+      }
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
+      localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
       localStorage.setItem('sc_unsynced', 'false');
       hasUnsyncedChanges = false;
       updateSyncBadge('ONLINE');
@@ -585,23 +740,24 @@
       renderStats();
       renderCustomerSection();
     } else if (inventory.length > 0 || sales.length > 0) {
-      // Initial seed to new Firebase database if cloud is empty
       syncToCloud();
     }
   });
 
   function syncToCloud() {
-    // 1. Always save locally first so zero data is ever lost offline
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
+    localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
+    localStorage.setItem('sc_owner_pin', ownerPin);
     hasUnsyncedChanges = true;
     localStorage.setItem('sc_unsynced', 'true');
     updateSyncBadge('SYNCING');
 
-    // 2. Sync to Firebase Realtime Database
     dbRef.set({
       inventory,
       sales,
+      udhaarLogs,
+      ownerPin,
       lastUpdated: new Date().toISOString()
     }).then(() => {
       hasUnsyncedChanges = false;
@@ -616,6 +772,66 @@
     if (hasUnsyncedChanges) syncToCloud();
   });
   window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
+
+  // --- FEATURE 3: OWNER PIN & COST/PROFIT LOCK ---
+  function updateOwnerLockUI() {
+    const btn = document.getElementById('ownerLockBtn');
+    if (btn) {
+      btn.innerHTML = ownerUnlocked ? '🔓 Cost: ON' : '🔒 Cost: OFF';
+      btn.style.background = ownerUnlocked ? '#0f6b2f' : '#333';
+    }
+    updateLiveSplit();
+    renderStock();
+    renderStats();
+  }
+
+  function toggleOwnerMode() {
+    if (ownerUnlocked) {
+      ownerUnlocked = false;
+      updateOwnerLockUI();
+    } else {
+      document.getElementById('ownerPinInput').value = '';
+      document.getElementById('pinErrorMsg').style.display = 'none';
+      document.getElementById('pinModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('ownerPinInput').focus(), 100);
+    }
+  }
+
+  function closePinModal() {
+    document.getElementById('pinModal').style.display = 'none';
+  }
+
+  function verifyOwnerPin() {
+    const inp = document.getElementById('ownerPinInput').value.trim();
+    if (inp === ownerPin) {
+      ownerUnlocked = true;
+      closePinModal();
+      updateOwnerLockUI();
+      if (document.getElementById('billModal').style.display === 'block' && lastSavedSale) {
+        openBillModal(lastSavedSale.invId);
+      }
+    } else {
+      document.getElementById('pinErrorMsg').style.display = 'block';
+    }
+  }
+
+  function changeOwnerPin() {
+    const oldP = document.getElementById('oldPinChange').value.trim();
+    const newP = document.getElementById('newPinChange').value.trim();
+    if (oldP !== ownerPin) {
+      showInlineMsg('pinChangeMsg', '❌ Purana PIN galat hai!', 'error');
+      return;
+    }
+    if (newP.length < 4) {
+      showInlineMsg('pinChangeMsg', '⚠️ Naya PIN 4 ank ka hona chahiye!', 'error');
+      return;
+    }
+    ownerPin = newP;
+    syncToCloud();
+    document.getElementById('oldPinChange').value = '';
+    document.getElementById('newPinChange').value = '';
+    showInlineMsg('pinChangeMsg', '✅ Naya Owner PIN safaltapoorvak save ho gaya!', 'success');
+  }
 
   let isAppClosed = false;
   let backGuardArmed = false;
@@ -637,11 +853,15 @@
     const shutMod = document.getElementById('shutdownModal');
     const waMod = document.getElementById('waPromptModal');
     const udhMod = document.getElementById('udhaarModal');
+    const pinMod = document.getElementById('pinModal');
+    const editMod = document.getElementById('editStockModal');
     if (billMod && billMod.style.display === 'block') { closeBillModal(); }
     else if (scanMod && scanMod.style.display === 'block') { stopScanner(); }
     else if (shutMod && shutMod.style.display === 'flex') { closeShutdownModal(); }
     else if (waMod && waMod.style.display === 'flex') { closeWaModal(); }
     else if (udhMod && udhMod.style.display === 'flex') { closeUdhaarModal(); }
+    else if (pinMod && pinMod.style.display === 'flex') { closePinModal(); }
+    else if (editMod && editMod.style.display === 'flex') { closeEditStockModal(); }
     window.history.pushState({ shakyaLock: true }, '', window.location.href);
   });
 
@@ -685,7 +905,7 @@
 
   document.addEventListener('touchstart', e => {
     if (!swipeEnabled || isAppClosed) return;
-    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #udhaarModal, #appClosedScreen')) {
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #appClosedScreen')) {
       ignoreSwipe = true;
       return;
     }
@@ -924,6 +1144,51 @@
     showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
+  // --- FEATURE 5: QUICK EDIT STOCK MODAL ---
+  function openEditStockModal(code) {
+    const item = inventory.find(i => i.code === code);
+    if (!item) return;
+    document.getElementById('editOrigCode').value = item.code;
+    document.getElementById('editCode').value = item.code;
+    document.getElementById('editCat').value = item.cat || 'Daily Saree';
+    document.getElementById('editColor').value = item.color || 'Standard';
+    document.getElementById('editQty').value = item.qty;
+    document.getElementById('editCost').value = item.cost;
+    document.getElementById('editMrp').value = item.mrp;
+    document.getElementById('editStockModal').style.display = 'flex';
+  }
+
+  function closeEditStockModal() {
+    document.getElementById('editStockModal').style.display = 'none';
+  }
+
+  function saveEditedStock() {
+    const origCode = document.getElementById('editOrigCode').value;
+    const newCode = cleanCode(document.getElementById('editCode').value);
+    const cat = document.getElementById('editCat').value;
+    const color = document.getElementById('editColor').value.trim() || 'Standard';
+    const qty = parseInt(document.getElementById('editQty').value) || 0;
+    const cost = parseFloat(document.getElementById('editCost').value) || 0;
+    const mrp = parseFloat(document.getElementById('editMrp').value) || 0;
+
+    if (!newCode || !mrp) return;
+
+    const item = inventory.find(i => i.code === origCode);
+    if (item) {
+      item.code = newCode;
+      item.cat = cat;
+      item.color = color;
+      item.qty = qty;
+      if (cost > 0) item.cost = cost;
+      item.mrp = mrp;
+    }
+
+    syncToCloud();
+    closeEditStockModal();
+    renderStock();
+    showInlineMsg('stockMsg', `✅ ${newCode} safaltapoorvak update ho gaya!`, 'success');
+  }
+
   function deleteStockItem(code, btnEl) {
     if (btnEl && !btnEl.classList.contains('confirming')) {
       btnEl.classList.add('confirming');
@@ -949,7 +1214,7 @@
         (item.color && item.color.toUpperCase().includes(q)) ||
         (item.cat && item.cat.toUpperCase().includes(q)) ||
         String(item.mrp).includes(q) ||
-        String(item.cost).includes(q);
+        (ownerUnlocked && String(item.cost).includes(q));
 
       const matchCat = (cat === 'ALL') || (item.cat === cat);
 
@@ -985,7 +1250,7 @@
       sumBar.innerHTML = `
         <span>📋 Items: <b>${filtered.length}</b></span>
         <span>📦 Kul Pcs: <b>${totalPcs}</b></span>
-        <span>💰 Kharid Value: <b>₹${totalCostVal}</b></span>
+        <span>💰 Kharid Value: <b>${ownerUnlocked ? '₹' + totalCostVal : '🔒 ***'}</b></span>
       `;
     }
 
@@ -998,13 +1263,14 @@
       <tr>
         <td class="code-cell">${item.code}</td>
         <td>${item.cat}<br><small style="color:var(--maroon);font-weight:600;">${item.color}</small></td>
-        <td>₹${item.cost}</td>
+        <td>${ownerUnlocked ? '₹' + item.cost : '🔒 ***'}</td>
         <td><b>₹${item.mrp}</b></td>
         <td style="color:${item.qty <= 2 ? 'red' : 'black'}; font-weight:bold;">${item.qty}</td>
         <td style="text-align:right; white-space:nowrap;">
           <div class="action-group">
             <button class="btn-action btn-bill" onclick="quickAdd('${item.code}')">+Bill</button>
             <button class="btn-action btn-tag" onclick="printSareeTag('${item.code}')">Tag</button>
+            <button class="btn-action btn-edit" onclick="openEditStockModal('${item.code}')">✏️</button>
             <button class="btn-action btn-del" onclick="deleteStockItem('${item.code}', this)">✕</button>
           </div>
         </td>
@@ -1037,7 +1303,7 @@
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
 
-    let tagsHTML = `<h3 style="margin:0 0 10px 0; color:var(--maroon);">SHAKYA COSMETIC - STOCK TAGS (${listToPrint.length})</h3><div class="batch-tag-container">`;
+    let tagsHTML = `<h3 style="margin:0 0 8px 0; color:#000; font-size:12px;">SHAKYA COSMETIC - TAGS (${listToPrint.length})</h3><div class="batch-tag-container">`;
     listToPrint.forEach((item, idx) => {
       tagsHTML += `
         <div class="single-tag">
@@ -1143,7 +1409,10 @@
     document.getElementById('dueInput').value = due;
 
     const box = document.getElementById('liveSplitBox');
-    if (cart.length === 0 || totalMrp === 0) { box.style.display = 'none'; return; }
+    if (!ownerUnlocked || cart.length === 0 || totalMrp === 0) {
+      box.style.display = 'none';
+      return;
+    }
 
     let totalCost = cart.reduce((s, i) => s + (i.cost * i.qty), 0);
     let totalDiscount = totalMrp - acc;
@@ -1170,16 +1439,16 @@
       <h2>SHAKYA COSMETIC</h2>
       <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
       <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
-      <hr>
+      <hr style="border-top:1px dashed #000;">
       <p style="text-align:left; margin:4px 0;"><b>Bill No:</b> ${saleRecord.invId} ${saleRecord.exchanged ? '(EXCHANGED)' : ''} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.village || 'Niwari Kalan'})<br><b>Mobile:</b> ${saleRecord.mobile || 'N/A'} | <b>Mode:</b> ${saleRecord.mode}</p>
       <table>
         <thead><tr><th>Code</th><th>Item & Qty</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
         <tbody>
-          ${saleRecord.items.map(i => `<tr><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color})<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
+          ${saleRecord.items.map(i => `<tr style="${i.returned ? 'text-decoration:line-through; opacity:0.6;' : ''}"><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color}) ${i.returned ? '[RETURNED]' : ''}<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
         </tbody>
       </table>
       <div class="receipt-total">TOTAL: ₹${saleRecord.totalMrp} | TAY: ₹${saleRecord.acc}</div>
-      ${dueVal > 0 ? `<p style="font-size:11px; font-weight:bold; color:#b30000; margin:2px 0;">JAMA (PAID): ₹${paidVal} | BAAKI UDHAAR: ₹${dueVal}</p>` : ''}
+      ${dueVal > 0 ? `<p style="font-size:11px; font-weight:bold; color:#000; margin:2px 0;">JAMA (PAID): ₹${paidVal} | BAAKI UDHAAR: ₹${dueVal}</p>` : ''}
       <p style="font-size:9px; margin:4px 0;">धन्यवाद! बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
       <div class="barcode-box"><svg id="${svgId}"></svg></div>
     `;
@@ -1196,6 +1465,25 @@
       fontSize: 9,
       margin: 1
     });
+  }
+
+  // --- FEATURE 2: 1-TAP 80MM RAWBT THERMAL PRINT ---
+  function printDirect80mm() {
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+      const base64Data = canvas.toDataURL('image/png');
+      window.location.href = 'rawbt:' + base64Data;
+    }).catch(() => {
+      window.print();
+    });
+  }
+
+  function printDirect80mmFromModal() {
+    closeBillModal();
+    const tabEl = document.getElementById('tab-billing');
+    if (tabEl) switchTab('billing', tabEl);
+    printDirect80mm();
   }
 
   let lastSavedSale = null;
@@ -1225,18 +1513,20 @@
     let totalCost = 0;
     cart.forEach(i => { totalCost += (i.cost * i.qty); });
     const invId = 'INV' + (sales.length + 101);
-    const dateStr = new Date().toLocaleDateString('hi-IN');
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('hi-IN');
+    const isoDate = now.toISOString().slice(0, 10);
 
     const itemsSold = cart.map(i => {
       const st = inventory.find(x => x.code === i.code);
       if (st) st.qty -= i.qty;
       let itemTotalMrp = i.mrp * i.qty;
       const realSale = Math.round((itemTotalMrp / totalMrp) * acc);
-      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale };
+      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale, returned: false };
     });
 
     const saleRecord = {
-      invId, date: dateStr,
+      invId, date: dateStr, isoDate,
       cust: document.getElementById('custName').value.trim() || 'Walk-in Customer',
       village: document.getElementById('custVillage').value.trim() || 'Niwari Kalan',
       mobile: mob,
@@ -1334,18 +1624,44 @@
     const dueVal = s.due || 0;
     const paidVal = s.paid !== undefined ? s.paid : s.acc;
 
-    document.getElementById('modalInternalBox').innerHTML = `
-      <b>🔒 अंदरूनी हिसाब (${s.invId}) ${s.exchanged ? '<span style="color:red;">[EXCHANGED/RETURNED]</span>' : ''}:</b><br>
-      Sticker MRP: ₹${s.totalMrp} | <b>Tay ACC: ₹${s.acc}</b><br>
-      Mila Cash: <b style="color:green;">₹${paidVal}</b> | Baaki Udhaar: <b style="color:red;">₹${dueVal}</b><br>
-      Kharid: ₹${s.totalCost} | <b style="color:green;">Net Profit: ₹${s.profit}</b><hr style="margin:5px 0;">
-      <b>Items Asli Bikri Rate:</b><br>
-      ${s.items.map(i => `• <b>${i.code}</b> (${i.color}) [${i.qty} pcs]: Sticker ₹${i.mrp * i.qty} ➔ Asli Sale <b>₹${i.realSale}</b>`).join('<br>')}
-    `;
+    const internalBox = document.getElementById('modalInternalBox');
+    if (ownerUnlocked) {
+      internalBox.style.display = 'block';
+      internalBox.innerHTML = `
+        <b>🔒 अंदरूनी हिसाब (${s.invId}) ${s.exchanged ? '<span style="color:red;">[EXCHANGED/RETURNED]</span>' : ''}:</b><br>
+        Sticker MRP: ₹${s.totalMrp} | <b>Tay ACC: ₹${s.acc}</b><br>
+        Mila Cash: <b style="color:green;">₹${paidVal}</b> | Baaki Udhaar: <b style="color:red;">₹${dueVal}</b><br>
+        Kharid: ₹${s.totalCost} | <b style="color:green;">Net Profit: ₹${s.profit}</b><hr style="margin:5px 0;">
+        <b>Items Asli Bikri Rate:</b><br>
+        ${s.items.map(i => `• <b>${i.code}</b> (${i.color}) [${i.qty} pcs] ${i.returned ? '<b style="color:red;">(Returned)</b>' : ''}: Sticker ₹${i.mrp * i.qty} ➔ Asli Sale <b>₹${i.realSale}</b>`).join('<br>')}
+      `;
+    } else {
+      internalBox.style.display = 'block';
+      internalBox.innerHTML = `<b>🔒 Owner Hisaab Hidden:</b> Asli Kharid aur Profit dekhne ke liye upar <b>🔒 Cost: OFF</b> button dabayein.`;
+    }
 
-    const exBtn = document.getElementById('exchangeBtn');
-    if (exBtn) {
-      exBtn.style.display = s.exchanged ? 'none' : 'block';
+    // Build Item-wise Exchange List
+    const exSec = document.getElementById('exchangeSectionBox');
+    const exList = document.getElementById('exchangeItemsList');
+    const activeItems = s.items.filter(i => !i.returned);
+    if (s.exchanged || activeItems.length === 0) {
+      exSec.style.display = 'none';
+    } else {
+      exSec.style.display = 'block';
+      exList.innerHTML = s.items.map((item, idx) => {
+        if (item.returned) {
+          return `<div class="exchange-item-row" style="opacity:0.5;"><span>✔ <b>${item.code}</b> (${item.color}) - Already Returned</span></div>`;
+        }
+        return `
+          <label class="exchange-item-row" style="margin:0; cursor:pointer;">
+            <span style="display:flex; align-items:center;">
+              <input type="checkbox" class="ex-item-chk" value="${idx}">
+              <span><b>${item.code}</b> - ${item.cat} (${item.color}) [${item.qty} pcs]</span>
+            </span>
+            <b style="color:var(--maroon);">Tay: ₹${item.realSale}</b>
+          </label>
+        `;
+      }).join('');
     }
 
     document.getElementById('modalReceiptBox').innerHTML = `<div style="border:2px dashed #333; padding:10px; text-align:center;">` + buildReceiptHTML(s, 'modalBarcodeSvg') + `</div>`;
@@ -1366,12 +1682,31 @@
     window.print();
   }
 
-  // --- 3-DAY SAREE EXCHANGE / RETURN TO STOCK ---
-  function exchangeReturnBill() {
+  // --- FEATURE 1: SINGLE-ITEM OR PARTIAL BILL EXCHANGE ---
+  function exchangeSelectedItems() {
     if (!lastSavedSale || lastSavedSale.exchanged) return;
-    if (!confirm(`Kya aap Bill ${lastSavedSale.invId} ki saari Saree/Items wapas Stock (+Qty) mein jodna chahte hain?`)) return;
+    const chks = Array.from(document.querySelectorAll('.ex-item-chk:checked'));
+    if (chks.length === 0) {
+      alert('⚠️ Kripya return karne wali Saree/Item par tick (✔) lagayein!');
+      return;
+    }
 
-    lastSavedSale.items.forEach(soldItem => {
+    const selectedIndexes = chks.map(c => parseInt(c.value));
+    const remainingUnreturned = lastSavedSale.items.filter((it, idx) => !it.returned && !selectedIndexes.includes(idx));
+
+    // If all remaining items are selected, perform full bill return
+    if (remainingUnreturned.length === 0) {
+      exchangeReturnBill();
+      return;
+    }
+
+    if (!confirm(`Kya aap chune hue ${selectedIndexes.length} item(s) wapas Stock (+Qty) mein jodna chahte hain?`)) return;
+
+    let refundRealSale = 0;
+    selectedIndexes.forEach(idx => {
+      const soldItem = lastSavedSale.items[idx];
+      if (!soldItem || soldItem.returned) return;
+
       const st = inventory.find(x => x.code === soldItem.code);
       if (st) {
         st.qty += soldItem.qty;
@@ -1385,6 +1720,52 @@
           mrp: soldItem.mrp
         });
       }
+
+      soldItem.returned = true;
+      refundRealSale += (soldItem.realSale || 0);
+      lastSavedSale.totalMrp = Math.max(0, lastSavedSale.totalMrp - (soldItem.mrp * soldItem.qty));
+      lastSavedSale.totalCost = Math.max(0, lastSavedSale.totalCost - (soldItem.cost * soldItem.qty));
+      lastSavedSale.acc = Math.max(0, lastSavedSale.acc - (soldItem.realSale || 0));
+    });
+
+    lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
+    if (lastSavedSale.due > 0) {
+      const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
+      lastSavedSale.due -= dueReduce;
+      const remRefund = refundRealSale - dueReduce;
+      lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
+    } else {
+      lastSavedSale.paid = lastSavedSale.acc;
+    }
+
+    syncToCloud();
+    openBillModal(lastSavedSale.invId);
+    renderStock();
+    renderStats();
+    renderCustomerSection();
+    alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
+  }
+
+  function exchangeReturnBill() {
+    if (!lastSavedSale || lastSavedSale.exchanged) return;
+    if (!confirm(`Kya aap Bill ${lastSavedSale.invId} ki saari Saree/Items wapas Stock (+Qty) mein jodna chahte hain?`)) return;
+
+    lastSavedSale.items.forEach(soldItem => {
+      if (soldItem.returned) return;
+      const st = inventory.find(x => x.code === soldItem.code);
+      if (st) {
+        st.qty += soldItem.qty;
+      } else {
+        inventory.push({
+          code: soldItem.code,
+          cat: soldItem.cat,
+          color: soldItem.color,
+          qty: soldItem.qty,
+          cost: soldItem.cost,
+          mrp: soldItem.mrp
+        });
+      }
+      soldItem.returned = true;
     });
 
     lastSavedSale.exchanged = true;
@@ -1398,7 +1779,7 @@
     renderStock();
     renderStats();
     renderCustomerSection();
-    alert(`✅ Bill ${lastSavedSale.invId} ke items wapas Stock mein jud gaye hain! Ab aap nayi Saree ka bill bana sakte hain.`);
+    alert(`✅ Bill ${lastSavedSale.invId} ke sabhi items wapas Stock mein jud gaye hain!`);
   }
 
   function decodeAcc(val, openPopup = false) {
@@ -1415,8 +1796,8 @@
         <div style="background:#fff8fa; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
           ✅ <b>${found.invId} (${found.date}) - ${found.cust}</b> ${found.exchanged ? '<b style="color:red;">[EXCHANGED]</b>' : ''}<br>
           Sticker Bill: ₹${found.totalMrp} | <b style="color:var(--maroon);">ACC: ₹${found.acc}</b> | <b style="color:red;">Udhaar: ₹${found.due || 0}</b><br>
-          ${found.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty}`).join('<br>')}
-          <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Bill Kholein / Exchange Karein</button>
+          ${found.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty} ${i.returned ? '(Returned)' : ''}`).join('<br>')}
+          <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Bill Kholein / Item Exchange Karein</button>
         </div>
       `;
       if (openPopup) openBillModal(found.invId);
@@ -1425,13 +1806,16 @@
     }
   }
 
-  // --- UDHAAR / KHATA BOOK MANAGEMENT ---
+  // --- FEATURE 4: UDHAAR PASSBOOK & PAYMENT HISTORY ---
   let activeUdhaarMobile = "";
+  let activeUdhaarName = "";
 
   function openUdhaarModal(mob, name, totalDue) {
     activeUdhaarMobile = mob;
+    activeUdhaarName = name;
     document.getElementById('udhaarCustInfo').innerText = `${name} (${mob}) — Kul Baaki Udhaar: ₹${totalDue}`;
     document.getElementById('udhaarReceiveInput').value = totalDue;
+    document.getElementById('udhaarPayMode').value = 'Cash';
     document.getElementById('udhaarModal').style.display = 'flex';
   }
 
@@ -1439,10 +1823,12 @@
     document.getElementById('udhaarModal').style.display = 'none';
   }
 
-  function confirmUdhaarPayment() {
+  function confirmUdhaarPayment(sendWa = false) {
     let recAmt = parseFloat(document.getElementById('udhaarReceiveInput').value) || 0;
+    const payMode = document.getElementById('udhaarPayMode').value || 'Cash';
     if (recAmt <= 0 || !activeUdhaarMobile) return;
 
+    const origRecAmt = recAmt;
     sales.forEach(s => {
       if (s.mobile === activeUdhaarMobile && (s.due || 0) > 0 && recAmt > 0) {
         let settle = Math.min(s.due, recAmt);
@@ -1452,11 +1838,33 @@
       }
     });
 
+    const actuallySettled = origRecAmt - recAmt;
+    const remainingDue = sales
+      .filter(s => s.mobile === activeUdhaarMobile)
+      .reduce((sum, s) => sum + (s.due || 0), 0);
+
+    const now = new Date();
+    udhaarLogs.unshift({
+      id: 'UDH' + Date.now().toString().slice(-5),
+      date: now.toLocaleDateString('hi-IN'),
+      isoDate: now.toISOString().slice(0, 10),
+      mobile: activeUdhaarMobile,
+      cust: activeUdhaarName,
+      amount: actuallySettled,
+      mode: payMode,
+      remainingDue
+    });
+
     syncToCloud();
     closeUdhaarModal();
     lookupCustomer(activeUdhaarMobile);
     renderCustomerSection();
     renderStats();
+
+    if (sendWa && activeUdhaarMobile.length >= 10) {
+      const msg = `🙏 नमस्कार *${activeUdhaarName}* जी,\n*SHAKYA COSMETIC & SAREE COLLECTION* (निवाड़ी कलां) में आज आपके उधार खाते में *₹${actuallySettled}* (${payMode}) जमा प्राप्त हुए।\nअब आपका कुल बाकी उधार: *₹${remainingDue}* है। धन्यवाद!`;
+      window.open(`https://wa.me/91${activeUdhaarMobile}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
   }
 
   function sendUdhaarReminder(mob, name, dueAmt) {
@@ -1488,6 +1896,10 @@
     let village = matchedBills[0].village;
     let mob = matchedBills[0].mobile || '';
 
+    const custPayments = udhaarLogs.filter(l =>
+      (mob && l.mobile === mob) || (l.cust && l.cust.toUpperCase().includes(q))
+    );
+
     res.innerHTML = `
       <div style="background:#f3e8ec; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
         👤 <b>Name:</b> ${custName} | 📍 <b>Gaon:</b> ${village} | 📱 <b>Mob:</b> ${mob || 'N/A'}<br>
@@ -1499,8 +1911,13 @@
           </div>
         ` : ''}
         <hr style="margin:6px 0;">
-        <b>Purane Bills ki List:</b>
+        <b>🧾 Purane Bills ki List:</b>
         ${matchedBills.map(b => `<div style="margin-top:4px; cursor:pointer; color:var(--maroon); text-decoration:underline;" onclick="openBillModal('${b.invId}')"><b>${b.invId}</b> (${b.date}) - Tay: ₹${b.acc} ${(b.due || 0) > 0 ? `<b style="color:red;">[Udhaar: ₹${b.due}]</b>` : ''}</div>`).join('')}
+        ${custPayments.length > 0 ? `
+          <hr style="margin:6px 0;">
+          <b style="color:#0f6b2f;">📓 Udhaar Jama Passbook History:</b>
+          ${custPayments.map(p => `<div style="margin-top:3px; font-size:11px; color:#222;">✅ <b>${p.date}</b>: <b>₹${p.amount}</b> jama (${p.mode}) — Baaki बचा: ₹${p.remainingDue}</div>`).join('')}
+        ` : ''}
       </div>
     `;
   }
@@ -1546,21 +1963,47 @@
     }).join('');
   }
 
-  // --- DAILY GALLA & INSIGHTS ---
+  // --- FEATURE 6: DATE & MONTH FILTERS IN INSIGHTS ---
+  function getSaleIsoDate(s) {
+    if (s.isoDate) return s.isoDate;
+    if (!s.date) return '';
+    const parts = s.date.split('/');
+    if (parts.length === 3) {
+      const d = parts[0].padStart(2, '0');
+      const m = parts[1].padStart(2, '0');
+      const y = parts[2];
+      return `${y}-${m}-${d}`;
+    }
+    return '';
+  }
+
   function setStatsFilter(mode) {
     statsFilterMode = mode;
-    document.getElementById('btnFilterToday').style.background = mode === 'TODAY' ? 'var(--maroon)' : '#ddd';
-    document.getElementById('btnFilterToday').style.color = mode === 'TODAY' ? '#fff' : '#333';
-    document.getElementById('btnFilterAll').style.background = mode === 'ALL' ? 'var(--maroon)' : '#ddd';
-    document.getElementById('btnFilterAll').style.color = mode === 'ALL' ? '#fff' : '#333';
+    ['TODAY', 'DATE', 'MONTH', 'ALL'].forEach(m => {
+      const btn = document.getElementById('btnFilter' + m.charAt(0) + m.slice(1).toLowerCase());
+      if (btn) {
+        btn.style.background = (mode === m) ? 'var(--maroon)' : '#ddd';
+        btn.style.color = (mode === m) ? '#fff' : '#333';
+      }
+    });
+    document.getElementById('statsDatePickerWrap').style.display = (mode === 'DATE') ? 'block' : 'none';
+    document.getElementById('statsMonthPickerWrap').style.display = (mode === 'MONTH') ? 'block' : 'none';
     renderStats();
   }
 
   function renderStats() {
     const todayStr = new Date().toLocaleDateString('hi-IN');
-    const filteredSales = statsFilterMode === 'TODAY'
-      ? sales.filter(s => s.date === todayStr)
-      : sales;
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const selDate = document.getElementById('statsDateInput')?.value || todayIso;
+    const selMonth = document.getElementById('statsMonthInput')?.value || todayIso.slice(0, 7);
+
+    const filteredSales = sales.filter(s => {
+      const sIso = getSaleIsoDate(s);
+      if (statsFilterMode === 'TODAY') return s.date === todayStr || sIso === todayIso;
+      if (statsFilterMode === 'DATE') return sIso === selDate;
+      if (statsFilterMode === 'MONTH') return sIso.startsWith(selMonth);
+      return true;
+    });
 
     let tAcc = 0, tProfit = 0, tPaid = 0, tDue = 0;
     let gCash = 0, gUpi = 0, gAeps = 0;
@@ -1579,11 +2022,13 @@
       else if (s.mode === 'AEPS Cash') gAeps += paidVal;
       else gCash += paidVal;
 
-      s.items.forEach(i => { colorCount[i.color] = (colorCount[i.color] || 0) + i.qty; });
+      s.items.forEach(i => {
+        if (!i.returned) colorCount[i.color] = (colorCount[i.color] || 0) + i.qty;
+      });
     });
 
     document.getElementById('stAcc').innerText = '₹' + tAcc;
-    document.getElementById('stProfit').innerText = '₹' + tProfit;
+    document.getElementById('stProfit').innerText = ownerUnlocked ? ('₹' + tProfit) : '🔒 ***';
     document.getElementById('stPaid').innerText = '₹' + tPaid;
     document.getElementById('stDue').innerText = '₹' + tDue;
 
@@ -1599,10 +2044,10 @@
     document.getElementById('salesHistoryBody').innerHTML = filteredSales.map(s => `
       <tr class="clickable-row" onclick="openBillModal('${s.invId}')" style="${s.exchanged ? 'opacity:0.5; text-decoration:line-through;' : ''}">
         <td><b style="color:var(--maroon); text-decoration:underline;">${s.invId} 🔍</b><br><small>${s.date}</small></td>
-        <td>${s.items.map(i => `${i.code} [${i.qty}p] (₹${i.realSale})`).join('<br>')}</td>
+        <td>${s.items.map(i => `${i.code} [${i.qty}p] (₹${i.realSale}) ${i.returned ? '🔄' : ''}`).join('<br>')}</td>
         <td><b>₹${s.acc}</b></td>
         <td style="color:${(s.due || 0) > 0 ? '#b30000' : '#888'}; font-weight:bold;">₹${s.due || 0}</td>
-        <td style="color:green;font-weight:bold;">₹${s.profit}</td>
+        <td style="color:green;font-weight:bold;">${ownerUnlocked ? '₹' + s.profit : '🔒 ***'}</td>
       </tr>
     `).join('');
   }
@@ -1614,7 +2059,7 @@
     }
     let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
     sales.forEach(s => {
-      const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale})`).join(' | ');
+      const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
       const paidVal = s.paid !== undefined ? s.paid : s.acc;
       csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
     });
@@ -1627,7 +2072,7 @@
   }
 
   function downloadBackupJSON() {
-    const data = JSON.stringify({ inventory, sales });
+    const data = JSON.stringify({ inventory, sales, udhaarLogs, ownerPin });
     const blob = new Blob([data], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1646,6 +2091,8 @@
         if (parsed.inventory && parsed.sales) {
           inventory = parsed.inventory;
           sales = parsed.sales;
+          if (parsed.udhaarLogs) udhaarLogs = parsed.udhaarLogs;
+          if (parsed.ownerPin) ownerPin = String(parsed.ownerPin);
           syncToCloud();
           renderStock(); renderStats(); renderCustomerSection();
           showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore aur Cloud par sync ho gaya!', 'success');
