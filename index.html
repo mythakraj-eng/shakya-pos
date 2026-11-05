@@ -84,6 +84,14 @@
     .btn-del { background: #e5e5e5; color: #333; padding: 5px 5px; }
     .btn-del.confirming { background: #d00000; color: #fff; }
 
+    .qty-ctrl { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; }
+    .qty-btn { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 800; cursor: pointer; width: auto; margin: 0; line-height: 1.1; }
+    .qty-btn:active { background: var(--maroon); color: #fff; }
+
+    .loose-box { background: #fdf8fa; border: 1px dashed #d9b8c4; padding: 8px; border-radius: 8px; margin-top: 8px; }
+    .credit-banner { display: none; background: #e8f8ee; border: 1.5px solid #0f6b2f; color: #0f6b2f; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 12px; font-weight: 700; justify-content: space-between; align-items: center; }
+    .udhaar-alert-banner { display: none; background: #ffeef0; border: 1.5px solid #b30000; color: #b30000; padding: 7px 10px; border-radius: 6px; margin-top: 8px; font-size: 12px; font-weight: 700; }
+
     .chip-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
     .color-chip { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 4px 9px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
     .color-chip:active { background: var(--maroon); color: #fff; }
@@ -103,7 +111,7 @@
     .stat-box span { font-size: 11px; color: #666; display: block; }
     .stat-box strong { font-size: 16px; color: var(--maroon); }
 
-    .galla-bar { display: flex; justify-content: space-between; background: #f3e8ec; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; font-weight: 700; color: #333; flex-wrap: wrap; gap: 4px; }
+    .galla-bar { display: flex; justify-content: space-between; background: #f3e8ec; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; font-weight: 700; color: #333; flex-wrap: wrap; gap: 6px; }
 
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
@@ -315,9 +323,10 @@
       <b style="color:var(--maroon); font-size:12px; display:block; margin-bottom:6px;">🔄 Saree Return / Exchange (Item chunein):</b>
       <div id="exchangeItemsList"></div>
       <div class="row" style="margin-top:8px;">
-        <div><button style="background:#b30000; margin:0; font-size:11px; padding:8px;" onclick="exchangeSelectedItems()">🔄 Chune Hue Item Return Karein</button></div>
-        <div><button class="dark" style="margin:0; font-size:11px; padding:8px;" onclick="exchangeReturnBill()">🔄 Poora Bill Return</button></div>
+        <div><button style="background:#0f6b2f; margin:0; font-size:11px; padding:8px;" onclick="exchangeSelectedItems(true)">🔄 Return & Naye Bill Mein Adjust</button></div>
+        <div><button style="background:#b30000; margin:0; font-size:11px; padding:8px;" onclick="exchangeSelectedItems(false)">🔄 Sirf Return Karein</button></div>
       </div>
+      <button class="dark" style="margin-top:6px; font-size:11px; padding:7px;" onclick="exchangeReturnBill()">🔄 Poora Bill Return Karein</button>
     </div>
 
     <div class="row" style="margin-top:10px;">
@@ -346,11 +355,36 @@
       </div>
     </div>
 
+    <!-- QUICK LOOSE ITEM (BINA STOCK KE) -->
+    <div class="loose-box">
+      <div style="font-size:11px; font-weight:700; color:var(--maroon); margin-bottom:4px;">⚡ Bina Code / Loose Item Jodein (Cosmetic, Fall, Bangles):</div>
+      <div class="row">
+        <div style="flex:1.6;">
+          <input type="text" id="looseName" placeholder="Item (Ex: Bangles/Fall)" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:1;">
+          <input type="number" id="looseMrp" placeholder="Rate ₹" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:0.9;">
+          <input type="number" id="looseCost" placeholder="Cost ₹" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:0.8;">
+          <button style="margin:0; padding:6px; font-size:11px;" onclick="addLooseItemToBill()">+ Jodein</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXCHANGE CREDIT BANNER -->
+    <div id="exchangeCreditBanner" class="credit-banner">
+      <span id="exchangeCreditText">🔄 Exchange Credit Applied: ₹0</span>
+      <button class="small" style="background:#b30000; color:#fff; margin:0; padding:3px 7px;" onclick="clearExchangeCredit()">✕ Hatayein</button>
+    </div>
+
     <div id="billMsg" class="inline-msg"></div>
 
     <table id="cartTable">
       <thead>
-        <tr><th>Code</th><th>Item/Colour</th><th>MRP (₹)</th><th></th></tr>
+        <tr><th>Code</th><th>Item & Qty</th><th>MRP (₹)</th><th></th></tr>
       </thead>
       <tbody id="cartBody"></tbody>
     </table>
@@ -368,7 +402,7 @@
 
     <div class="row">
       <div>
-        <label style="color:#0f6b2f;">Mila Cash (Paid ₹)</label>
+        <label style="color:#0f6b2f;">Abhi Mila Cash (Paid ₹)</label>
         <input type="number" id="paidInput" placeholder="Abhi mile paise" oninput="updateLiveSplit()">
       </div>
       <div>
@@ -378,9 +412,10 @@
     </div>
 
     <div class="row">
-      <div>
+      <div class="suggest-wrap">
         <label>Customer Name</label>
-        <input type="text" id="custName" placeholder="Ex: Sunita Devi">
+        <input type="text" id="custName" placeholder="Ex: Sunita Devi" autocomplete="off" oninput="onCustNameInputType(this)">
+        <div id="custNameSuggestBox" class="suggest-box"></div>
       </div>
       <div class="suggest-wrap">
         <label>Gaon / City</label>
@@ -392,7 +427,7 @@
     <div class="row">
       <div>
         <label>Mobile Number (WhatsApp)</label>
-        <input type="tel" id="custMobile" placeholder="Ex: 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        <input type="tel" id="custMobile" placeholder="Ex: 9876543210" maxlength="10" oninput="onCustMobileInputType(this)">
       </div>
       <div>
         <label>Payment Mode</label>
@@ -403,6 +438,9 @@
         </select>
       </div>
     </div>
+
+    <!-- PREVIOUS UDHAAR ALERT IN BILLING -->
+    <div id="custPrevUdhaarBanner" class="udhaar-alert-banner"></div>
 
     <div id="liveSplitBox" style="background:#fff3cd; padding:8px; border-radius:6px; margin-top:10px; font-size:12px; display:none;"></div>
 
@@ -581,7 +619,7 @@
     <div class="stat-grid">
       <div class="stat-box"><span>Total Tay Bikri (ACC)</span><strong id="stAcc">₹0</strong></div>
       <div class="stat-box"><span>Shuddh Munafa (Profit)</span><strong id="stProfit" style="color:green;">₹0</strong></div>
-      <div class="stat-box"><span>Galla Mila Cash/UPI</span><strong id="stPaid" style="color:#0f6b2f;">₹0</strong></div>
+      <div class="stat-box"><span>Galla Mila (Bill + Vasooli)</span><strong id="stPaid" style="color:#0f6b2f;">₹0</strong></div>
       <div class="stat-box"><span>Market Mein Udhaar</span><strong id="stDue" style="color:#b30000;">₹0</strong></div>
     </div>
 
@@ -590,6 +628,24 @@
       <span>📱 UPI: ₹0</span>
       <span>🏦 AEPS: ₹0</span>
     </div>
+    <div id="gallaNetBar" class="galla-bar" style="background:#fff3cd; border:1px solid #ecd996; margin-top:5px;"></div>
+  </div>
+
+  <!-- ROZANA DUKAAN KHARCHA (EXPENSE) TRACKER -->
+  <div class="card">
+    <h3>☕ Rozana Dukaan Kharcha (Chai, Bhaada, Polythene)</h3>
+    <div class="row">
+      <div style="flex:1.8;">
+        <input type="text" id="expNote" placeholder="Kharcha (Ex: Chai, Auto Bhaada)" style="margin:0; padding:8px; font-size:13px;">
+      </div>
+      <div style="flex:1;">
+        <input type="number" id="expAmt" placeholder="₹ Rakam" style="margin:0; padding:8px; font-size:13px;">
+      </div>
+      <div style="flex:0.8;">
+        <button style="margin:0; padding:8px; font-size:12px;" onclick="addExpense()">+ Jodein</button>
+      </div>
+    </div>
+    <div id="expenseListBox" style="margin-top:8px; font-size:12px;"></div>
   </div>
 
   <div class="card">
@@ -631,8 +687,8 @@
 <!-- 5. BACKUP & SECURITY SECTION -->
 <div id="backup" class="section">
   <div class="card">
-    <h3>🔐 Owner Security PIN Badlein</h3>
-    <p style="font-size:12px; color:#555; margin:0 0 8px 0;">Default Owner PIN <b>1234</b> hai. Aap apna naya 4-ank ka PIN yahan set kar sakte hain:</p>
+    <h3>🔐 Owner Security PIN & Tag Secret Key</h3>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0;">Default Owner PIN <b>1234</b> hai. Tag par chhapne wala Secret Cost Code Key: <b>1=S, 2=H, 3=A, 4=K, 5=Y, 6=B, 7=C, 8=D, 9=E, 0=Z</b> (Ex: ₹190 = <b>SEZ</b>).</p>
     <div class="row">
       <div>
         <input type="password" id="oldPinChange" placeholder="Purana PIN" maxlength="4" inputmode="numeric">
@@ -678,12 +734,22 @@
   ];
   let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
   let udhaarLogs = JSON.parse(localStorage.getItem('sc_udhaar_logs')) || [];
+  let expenses = JSON.parse(localStorage.getItem('sc_expenses')) || [];
   let ownerPin = localStorage.getItem('sc_owner_pin') || '1234';
   let ownerUnlocked = false;
   let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
   let statsFilterMode = 'TODAY';
 
-  // Set default values for Date & Month pickers
+  // Exchange Credit State for New Bill Swap
+  let activeExchangeCredit = 0;
+  let activeExchangeRefInv = '';
+
+  // Secret Letter Cost Code Cipher (1=S, 2=H, 3=A, 4=K, 5=Y, 6=B, 7=C, 8=D, 9=E, 0=Z)
+  const costCipherMap = { '1':'S', '2':'H', '3':'A', '4':'K', '5':'Y', '6':'B', '7':'C', '8':'D', '9':'E', '0':'Z' };
+  function encodeSecretCost(costVal) {
+    return String(Math.round(Number(costVal) || 0)).split('').map(d => costCipherMap[d] || d).join('');
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     const todayIso = new Date().toISOString().slice(0, 10);
     const dInp = document.getElementById('statsDateInput');
@@ -725,6 +791,7 @@
       if (cloudData.inventory) inventory = cloudData.inventory;
       if (cloudData.sales) sales = cloudData.sales;
       if (cloudData.udhaarLogs) udhaarLogs = cloudData.udhaarLogs;
+      if (cloudData.expenses) expenses = cloudData.expenses;
       if (cloudData.ownerPin) {
         ownerPin = String(cloudData.ownerPin);
         localStorage.setItem('sc_owner_pin', ownerPin);
@@ -732,6 +799,7 @@
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
       localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
+      localStorage.setItem('sc_expenses', JSON.stringify(expenses));
       localStorage.setItem('sc_unsynced', 'false');
       hasUnsyncedChanges = false;
       updateSyncBadge('ONLINE');
@@ -748,6 +816,7 @@
     localStorage.setItem('sc_inventory', JSON.stringify(inventory));
     localStorage.setItem('sc_sales', JSON.stringify(sales));
     localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
+    localStorage.setItem('sc_expenses', JSON.stringify(expenses));
     localStorage.setItem('sc_owner_pin', ownerPin);
     hasUnsyncedChanges = true;
     localStorage.setItem('sc_unsynced', 'true');
@@ -757,6 +826,7 @@
       inventory,
       sales,
       udhaarLogs,
+      expenses,
       ownerPin,
       lastUpdated: new Date().toISOString()
     }).then(() => {
@@ -773,7 +843,7 @@
   });
   window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
 
-  // --- FEATURE 3: OWNER PIN & COST/PROFIT LOCK ---
+  // --- OWNER PIN & COST/PROFIT LOCK ---
   function updateOwnerLockUI() {
     const btn = document.getElementById('ownerLockBtn');
     if (btn) {
@@ -996,6 +1066,89 @@
     document.getElementById('villageSuggestBox').style.display = 'none';
   }
 
+  // --- CUSTOMER AUTO-FILL & PREVIOUS UDHAAR ALERT IN BILLING ---
+  function getCustomerDirectory() {
+    let dir = {};
+    sales.forEach(s => {
+      const key = s.mobile || (s.cust && s.cust !== 'Walk-in Customer' ? s.cust.toUpperCase() : '');
+      if (!key) return;
+      if (!dir[key]) {
+        dir[key] = { name: s.cust, village: s.village || 'Niwari Kalan', mobile: s.mobile || '', due: 0 };
+      }
+      dir[key].due += (s.due || 0);
+    });
+    return Object.values(dir);
+  }
+
+  function checkCustomerPrevUdhaar(mob, name) {
+    const banner = document.getElementById('custPrevUdhaarBanner');
+    if (!banner) return;
+    let totalPrevDue = 0;
+    sales.forEach(s => {
+      if (mob && mob.length === 10 && s.mobile === mob) {
+        totalPrevDue += (s.due || 0);
+      } else if (!mob && name && s.cust && s.cust.toUpperCase() === name.toUpperCase()) {
+        totalPrevDue += (s.due || 0);
+      }
+    });
+    if (totalPrevDue > 0) {
+      banner.style.display = 'block';
+      banner.innerHTML = `⚠️ Is grahak par pehle se <b>₹${totalPrevDue}</b> udhaar baaki hai!`;
+    } else {
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+    }
+  }
+
+  function onCustMobileInputType(inp) {
+    inp.value = inp.value.replace(/[^0-9]/g, '');
+    const mob = inp.value.trim();
+    if (mob.length === 10) {
+      const prevSale = sales.find(s => s.mobile === mob);
+      if (prevSale) {
+        const nameInp = document.getElementById('custName');
+        const vilInp = document.getElementById('custVillage');
+        if (!nameInp.value.trim()) nameInp.value = prevSale.cust;
+        if (!vilInp.value.trim()) vilInp.value = prevSale.village || 'Niwari Kalan';
+      }
+      checkCustomerPrevUdhaar(mob, '');
+    } else {
+      document.getElementById('custPrevUdhaarBanner').style.display = 'none';
+    }
+  }
+
+  function onCustNameInputType(inp) {
+    const q = inp.value.trim().toUpperCase();
+    const box = document.getElementById('custNameSuggestBox');
+    if (!q || q.length < 2) {
+      box.style.display = 'none';
+      return;
+    }
+    const dir = getCustomerDirectory().filter(c =>
+      (c.name && c.name.toUpperCase().includes(q)) || (c.mobile && c.mobile.includes(q))
+    ).slice(0, 6);
+
+    if (dir.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+    box.innerHTML = dir.map(c => `
+      <div class="suggest-item" onclick="selectCustomerSuggestion('${(c.name || '').replace(/'/g, "\\'")}', '${(c.village || '').replace(/'/g, "\\'")}', '${c.mobile || ''}')">
+        <span>👤 <b>${c.name}</b> (${c.village})</span>
+        <span style="color:${c.due > 0 ? '#b30000' : '#0f6b2f'}; font-weight:700;">${c.due > 0 ? 'Udhaar: ₹' + c.due : (c.mobile || 'Clear')}</span>
+      </div>
+    `).join('');
+    box.style.display = 'block';
+  }
+
+  function selectCustomerSuggestion(name, village, mobile) {
+    document.getElementById('custName').value = name;
+    document.getElementById('custVillage').value = village;
+    if (mobile) document.getElementById('custMobile').value = mobile;
+    document.getElementById('custNameSuggestBox').style.display = 'none';
+    checkCustomerPrevUdhaar(mobile, name);
+  }
+
   function onScanInputType(inp) {
     inp.value = cleanCode(inp.value);
     const q = inp.value;
@@ -1144,7 +1297,6 @@
     showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
-  // --- FEATURE 5: QUICK EDIT STOCK MODAL ---
   function openEditStockModal(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
@@ -1263,7 +1415,7 @@
       <tr>
         <td class="code-cell">${item.code}</td>
         <td>${item.cat}<br><small style="color:var(--maroon);font-weight:600;">${item.color}</small></td>
-        <td>${ownerUnlocked ? '₹' + item.cost : '🔒 ***'}</td>
+        <td>${ownerUnlocked ? '₹' + item.cost : '🔒 ' + encodeSecretCost(item.cost)}</td>
         <td><b>₹${item.mrp}</b></td>
         <td style="color:${item.qty <= 2 ? 'red' : 'black'}; font-weight:bold;">${item.qty}</td>
         <td style="text-align:right; white-space:nowrap;">
@@ -1278,15 +1430,17 @@
     `).join('');
   }
 
+  // --- SECRET LETTER COST CODE ON PRINTED TAGS ---
   function printSareeTag(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
     document.querySelectorAll('.tab')[0].click();
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
+    const secretCostStr = encodeSecretCost(item.cost);
     zone.innerHTML = `
       <h2>SHAKYA COSMETIC</h2>
-      <p>${item.cat} - ${item.color} | Code: C${item.cost}X</p>
+      <p>${item.cat} - ${item.color} | Code: ${secretCostStr}</p>
       <div class="receipt-total">MRP: ₹${item.mrp}</div>
       <div class="barcode-box"><svg id="tagBarcode"></svg></div>
     `;
@@ -1305,11 +1459,12 @@
 
     let tagsHTML = `<h3 style="margin:0 0 8px 0; color:#000; font-size:12px;">SHAKYA COSMETIC - TAGS (${listToPrint.length})</h3><div class="batch-tag-container">`;
     listToPrint.forEach((item, idx) => {
+      const secretCostStr = encodeSecretCost(item.cost);
       tagsHTML += `
         <div class="single-tag">
           <h4>SHAKYA COSMETIC</h4>
           <p>${item.cat} - ${item.color}</p>
-          <p>Code: C${item.cost}X</p>
+          <p>Code: ${secretCostStr}</p>
           <div class="tag-mrp">MRP: ₹${item.mrp}</div>
           <div class="barcode-box"><svg id="batchTag_${idx}"></svg></div>
         </div>
@@ -1362,7 +1517,7 @@
     if (existingCartItem) {
       existingCartItem.qty += 1;
     } else {
-      cart.push({ ...item, qty: 1 });
+      cart.push({ ...item, qty: 1, isLoose: false });
     }
 
     document.getElementById('scanInput').value = '';
@@ -1370,8 +1525,76 @@
     renderCart();
   }
 
+  // --- QUICK LOOSE ITEM BILLING ---
+  function addLooseItemToBill() {
+    const name = document.getElementById('looseName').value.trim() || 'Cosmetic/Loose';
+    const mrp = parseFloat(document.getElementById('looseMrp').value) || 0;
+    const costInput = parseFloat(document.getElementById('looseCost').value);
+    if (!mrp || mrp <= 0) {
+      showInlineMsg('billMsg', '⚠️ Loose item ka Rate (MRP ₹) daalein!', 'error');
+      return;
+    }
+    const cost = !isNaN(costInput) && costInput >= 0 ? costInput : Math.round(mrp * 0.7);
+    const code = 'LS' + Math.floor(10 + Math.random() * 89);
+
+    cart.push({
+      code,
+      cat: name,
+      color: 'Loose',
+      qty: 1,
+      cost,
+      mrp,
+      isLoose: true
+    });
+
+    document.getElementById('looseName').value = '';
+    document.getElementById('looseMrp').value = '';
+    document.getElementById('looseCost').value = '';
+    showInlineMsg('billMsg', `✅ Loose Item (${name} - ₹${mrp}) bill mein jud gaya!`, 'success');
+    renderCart();
+  }
+
+  // --- CART + / - QUANTITY CONTROLS ---
+  function changeCartQty(idx, delta) {
+    const item = cart[idx];
+    if (!item) return;
+    const newQty = item.qty + delta;
+    if (newQty <= 0) {
+      cart.splice(idx, 1);
+      renderCart();
+      return;
+    }
+    if (!item.isLoose) {
+      const st = inventory.find(i => i.code === item.code);
+      if (st && newQty > st.qty) {
+        showInlineMsg('billMsg', `⚠️ Stock mein sirf ${st.qty} pcs available hain!`, 'error');
+        return;
+      }
+    }
+    item.qty = newQty;
+    renderCart();
+  }
+
   function removeCartItem(idx) {
     cart.splice(idx, 1);
+    renderCart();
+  }
+
+  function applyExchangeCreditBanner() {
+    const banner = document.getElementById('exchangeCreditBanner');
+    const txt = document.getElementById('exchangeCreditText');
+    if (activeExchangeCredit > 0) {
+      banner.style.display = 'flex';
+      txt.innerText = `🔄 Exchange Credit (${activeExchangeRefInv}): -₹${activeExchangeCredit} Adjust Hoga`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  function clearExchangeCredit() {
+    activeExchangeCredit = 0;
+    activeExchangeRefInv = '';
+    applyExchangeCreditBanner();
     renderCart();
   }
 
@@ -1383,21 +1606,31 @@
       totalMrp += itemTotalMrp;
       return `<tr>
         <td class="code-cell">${c.code}</td>
-        <td>${c.cat} (${c.color})<br><small style="color:var(--maroon);font-weight:bold;">Qty: ${c.qty} pcs</small></td>
+        <td>
+          ${c.cat} (${c.color})<br>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeCartQty(${idx}, -1)">−</button>
+            <span style="font-weight:bold; font-size:12px; min-width:22px; text-align:center;">${c.qty}</span>
+            <button class="qty-btn" onclick="changeCartQty(${idx}, 1)">+</button>
+          </div>
+        </td>
         <td>₹${itemTotalMrp}</td>
         <td><button class="small" style="background:#c00" onclick="removeCartItem(${idx})">✕</button></td>
       </tr>`;
     }).join('');
     document.getElementById('billTotalMrp').value = totalMrp;
     document.getElementById('accInput').value = totalMrp;
-    document.getElementById('paidInput').value = totalMrp;
+    const netPayable = Math.max(0, totalMrp - activeExchangeCredit);
+    document.getElementById('paidInput').value = netPayable;
     document.getElementById('dueInput').value = 0;
+    applyExchangeCreditBanner();
     updateLiveSplit();
   }
 
   function onAccInputChange() {
     const acc = parseFloat(document.getElementById('accInput').value) || 0;
-    document.getElementById('paidInput').value = acc;
+    const netPayable = Math.max(0, acc - activeExchangeCredit);
+    document.getElementById('paidInput').value = netPayable;
     updateLiveSplit();
   }
 
@@ -1405,7 +1638,8 @@
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
     const acc = parseFloat(document.getElementById('accInput').value) || 0;
     const paid = parseFloat(document.getElementById('paidInput').value) || 0;
-    const due = Math.max(0, acc - paid);
+    const netTarget = Math.max(0, acc - activeExchangeCredit);
+    const due = Math.max(0, netTarget - paid);
     document.getElementById('dueInput').value = due;
 
     const box = document.getElementById('liveSplitBox');
@@ -1428,13 +1662,14 @@
 
     box.style.display = 'block';
     box.innerHTML = `<b>🔒 Owner Internal Hisaab (Bill par nahi chhapega):</b><br>
-      Kharid: ₹${totalCost} | Chhoot: ₹${totalDiscount} | <b>Net Profit: ₹${netProfit}</b> ${due > 0 ? `| <b style="color:#b30000;">Baaki Udhaar: ₹${due}</b>` : ''}<hr style="margin:4px 0">
+      Kharid: ₹${totalCost} | Chhoot: ₹${totalDiscount} | <b>Net Profit: ₹${netProfit}</b> ${activeExchangeCredit > 0 ? `| <b style="color:#0f6b2f;">Exch. Credit: -₹${activeExchangeCredit}</b>` : ''} ${due > 0 ? `| <b style="color:#b30000;">Baaki Udhaar: ₹${due}</b>` : ''}<hr style="margin:4px 0">
       ${itemBreakup}`;
   }
 
   function buildReceiptHTML(saleRecord, svgId) {
     const dueVal = saleRecord.due || 0;
     const paidVal = saleRecord.paid !== undefined ? saleRecord.paid : saleRecord.acc;
+    const exCredit = saleRecord.exchangeCredit || 0;
     return `
       <h2>SHAKYA COSMETIC</h2>
       <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
@@ -1448,6 +1683,7 @@
         </tbody>
       </table>
       <div class="receipt-total">TOTAL: ₹${saleRecord.totalMrp} | TAY: ₹${saleRecord.acc}</div>
+      ${exCredit > 0 ? `<p style="font-size:10px; font-weight:bold; color:#000; margin:2px 0;">EXCHANGE CREDIT (${saleRecord.exchangeRef || ''}): -₹${exCredit} | NET: ₹${Math.max(0, saleRecord.acc - exCredit)}</p>` : ''}
       ${dueVal > 0 ? `<p style="font-size:11px; font-weight:bold; color:#000; margin:2px 0;">JAMA (PAID): ₹${paidVal} | BAAKI UDHAAR: ₹${dueVal}</p>` : ''}
       <p style="font-size:9px; margin:4px 0;">धन्यवाद! बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
       <div class="barcode-box"><svg id="${svgId}"></svg></div>
@@ -1467,7 +1703,6 @@
     });
   }
 
-  // --- FEATURE 2: 1-TAP 80MM RAWBT THERMAL PRINT ---
   function printDirect80mm() {
     const zone = document.getElementById('printZone');
     document.getElementById('printCard').style.display = 'block';
@@ -1495,13 +1730,14 @@
         inp.focus();
         onScanInputType(inp);
       }
-      showInlineMsg('billMsg', '⚠️ Pehle Saree Code jodein!', 'error');
+      showInlineMsg('billMsg', '⚠️ Pehle Saree Code ya Loose Item jodein!', 'error');
       return;
     }
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
     const acc = parseFloat(document.getElementById('accInput').value) || totalMrp;
     const paid = parseFloat(document.getElementById('paidInput').value) || 0;
-    const due = Math.max(0, acc - paid);
+    const netTarget = Math.max(0, acc - activeExchangeCredit);
+    const due = Math.max(0, netTarget - paid);
     const mob = document.getElementById('custMobile').value.trim();
 
     if (due > 0 && (!mob || mob.length < 10)) {
@@ -1518,11 +1754,13 @@
     const isoDate = now.toISOString().slice(0, 10);
 
     const itemsSold = cart.map(i => {
-      const st = inventory.find(x => x.code === i.code);
-      if (st) st.qty -= i.qty;
+      if (!i.isLoose) {
+        const st = inventory.find(x => x.code === i.code);
+        if (st) st.qty -= i.qty;
+      }
       let itemTotalMrp = i.mrp * i.qty;
       const realSale = Math.round((itemTotalMrp / totalMrp) * acc);
-      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale, returned: false };
+      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale, returned: false, isLoose: !!i.isLoose };
     });
 
     const saleRecord = {
@@ -1532,12 +1770,16 @@
       mobile: mob,
       mode: document.getElementById('payMode').value,
       totalMrp, acc, paid, due, totalCost, profit: acc - totalCost,
+      exchangeCredit: activeExchangeCredit,
+      exchangeRef: activeExchangeRefInv,
       exchanged: false,
       items: itemsSold
     };
 
     sales.unshift(saleRecord);
     lastSavedSale = saleRecord;
+    activeExchangeCredit = 0;
+    activeExchangeRefInv = '';
     syncToCloud();
 
     const zone = document.getElementById('printZone');
@@ -1550,6 +1792,7 @@
     document.getElementById('custName').value = '';
     document.getElementById('custVillage').value = '';
     document.getElementById('custMobile').value = '';
+    document.getElementById('custPrevUdhaarBanner').style.display = 'none';
 
     showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Local + Cloud par sync ho gaya!`, 'success');
   }
@@ -1640,7 +1883,6 @@
       internalBox.innerHTML = `<b>🔒 Owner Hisaab Hidden:</b> Asli Kharid aur Profit dekhne ke liye upar <b>🔒 Cost: OFF</b> button dabayein.`;
     }
 
-    // Build Item-wise Exchange List
     const exSec = document.getElementById('exchangeSectionBox');
     const exList = document.getElementById('exchangeItemsList');
     const activeItems = s.items.filter(i => !i.returned);
@@ -1682,8 +1924,8 @@
     window.print();
   }
 
-  // --- FEATURE 1: SINGLE-ITEM OR PARTIAL BILL EXCHANGE ---
-  function exchangeSelectedItems() {
+  // --- SINGLE-ITEM EXCHANGE WITH NEW BILL CREDIT SWAP ---
+  function exchangeSelectedItems(sendToNewBill = false) {
     if (!lastSavedSale || lastSavedSale.exchanged) return;
     const chks = Array.from(document.querySelectorAll('.ex-item-chk:checked'));
     if (chks.length === 0) {
@@ -1692,14 +1934,6 @@
     }
 
     const selectedIndexes = chks.map(c => parseInt(c.value));
-    const remainingUnreturned = lastSavedSale.items.filter((it, idx) => !it.returned && !selectedIndexes.includes(idx));
-
-    // If all remaining items are selected, perform full bill return
-    if (remainingUnreturned.length === 0) {
-      exchangeReturnBill();
-      return;
-    }
-
     if (!confirm(`Kya aap chune hue ${selectedIndexes.length} item(s) wapas Stock (+Qty) mein jodna chahte hain?`)) return;
 
     let refundRealSale = 0;
@@ -1707,18 +1941,20 @@
       const soldItem = lastSavedSale.items[idx];
       if (!soldItem || soldItem.returned) return;
 
-      const st = inventory.find(x => x.code === soldItem.code);
-      if (st) {
-        st.qty += soldItem.qty;
-      } else {
-        inventory.push({
-          code: soldItem.code,
-          cat: soldItem.cat,
-          color: soldItem.color,
-          qty: soldItem.qty,
-          cost: soldItem.cost,
-          mrp: soldItem.mrp
-        });
+      if (!soldItem.isLoose) {
+        const st = inventory.find(x => x.code === soldItem.code);
+        if (st) {
+          st.qty += soldItem.qty;
+        } else {
+          inventory.push({
+            code: soldItem.code,
+            cat: soldItem.cat,
+            color: soldItem.color,
+            qty: soldItem.qty,
+            cost: soldItem.cost,
+            mrp: soldItem.mrp
+          });
+        }
       }
 
       soldItem.returned = true;
@@ -1728,22 +1964,45 @@
       lastSavedSale.acc = Math.max(0, lastSavedSale.acc - (soldItem.realSale || 0));
     });
 
-    lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
-    if (lastSavedSale.due > 0) {
-      const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
-      lastSavedSale.due -= dueReduce;
-      const remRefund = refundRealSale - dueReduce;
-      lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
+    const remainingActive = lastSavedSale.items.filter(i => !i.returned);
+    if (remainingActive.length === 0) {
+      lastSavedSale.exchanged = true;
+      lastSavedSale.acc = 0;
+      lastSavedSale.paid = 0;
+      lastSavedSale.due = 0;
+      lastSavedSale.profit = 0;
     } else {
-      lastSavedSale.paid = lastSavedSale.acc;
+      lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
+      if (lastSavedSale.due > 0) {
+        const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
+        lastSavedSale.due -= dueReduce;
+        const remRefund = refundRealSale - dueReduce;
+        lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
+      } else {
+        lastSavedSale.paid = lastSavedSale.acc;
+      }
     }
 
     syncToCloud();
-    openBillModal(lastSavedSale.invId);
     renderStock();
     renderStats();
     renderCustomerSection();
-    alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
+
+    if (sendToNewBill) {
+      activeExchangeCredit += refundRealSale;
+      activeExchangeRefInv = lastSavedSale.invId;
+      document.getElementById('custName').value = lastSavedSale.cust !== 'Walk-in Customer' ? lastSavedSale.cust : '';
+      document.getElementById('custVillage').value = lastSavedSale.village || '';
+      document.getElementById('custMobile').value = lastSavedSale.mobile || '';
+      closeBillModal();
+      const tabEl = document.getElementById('tab-billing');
+      if (tabEl) switchTab('billing', tabEl);
+      renderCart();
+      showInlineMsg('billMsg', `🔄 ₹${refundRealSale} ka Exchange Credit (${lastSavedSale.invId}) naye bill mein jud gaya! Ab nayi saree scan karein.`, 'success');
+    } else {
+      openBillModal(lastSavedSale.invId);
+      alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
+    }
   }
 
   function exchangeReturnBill() {
@@ -1752,18 +2011,20 @@
 
     lastSavedSale.items.forEach(soldItem => {
       if (soldItem.returned) return;
-      const st = inventory.find(x => x.code === soldItem.code);
-      if (st) {
-        st.qty += soldItem.qty;
-      } else {
-        inventory.push({
-          code: soldItem.code,
-          cat: soldItem.cat,
-          color: soldItem.color,
-          qty: soldItem.qty,
-          cost: soldItem.cost,
-          mrp: soldItem.mrp
-        });
+      if (!soldItem.isLoose) {
+        const st = inventory.find(x => x.code === soldItem.code);
+        if (st) {
+          st.qty += soldItem.qty;
+        } else {
+          inventory.push({
+            code: soldItem.code,
+            cat: soldItem.cat,
+            color: soldItem.color,
+            qty: soldItem.qty,
+            cost: soldItem.cost,
+            mrp: soldItem.mrp
+          });
+        }
       }
       soldItem.returned = true;
     });
@@ -1806,7 +2067,7 @@
     }
   }
 
-  // --- FEATURE 4: UDHAAR PASSBOOK & PAYMENT HISTORY ---
+  // --- UDHAAR PASSBOOK & PAYMENT HISTORY (FIXED FOR TODAY'S GALLA) ---
   let activeUdhaarMobile = "";
   let activeUdhaarName = "";
 
@@ -1829,11 +2090,13 @@
     if (recAmt <= 0 || !activeUdhaarMobile) return;
 
     const origRecAmt = recAmt;
+    // Reduce due on older bills without mutating their original creation-day paid amount
+    // so Today's Galla accurately tracks Udhaar Vasooli via udhaarLogs on the collection date!
     sales.forEach(s => {
       if (s.mobile === activeUdhaarMobile && (s.due || 0) > 0 && recAmt > 0) {
         let settle = Math.min(s.due, recAmt);
         s.due -= settle;
-        s.paid = (s.paid !== undefined ? s.paid : (s.acc - s.due)) + settle;
+        s.udhaarRecovered = (s.udhaarRecovered || 0) + settle;
         recAmt -= settle;
       }
     });
@@ -1963,7 +2226,34 @@
     }).join('');
   }
 
-  // --- FEATURE 6: DATE & MONTH FILTERS IN INSIGHTS ---
+  // --- ROZANA DUKAAN KHARCHA (EXPENSE TRACKER) ---
+  function addExpense() {
+    const note = document.getElementById('expNote').value.trim();
+    const amt = parseFloat(document.getElementById('expAmt').value) || 0;
+    if (!note || amt <= 0) return;
+
+    const now = new Date();
+    expenses.unshift({
+      id: 'EXP' + Date.now().toString().slice(-5),
+      date: now.toLocaleDateString('hi-IN'),
+      isoDate: now.toISOString().slice(0, 10),
+      note,
+      amount: amt
+    });
+
+    document.getElementById('expNote').value = '';
+    document.getElementById('expAmt').value = '';
+    syncToCloud();
+    renderStats();
+  }
+
+  function deleteExpense(id) {
+    expenses = expenses.filter(e => e.id !== id);
+    syncToCloud();
+    renderStats();
+  }
+
+  // --- DATE & MONTH FILTERS IN INSIGHTS ---
   function getSaleIsoDate(s) {
     if (s.isoDate) return s.isoDate;
     if (!s.date) return '';
@@ -1991,19 +2281,23 @@
     renderStats();
   }
 
+  function matchDateFilter(itemDateStr, itemIsoStr, todayStr, todayIso, selDate, selMonth) {
+    const iso = itemIsoStr || getSaleIsoDate({ date: itemDateStr });
+    if (statsFilterMode === 'TODAY') return itemDateStr === todayStr || iso === todayIso;
+    if (statsFilterMode === 'DATE') return iso === selDate;
+    if (statsFilterMode === 'MONTH') return iso.startsWith(selMonth);
+    return true;
+  }
+
   function renderStats() {
     const todayStr = new Date().toLocaleDateString('hi-IN');
     const todayIso = new Date().toISOString().slice(0, 10);
     const selDate = document.getElementById('statsDateInput')?.value || todayIso;
     const selMonth = document.getElementById('statsMonthInput')?.value || todayIso.slice(0, 7);
 
-    const filteredSales = sales.filter(s => {
-      const sIso = getSaleIsoDate(s);
-      if (statsFilterMode === 'TODAY') return s.date === todayStr || sIso === todayIso;
-      if (statsFilterMode === 'DATE') return sIso === selDate;
-      if (statsFilterMode === 'MONTH') return sIso.startsWith(selMonth);
-      return true;
-    });
+    const filteredSales = sales.filter(s => matchDateFilter(s.date, s.isoDate, todayStr, todayIso, selDate, selMonth));
+    const filteredUdhaarLogs = udhaarLogs.filter(u => matchDateFilter(u.date, u.isoDate, todayStr, todayIso, selDate, selMonth));
+    const filteredExpenses = expenses.filter(e => matchDateFilter(e.date, e.isoDate, todayStr, todayIso, selDate, selMonth));
 
     let tAcc = 0, tProfit = 0, tPaid = 0, tDue = 0;
     let gCash = 0, gUpi = 0, gAeps = 0;
@@ -2027,8 +2321,22 @@
       });
     });
 
+    // Add Udhaar Vasooli collected during the selected date/period into Galla
+    let udhaarVasooliTotal = 0;
+    filteredUdhaarLogs.forEach(u => {
+      const amt = u.amount || 0;
+      udhaarVasooliTotal += amt;
+      tPaid += amt;
+      if (u.mode === 'UPI') gUpi += amt;
+      else if (u.mode === 'AEPS Cash') gAeps += amt;
+      else gCash += amt;
+    });
+
+    const totalExp = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const netCashInHand = gCash - totalExp;
+
     document.getElementById('stAcc').innerText = '₹' + tAcc;
-    document.getElementById('stProfit').innerText = ownerUnlocked ? ('₹' + tProfit) : '🔒 ***';
+    document.getElementById('stProfit').innerText = ownerUnlocked ? ('₹' + (tProfit - totalExp)) : '🔒 ***';
     document.getElementById('stPaid').innerText = '₹' + tPaid;
     document.getElementById('stDue').innerText = '₹' + tDue;
 
@@ -2036,7 +2344,25 @@
       <span>💵 Cash: ₹${gCash}</span>
       <span>📱 UPI: ₹${gUpi}</span>
       <span>🏦 AEPS: ₹${gAeps}</span>
+      <span>📓 Vasooli: ₹${udhaarVasooliTotal}</span>
     `;
+
+    document.getElementById('gallaNetBar').innerHTML = `
+      <span>☕ Kharcha: <b style="color:#b30000;">-₹${totalExp}</b></span>
+      <span>💰 Galle Mein Net Cash: <b style="color:#0f6b2f;">₹${netCashInHand}</b></span>
+    `;
+
+    const expBox = document.getElementById('expenseListBox');
+    if (expBox) {
+      expBox.innerHTML = filteredExpenses.length === 0
+        ? `<span style="color:#888;">Is avadhi mein koi dukaan kharcha nahi likha gaya.</span>`
+        : filteredExpenses.map(e => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #eee;">
+              <span>• <b>${e.note}</b> <small style="color:#666;">(${e.date})</small></span>
+              <span><b style="color:#b30000;">₹${e.amount}</b> <button class="btn-action btn-del" style="margin-left:6px;" onclick="deleteExpense('${e.id}')">✕</button></span>
+            </div>
+          `).join('');
+    }
 
     const topColors = Object.entries(colorCount).sort((a,b) => b[1]-a[1]).map(c => `<b>${c[0]}</b> (${c[1]} pcs)`).join(', ');
     document.getElementById('colorInsights').innerHTML = topColors ? `🔥 Bikne Wale Colours: ${topColors}` : 'Is avadhi mein koi sale record nahi hai.';
@@ -2057,11 +2383,11 @@
       showInlineMsg('backupMsg', '⚠️ Abhi koi sale record nahi hai!', 'error');
       return;
     }
-    let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
+    let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,ExchangeCredit,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
     sales.forEach(s => {
       const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
       const paidVal = s.paid !== undefined ? s.paid : s.acc;
-      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
+      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${s.exchangeCredit || 0},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -2072,7 +2398,7 @@
   }
 
   function downloadBackupJSON() {
-    const data = JSON.stringify({ inventory, sales, udhaarLogs, ownerPin });
+    const data = JSON.stringify({ inventory, sales, udhaarLogs, expenses, ownerPin });
     const blob = new Blob([data], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -2092,6 +2418,7 @@
           inventory = parsed.inventory;
           sales = parsed.sales;
           if (parsed.udhaarLogs) udhaarLogs = parsed.udhaarLogs;
+          if (parsed.expenses) expenses = parsed.expenses;
           if (parsed.ownerPin) ownerPin = String(parsed.ownerPin);
           syncToCloud();
           renderStock(); renderStats(); renderCustomerSection();
