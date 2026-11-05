@@ -85,6 +85,15 @@
     .btn-del { background: #e5e5e5; color: #333; padding: 5px 5px; }
     .btn-del.confirming { background: #d00000; color: #fff; }
 
+    /* HIGH-CONTRAST 2x2 CUSTOMER ACTION BUTTONS */
+    .cust-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; min-width: 118px; }
+    .c-btn { padding: 5px 6px; font-size: 10px; font-weight: 800; border-radius: 5px; cursor: pointer; width: 100%; margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 3px; line-height: 1.1; white-space: nowrap; }
+    .c-btn-call { background: #e8f8ee; color: #0b5323; border: 1.2px solid #16a34a; }
+    .c-btn-save { background: #eef2ff; color: #1e3a8a; border: 1.2px solid #6366f1; }
+    .c-btn-jama { background: #fef9c3; color: #713f12; border: 1.2px solid #eab308; }
+    .c-btn-wa { background: #dcfce7; color: #065f46; border: 1.2px solid #10b981; }
+    .c-btn:active { transform: scale(0.96); }
+
     .qty-btn { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 12px; width: auto; margin: 0 2px; display: inline-block; }
 
     .chip-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
@@ -95,7 +104,7 @@
     .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: #555; background: #f3e8ec; padding: 5px 8px; border-radius: 5px; margin-top: 8px; font-weight: 600; }
 
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; table-layout: auto; }
-    th, td { border-bottom: 1px solid #eee; padding: 7px 3px; text-align: left; vertical-align: middle; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px 4px; text-align: left; vertical-align: middle; }
     th { background: #f3e8ec; color: var(--maroon); font-size: 11px; }
     .code-cell { font-weight: 700; white-space: nowrap; font-size: 12px; color: #111; }
     tr.clickable-row { cursor: pointer; transition: background 0.15s; }
@@ -652,7 +661,7 @@
 
 <!-- 4. CUSTOMER LEDGER, KHATA & CALL DIRECTORY SECTION -->
 <div id="cust" class="section">
-  <div class="card">
+  <div class="card" id="custSearchCard">
     <h3>📓 Customer Khata, Call & Contact Directory</h3>
     <label>Mobile Number Ya Naam Dalein</label>
     <div class="row">
@@ -667,9 +676,25 @@
   </div>
 
   <div class="card">
-    <h3>📋 Sabhi Customers, Call & Baki Udhaar List</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #eee; padding-bottom:6px;">
+      <h3 style="margin:0; border:none; padding:0;">📋 Sabhi Customers & Udhaar List</h3>
+      <div>
+        <button id="btnCustAll" class="small" style="background:var(--maroon); color:#fff; margin:0;" onclick="setCustFilter('ALL')">📋 Sabhi</button>
+        <button id="btnCustDue" class="small" style="background:#ddd; color:#333; margin:0;" onclick="setCustFilter('DUE')">🔴 Sirf Udhaar</button>
+      </div>
+    </div>
+
+    <div id="custSummaryBar" class="filter-summary"></div>
+
     <table>
-      <thead><tr><th>Customer</th><th>Gaon</th><th>Kul Kharid</th><th>Baaki Udhaar</th><th style="text-align:right;">Action (Call/WA)</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Customer & Gaon</th>
+          <th>Kharid</th>
+          <th>Udhaar</th>
+          <th style="text-align:center;">Action (Call / WA)</th>
+        </tr>
+      </thead>
       <tbody id="allCustomersBody"></tbody>
     </table>
   </div>
@@ -731,6 +756,7 @@
   let ownerUnlocked = false;
   let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
   let statsFilterMode = 'TODAY';
+  let custFilterMode = 'ALL';
 
   window.addEventListener('DOMContentLoaded', () => {
     const todayIso = new Date().toISOString().slice(0, 10);
@@ -767,7 +793,6 @@
     }
   });
 
-  // FIXED BUG #1: Handle empty arrays properly when last item is deleted on another device
   dbRef.on('value', (snapshot) => {
     const cloudData = snapshot.val();
     if (cloudData) {
@@ -830,7 +855,7 @@
   });
   window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
 
-  // --- CUSTOMER DIRECTORY BUILDER (COMBINES SAVED CONTACTS + PAST BILLS) ---
+  // --- CUSTOMER DIRECTORY BUILDER ---
   function getCustomerDirectory() {
     const dir = {};
     contacts.forEach(c => {
@@ -885,7 +910,6 @@
     }
   }
 
-  // --- FEATURE: CUSTOMER NAME & MOBILE AUTO-SUGGESTIONS + UDHAAR ALERT ---
   function onCustNameInputType(inp) {
     const q = (inp.value || '').trim().toUpperCase();
     const box = document.getElementById('nameSuggestBox');
@@ -920,7 +944,6 @@
       ? list.filter(c => c.mobile.includes(q) || c.name.toUpperCase().includes(q.toUpperCase())).slice(0, 7)
       : list.slice(0, 6);
 
-    // If exact 10-digit match typed manually, auto-fill name/village & show udhaar alert
     if (q.length === 10) {
       const exact = list.find(c => c.mobile === q);
       if (exact) {
@@ -1600,7 +1623,6 @@
     renderCart();
   }
 
-  // --- QUICK FUTTKAR / COSMETIC ITEM ---
   function addQuickCustomItem() {
     const name = document.getElementById('qItemName').value.trim() || 'Cosmetic/Futtkar';
     const mrp = parseFloat(document.getElementById('qItemMrp').value) || 0;
@@ -1860,7 +1882,6 @@
       items: itemsSold
     };
 
-    // Save customer to permanent contacts directory
     saveContactToDirectory(custName, mob, custVil);
 
     sales.unshift(saleRecord);
@@ -1882,7 +1903,6 @@
     showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Customer Contact + Cloud sync ho gaya!`, 'success');
   }
 
-  // --- POINT #4: DIRECT WHATSAPP TO SPECIFIC CUSTOMER NUMBER ---
   function formatWhatsAppReceiptText(s) {
     const paidVal = s.paid !== undefined ? s.paid : s.acc;
     const dueVal = s.due || 0;
@@ -1946,7 +1966,6 @@
     document.getElementById('printCard').style.display = 'block';
     const receiptText = formatWhatsAppReceiptText(lastSavedSale);
 
-    // Copy bill image to clipboard automatically if supported, then open direct customer WhatsApp chat
     html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
       canvas.toBlob(blob => {
         if (navigator.clipboard && window.ClipboardItem) {
@@ -2037,487 +2056,4 @@
     renderBarcodeOnSvg('modalBarcodeSvg', s);
 
     document.getElementById('printZone').innerHTML = buildReceiptHTML(s, 'printBarcodeSvg');
-    renderBarcodeOnSvg('printBarcodeSvg', s);
-  }
-
-  function closeBillModal() { document.getElementById('billModal').style.display = 'none'; }
-
-  function printFromModal() {
-    closeBillModal();
-    const tabEl = document.getElementById('tab-billing');
-    if (tabEl) switchTab('billing', tabEl);
-    document.getElementById('printCard').style.display = 'block';
-    window.print();
-  }
-
-  function exchangeSelectedItems() {
-    if (!lastSavedSale || lastSavedSale.exchanged) return;
-    const chks = Array.from(document.querySelectorAll('.ex-item-chk:checked'));
-    if (chks.length === 0) {
-      alert('⚠️ Kripya return karne wali Saree/Item par tick (✔) lagayein!');
-      return;
-    }
-
-    const selectedIndexes = chks.map(c => parseInt(c.value));
-    const remainingUnreturned = lastSavedSale.items.filter((it, idx) => !it.returned && !selectedIndexes.includes(idx));
-
-    if (remainingUnreturned.length === 0) {
-      exchangeReturnBill();
-      return;
-    }
-
-    if (!confirm(`Kya aap chune hue ${selectedIndexes.length} item(s) wapas Stock (+Qty) mein jodna chahte hain?`)) return;
-
-    let refundRealSale = 0;
-    selectedIndexes.forEach(idx => {
-      const soldItem = lastSavedSale.items[idx];
-      if (!soldItem || soldItem.returned) return;
-
-      const st = inventory.find(x => x.code === soldItem.code);
-      if (st) {
-        st.qty += soldItem.qty;
-      } else {
-        inventory.push({
-          code: soldItem.code,
-          cat: soldItem.cat,
-          color: soldItem.color,
-          qty: soldItem.qty,
-          cost: soldItem.cost,
-          mrp: soldItem.mrp
-        });
-      }
-
-      soldItem.returned = true;
-      refundRealSale += (soldItem.realSale || 0);
-      lastSavedSale.totalMrp = Math.max(0, lastSavedSale.totalMrp - (soldItem.mrp * soldItem.qty));
-      lastSavedSale.totalCost = Math.max(0, lastSavedSale.totalCost - (soldItem.cost * soldItem.qty));
-      lastSavedSale.acc = Math.max(0, lastSavedSale.acc - (soldItem.realSale || 0));
-    });
-
-    lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
-    if (lastSavedSale.due > 0) {
-      const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
-      lastSavedSale.due -= dueReduce;
-      const remRefund = refundRealSale - dueReduce;
-      lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
-    } else {
-      lastSavedSale.paid = lastSavedSale.acc;
-    }
-
-    syncToCloud();
-    openBillModal(lastSavedSale.invId);
-    renderStock();
-    renderStats();
-    renderCustomerSection();
-    alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
-  }
-
-  function exchangeReturnBill() {
-    if (!lastSavedSale || lastSavedSale.exchanged) return;
-    if (!confirm(`Kya aap Bill ${lastSavedSale.invId} ki saari Saree/Items wapas Stock (+Qty) mein jodna chahte hain?`)) return;
-
-    lastSavedSale.items.forEach(soldItem => {
-      if (soldItem.returned) return;
-      const st = inventory.find(x => x.code === soldItem.code);
-      if (st) {
-        st.qty += soldItem.qty;
-      } else {
-        inventory.push({
-          code: soldItem.code,
-          cat: soldItem.cat,
-          color: soldItem.color,
-          qty: soldItem.qty,
-          cost: soldItem.cost,
-          mrp: soldItem.mrp
-        });
-      }
-      soldItem.returned = true;
-    });
-
-    lastSavedSale.exchanged = true;
-    lastSavedSale.acc = 0;
-    lastSavedSale.paid = 0;
-    lastSavedSale.due = 0;
-    lastSavedSale.profit = 0;
-
-    syncToCloud();
-    closeBillModal();
-    renderStock();
-    renderStats();
-    renderCustomerSection();
-    alert(`✅ Bill ${lastSavedSale.invId} ke sabhi items wapas Stock mein jud gaye hain!`);
-  }
-
-  function decodeAcc(val, openPopup = false) {
-    const res = document.getElementById('decodeResult');
-    const clean = cleanCode(val);
-    if (!clean) { res.innerHTML = ''; return; }
-
-    const fullMatch = clean.match(/(INV\d+)A(\d+)C(\d+)/);
-    let targetInv = fullMatch ? fullMatch[1] : (clean.startsWith('INV') ? clean : 'INV' + clean);
-
-    const found = sales.find(s => cleanCode(s.invId) === targetInv);
-    if (found) {
-      res.innerHTML = `
-        <div style="background:#fff8fa; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
-          ✅ <b>${found.invId} (${found.date}) - ${found.cust}</b> ${found.exchanged ? '<b style="color:red;">[EXCHANGED]</b>' : ''}<br>
-          Sticker Bill: ₹${found.totalMrp} | <b style="color:var(--maroon);">ACC: ₹${found.acc}</b> | <b style="color:red;">Udhaar: ₹${found.due || 0}</b><br>
-          ${found.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty} ${i.returned ? '(Returned)' : ''}`).join('<br>')}
-          <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Bill Kholein / Item Exchange Karein</button>
-        </div>
-      `;
-      if (openPopup) openBillModal(found.invId);
-    } else {
-      res.innerHTML = `<span style="color:#888;">Bill <b>${targetInv}</b> nahi mila.</span>`;
-    }
-  }
-
-  // --- UDHAAR PASSBOOK, REMINDER & CALL ---
-  let activeUdhaarMobile = "";
-  let activeUdhaarName = "";
-
-  function openUdhaarModal(mob, name, totalDue) {
-    activeUdhaarMobile = mob;
-    activeUdhaarName = name;
-    document.getElementById('udhaarCustInfo').innerText = `${name} (${mob}) — Kul Baaki Udhaar: ₹${totalDue}`;
-    document.getElementById('udhaarReceiveInput').value = totalDue;
-    document.getElementById('udhaarPayMode').value = 'Cash';
-    document.getElementById('udhaarModal').style.display = 'flex';
-  }
-
-  function closeUdhaarModal() {
-    document.getElementById('udhaarModal').style.display = 'none';
-  }
-
-  function confirmUdhaarPayment(sendWa = false) {
-    let recAmt = parseFloat(document.getElementById('udhaarReceiveInput').value) || 0;
-    const payMode = document.getElementById('udhaarPayMode').value || 'Cash';
-    if (recAmt <= 0 || !activeUdhaarMobile) return;
-
-    const origRecAmt = recAmt;
-    sales.forEach(s => {
-      if (s.mobile === activeUdhaarMobile && (s.due || 0) > 0 && recAmt > 0) {
-        let settle = Math.min(s.due, recAmt);
-        s.due -= settle;
-        s.paid = (s.paid !== undefined ? s.paid : (s.acc - s.due)) + settle;
-        recAmt -= settle;
-      }
-    });
-
-    const actuallySettled = origRecAmt - recAmt;
-    const remainingDue = sales
-      .filter(s => s.mobile === activeUdhaarMobile)
-      .reduce((sum, s) => sum + (s.due || 0), 0);
-
-    const now = new Date();
-    udhaarLogs.unshift({
-      id: 'UDH' + Date.now().toString().slice(-5),
-      date: now.toLocaleDateString('hi-IN'),
-      isoDate: now.toISOString().slice(0, 10),
-      mobile: activeUdhaarMobile,
-      cust: activeUdhaarName,
-      amount: actuallySettled,
-      mode: payMode,
-      remainingDue
-    });
-
-    syncToCloud();
-    closeUdhaarModal();
-    lookupCustomer(activeUdhaarMobile);
-    renderCustomerSection();
-    renderStats();
-
-    if (sendWa && activeUdhaarMobile.length >= 10) {
-      const msg = `🙏 नमस्कार *${activeUdhaarName}* जी,\n*SHAKYA COSMETIC & SAREE COLLECTION* (निवाड़ी कलां) में आज आपके उधार खाते में *₹${actuallySettled}* (${payMode}) जमा प्राप्त हुए।\nअब आपका कुल बाकी उधार: *₹${remainingDue}* है। धन्यवाद!`;
-      window.open(`https://wa.me/91${activeUdhaarMobile}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-  }
-
-  function sendUdhaarReminder(mob, name, dueAmt) {
-    const msg = `🙏 नमस्कार *${name}* जी,\n*SHAKYA COSMETIC & SAREE COLLECTION* (निवाड़ी कलां) की तरफ से याद दिलाया जाता है कि आपका *₹${dueAmt}* का हिसाब बाकी (उधार) है। कृपया सुविधा अनुसार जल्द जमा करने का कष्ट करें। धन्यवाद!`;
-    window.open(`https://wa.me/91${mob}?text=${encodeURIComponent(msg)}`, '_blank');
-  }
-
-  function lookupCustomer(query) {
-    const q = (query || '').trim().toUpperCase();
-    const res = document.getElementById('customerLedgerResult');
-    if (!q || q.length < 2) {
-      res.innerHTML = '';
-      return;
-    }
-
-    const matchedBills = sales.filter(s =>
-      (s.mobile && s.mobile.includes(q)) ||
-      (s.cust && s.cust.toUpperCase().includes(q))
-    );
-
-    if (matchedBills.length === 0) {
-      res.innerHTML = `<div style="color:#b30000; padding:8px; background:#fff3cd; border-radius:6px;">❌ "${query}" naam ya mobile se koi bill nahi mila.</div>`;
-      return;
-    }
-
-    let totalSpend = matchedBills.reduce((acc, s) => acc + (s.acc || 0), 0);
-    let totalDue = matchedBills.reduce((acc, s) => acc + (s.due || 0), 0);
-    let custName = matchedBills[0].cust;
-    let village = matchedBills[0].village;
-    let mob = matchedBills[0].mobile || '';
-
-    const custPayments = udhaarLogs.filter(l =>
-      (mob && l.mobile === mob) || (l.cust && l.cust.toUpperCase().includes(q))
-    );
-
-    res.innerHTML = `
-      <div style="background:#f3e8ec; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
-        👤 <b>Name:</b> ${custName} | 📍 <b>Gaon:</b> ${village} | 📱 <b>Mob:</b> ${mob || 'N/A'}<br>
-        📦 <b>Kul Bills:</b> ${matchedBills.length} | 💰 <b>Kul Kharid:</b> ₹${totalSpend} | <b style="color:#b30000;">Baaki Udhaar: ₹${totalDue}</b>
-        ${mob ? `
-          <div class="row" style="margin-top:8px;">
-            <div><button class="callbtn small" style="width:100%; margin:0;" onclick="callCustomer('${mob}')">📞 Call Karein</button></div>
-            <div><button class="dark small" style="width:100%; margin:0;" onclick="saveCustomerContactVcf('${custName.replace(/'/g, "\\'")}', '${mob}', '${(village || '').replace(/'/g, "\\'")}')">👤 Save Contact</button></div>
-          </div>
-        ` : ''}
-        ${totalDue > 0 && mob ? `
-          <div class="row" style="margin-top:6px;">
-            <div><button class="gold small" style="width:100%; margin:0;" onclick="openUdhaarModal('${mob}', '${custName.replace(/'/g, "\\'")}', ${totalDue})">💰 Udhaar Jama</button></div>
-            <div><button class="whatsapp small" style="width:100%; margin:0;" onclick="sendUdhaarReminder('${mob}', '${custName.replace(/'/g, "\\'")}', ${totalDue})">💬 WA Reminder</button></div>
-          </div>
-        ` : ''}
-        <hr style="margin:6px 0;">
-        <b>🧾 Purane Bills ki List:</b>
-        ${matchedBills.map(b => `<div style="margin-top:4px; cursor:pointer; color:var(--maroon); text-decoration:underline;" onclick="openBillModal('${b.invId}')"><b>${b.invId}</b> (${b.date}) - Tay: ₹${b.acc} ${(b.due || 0) > 0 ? `<b style="color:red;">[Udhaar: ₹${b.due}]</b>` : ''}</div>`).join('')}
-        ${custPayments.length > 0 ? `
-          <hr style="margin:6px 0;">
-          <b style="color:#0f6b2f;">📓 Udhaar Jama Passbook History:</b>
-          ${custPayments.map(p => `<div style="margin-top:3px; font-size:11px; color:#222;">✅ <b>${p.date}</b>: <b>₹${p.amount}</b> jama (${p.mode}) — Baaki बचा: ₹${p.remainingDue}</div>`).join('')}
-        ` : ''}
-      </div>
-    `;
-  }
-
-  function renderCustomerSection() {
-    const list = getCustomerDirectory();
-    const tbody = document.getElementById('allCustomersBody');
-    list.sort((a, b) => (b.due || 0) - (a.due || 0));
-
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px; color:#888;">Abhi koi customer record nahi hai.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = list.map(c => {
-      const safeName = (c.name || 'Customer').replace(/'/g, "\\'");
-      const safeVil = (c.village || '').replace(/'/g, "\\'");
-      return `
-        <tr>
-          <td onclick="document.getElementById('searchMobile').value='${c.mobile || safeName}'; lookupCustomer('${c.mobile || safeName}');" style="cursor:pointer;">
-            <b>${c.name}</b><br><small style="color:#555;">${c.mobile || 'No Mob'}</small>
-          </td>
-          <td>${c.village || ''}</td>
-          <td>₹${c.spend || 0}</td>
-          <td><b style="color:${c.due > 0 ? '#b30000' : 'green'};">₹${c.due || 0}</b></td>
-          <td style="text-align:right; white-space:nowrap;">
-            <div class="action-group">
-              ${c.mobile ? `<button class="btn-action" style="background:#0f6b2f; color:#fff;" onclick="callCustomer('${c.mobile}')" title="Call Customer">📞</button>` : ''}
-              ${c.mobile ? `<button class="btn-action" style="background:#333; color:#fff;" onclick="saveCustomerContactVcf('${safeName}', '${c.mobile}', '${safeVil}')" title="Save to Phone Contacts">👤</button>` : ''}
-              ${c.due > 0 && c.mobile ? `
-                <button class="btn-action" style="background:var(--gold); color:#222;" onclick="openUdhaarModal('${c.mobile}', '${safeName}', ${c.due})">💰</button>
-                <button class="btn-action" style="background:#25d366; color:#fff;" onclick="sendUdhaarReminder('${c.mobile}', '${safeName}', ${c.due})">💬</button>
-              ` : `<span style="color:green; font-size:10px; font-weight:bold;">✔</span>`}
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  // --- DAILY EXPENSE (DUKAN KHARCHA) & INSIGHTS ---
-  function addDailyExpense() {
-    const note = document.getElementById('expNote').value.trim();
-    const amt = parseFloat(document.getElementById('expAmt').value) || 0;
-    if (!note || amt <= 0) return;
-    const now = new Date();
-    expenses.unshift({
-      id: 'EXP' + Date.now().toString().slice(-4),
-      date: now.toLocaleDateString('hi-IN'),
-      isoDate: now.toISOString().slice(0, 10),
-      note,
-      amount: amt
-    });
-    document.getElementById('expNote').value = '';
-    document.getElementById('expAmt').value = '';
-    syncToCloud();
-    renderStats();
-  }
-
-  function deleteExpense(id) {
-    expenses = expenses.filter(e => e.id !== id);
-    syncToCloud();
-    renderStats();
-  }
-
-  function getSaleIsoDate(s) {
-    if (s.isoDate) return s.isoDate;
-    if (!s.date) return '';
-    const parts = s.date.split('/');
-    if (parts.length === 3) {
-      const d = parts[0].padStart(2, '0');
-      const m = parts[1].padStart(2, '0');
-      const y = parts[2];
-      return `${y}-${m}-${d}`;
-    }
-    return '';
-  }
-
-  function setStatsFilter(mode) {
-    statsFilterMode = mode;
-    ['TODAY', 'DATE', 'MONTH', 'ALL'].forEach(m => {
-      const btn = document.getElementById('btnFilter' + m.charAt(0) + m.slice(1).toLowerCase());
-      if (btn) {
-        btn.style.background = (mode === m) ? 'var(--maroon)' : '#ddd';
-        btn.style.color = (mode === m) ? '#fff' : '#333';
-      }
-    });
-    document.getElementById('statsDatePickerWrap').style.display = (mode === 'DATE') ? 'block' : 'none';
-    document.getElementById('statsMonthPickerWrap').style.display = (mode === 'MONTH') ? 'block' : 'none';
-    renderStats();
-  }
-
-  function renderStats() {
-    const todayStr = new Date().toLocaleDateString('hi-IN');
-    const todayIso = new Date().toISOString().slice(0, 10);
-    const selDate = document.getElementById('statsDateInput')?.value || todayIso;
-    const selMonth = document.getElementById('statsMonthInput')?.value || todayIso.slice(0, 7);
-
-    const filterFn = (item) => {
-      const sIso = getSaleIsoDate(item);
-      if (statsFilterMode === 'TODAY') return item.date === todayStr || sIso === todayIso;
-      if (statsFilterMode === 'DATE') return sIso === selDate;
-      if (statsFilterMode === 'MONTH') return sIso.startsWith(selMonth);
-      return true;
-    };
-
-    const filteredSales = sales.filter(filterFn);
-    const filteredExpenses = expenses.filter(filterFn);
-
-    let tAcc = 0, tProfit = 0, tPaid = 0, tDue = 0;
-    let gCash = 0, gUpi = 0, gAeps = 0;
-    let colorCount = {};
-
-    filteredSales.forEach(s => {
-      if (s.exchanged) return;
-      const paidVal = s.paid !== undefined ? s.paid : s.acc;
-      const dueVal = s.due || 0;
-      tAcc += s.acc;
-      tProfit += s.profit;
-      tPaid += paidVal;
-      tDue += dueVal;
-
-      if (s.mode === 'UPI') gUpi += paidVal;
-      else if (s.mode === 'AEPS Cash') gAeps += paidVal;
-      else if (s.mode === 'Split') {
-        gCash += (s.splitCash || 0);
-        gUpi += (s.splitUpi || 0);
-      } else {
-        gCash += paidVal;
-      }
-
-      s.items.forEach(i => {
-        if (!i.returned) colorCount[i.color] = (colorCount[i.color] || 0) + i.qty;
-      });
-    });
-
-    const totalExp = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-    const netGallaCash = gCash - totalExp;
-
-    document.getElementById('stAcc').innerText = '₹' + tAcc;
-    document.getElementById('stProfit').innerText = ownerUnlocked ? ('₹' + (tProfit - totalExp)) : '🔒 ***';
-    document.getElementById('stPaid').innerText = '₹' + tPaid;
-    document.getElementById('stDue').innerText = '₹' + tDue;
-
-    document.getElementById('gallaBreakdown').innerHTML = `
-      <span>💵 Cash: ₹${gCash}</span>
-      <span>📱 UPI: ₹${gUpi}</span>
-      <span>🏦 AEPS: ₹${gAeps}</span>
-      <span style="color:#b30000;">💸 Kharcha: ₹${totalExp}</span>
-      <span style="color:#0f6b2f;">✅ Net Galla Cash: ₹${netGallaCash}</span>
-    `;
-
-    const expBox = document.getElementById('expenseListBox');
-    if (expBox) {
-      expBox.innerHTML = filteredExpenses.length > 0
-        ? filteredExpenses.map(e => `<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>• ${e.note} (${e.date})</span><span><b>₹${e.amount}</b> <b style="color:red; cursor:pointer; margin-left:6px;" onclick="deleteExpense('${e.id}')">✕</b></span></div>`).join('')
-        : '<small style="color:#888;">Is avadhi mein koi dukan kharcha darj nahi hai.</small>';
-    }
-
-    const topColors = Object.entries(colorCount).sort((a,b) => b[1]-a[1]).map(c => `<b>${c[0]}</b> (${c[1]} pcs)`).join(', ');
-    document.getElementById('colorInsights').innerHTML = topColors ? `🔥 Bikne Wale Colours: ${topColors}` : 'Is avadhi mein koi sale record nahi hai.';
-
-    document.getElementById('salesHistoryBody').innerHTML = filteredSales.map(s => `
-      <tr class="clickable-row" onclick="openBillModal('${s.invId}')" style="${s.exchanged ? 'opacity:0.5; text-decoration:line-through;' : ''}">
-        <td><b style="color:var(--maroon); text-decoration:underline;">${s.invId} 🔍</b><br><small>${s.date}</small></td>
-        <td>${s.items.map(i => `${i.code} [${i.qty}p] (₹${i.realSale}) ${i.returned ? '🔄' : ''}`).join('<br>')}</td>
-        <td><b>₹${s.acc}</b></td>
-        <td style="color:${(s.due || 0) > 0 ? '#b30000' : '#888'}; font-weight:bold;">₹${s.due || 0}</td>
-        <td style="color:green;font-weight:bold;">${ownerUnlocked ? '₹' + s.profit : '🔒 ***'}</td>
-      </tr>
-    `).join('');
-  }
-
-  function exportSalesCSV() {
-    if (sales.length === 0) {
-      showInlineMsg('backupMsg', '⚠️ Abhi koi sale record nahi hai!', 'error');
-      return;
-    }
-    let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
-    sales.forEach(s => {
-      const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
-      const paidVal = s.paid !== undefined ? s.paid : s.acc;
-      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Shakya_Sales_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    showInlineMsg('backupMsg', '✅ Sales Excel (.CSV) download ho gayi!', 'success');
-  }
-
-  function downloadBackupJSON() {
-    const data = JSON.stringify({ inventory, sales, udhaarLogs, contacts, expenses, ownerPin });
-    const blob = new Blob([data], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Shakya_POS_Backup_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    showInlineMsg('backupMsg', '✅ Full Backup (.JSON) download ho gaya!', 'success');
-  }
-
-  function restoreBackupJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const parsed = JSON.parse(e.target.result);
-        if (parsed.inventory && parsed.sales) {
-          inventory = parsed.inventory;
-          sales = parsed.sales;
-          if (parsed.udhaarLogs) udhaarLogs = parsed.udhaarLogs;
-          if (parsed.contacts) contacts = parsed.contacts;
-          if (parsed.expenses) expenses = parsed.expenses;
-          if (parsed.ownerPin) ownerPin = String(parsed.ownerPin);
-          syncToCloud();
-          renderStock(); renderStats(); renderCustomerSection();
-          showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore aur Cloud par sync ho gaya!', 'success');
-        }
-      } catch (err) {
-        showInlineMsg('backupMsg', '❌ Invalid backup file!', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  renderStock();
-</script>
-</body>
-</html>
+    renderBarcodeOnSvg('print
