@@ -1,3 +1,44 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6b092b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Shakya POS</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+  </script>
+
+  <!-- Firebase App & Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root { --maroon: #6b092b; --gold: #f5c542; --bg: #f8f5f2; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: #222; padding-bottom: 60px; user-select: none; }
+    header { background: var(--maroon); color: white; padding: 10px 10px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap; }
+    header .header-info { text-align: left; }
+    header h1 { margin: 0; font-size: 15px; color: var(--gold); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    header p { margin: 2px 0 0; font-size: 10px; opacity: 0.95; }
+
+    .sync-badge { font-size: 9px; padding: 2px 6px; border-radius: 10px; background: rgba(0,0,0,0.35); color: #fff; font-weight: 600; letter-spacing: 0; }
+
+    .header-actions { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    .slide-lock-btn { background: #333; color: #fff; border: 1px solid #aaa; padding: 5px 6px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
+    .shutdown-btn { background: #b30000; color: #fff; border: 1px solid var(--gold); padding: 5px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; width: auto; margin: 0; white-space: nowrap; }
+
     /* --- DIWALI FESTIVE THEME & ANIMATIONS --- */
     .diwali-toran {
       background: linear-gradient(90deg, #4a041c, #800b34, #4a041c);
@@ -41,6 +82,2685 @@
       pointer-events: none !important;
       z-index: 9999;
     }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid #ddd; position: sticky; top: 0; z-index: 20; }
+    .tab { flex: 1; padding: 11px 4px; text-align: center; font-weight: 700; font-size: 11px; cursor: pointer; color: #555; }
+    .tab.active { color: var(--maroon); border-bottom: 3px solid var(--maroon); background: #fff8fa; }
+
+    .section { display: none; padding: 10px; max-width: 600px; margin: auto; }
+    .section.active { display: block; }
+
+    .card { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 12px; }
+    .card h3 { margin-top: 0; color: var(--maroon); font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; margin-top: 8px; color: #444; }
+    input, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    .row { display: flex; gap: 8px; align-items: flex-end; }
+    .row > div { flex: 1; }
+
+    button { background: var(--maroon); color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; font-size: 13px; }
+    button.gold { background: var(--gold); color: #222; font-size: 14px; }
+    button.dark { background: #333; color: #fff; }
+    button.whatsapp { background: #25d366; color: #fff; font-size: 13px; }
+    button.thermal { background: #0056b3; color: #fff; font-size: 13px; }
+    button.callbtn { background: #0f6b2f; color: #fff; font-size: 13px; }
+    button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
+
+    #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; align-items: center; justify-content: center; }
+    .dialog-box { background: #fff; width: 100%; max-width: 340px; padding: 18px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+    #appClosedScreen { display: none; position: fixed; inset: 0; background: var(--maroon); color: #fff; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+    .closed-box { background: rgba(255,255,255,0.08); border: 2px solid var(--gold); border-radius: 16px; padding: 24px 18px; max-width: 340px; width: 100%; }
+
+    .suggest-wrap { position: relative; }
+    .suggest-box { display: none; position: absolute; left: 0; right: 0; top: 100%; background: #fff; border: 1.5px solid var(--maroon); border-radius: 0 0 8px 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.18); z-index: 50; max-height: 210px; overflow-y: auto; }
+    .suggest-item { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: left; }
+    .suggest-item:active, .suggest-item:hover { background: #fff0f5; }
+
+    .inline-msg { display: none; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 6px; transition: all 0.2s; }
+    .inline-msg.error { display: block; background: #ffeef0; color: #b30000; border-left: 4px solid #b30000; }
+    .inline-msg.success { display: block; background: #e8f8ee; color: #0f6b2f; border-left: 4px solid #0f6b2f; }
+
+    .action-group { display: inline-flex; gap: 3px; align-items: center; justify-content: flex-end; }
+    .btn-action { padding: 5px 6px; font-size: 10px; border-radius: 4px; font-weight: 700; border: none; cursor: pointer; width: auto; margin: 0; line-height: 1; }
+    .btn-bill { background: var(--maroon); color: #fff; }
+    .btn-tag { background: #333; color: #fff; }
+    .btn-edit { background: var(--gold); color: #222; }
+    .btn-del { background: #e5e5e5; color: #333; padding: 5px 5px; }
+    .btn-del.confirming { background: #d00000; color: #fff; }
+
+    .qty-btn { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 12px; width: auto; margin: 0 2px; display: inline-block; }
+
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .color-chip { background: #f3e8ec; color: var(--maroon); border: 1px solid #d9b8c4; padding: 4px 9px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer; user-select: none; }
+    .color-chip:active { background: var(--maroon); color: #fff; }
+
+    .filter-box { background: #fdf8fa; border: 1px solid #ecdce2; padding: 8px; border-radius: 8px; margin-top: 8px; }
+    .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: #555; background: #f3e8ec; padding: 5px 8px; border-radius: 5px; margin-top: 8px; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; table-layout: auto; }
+    th, td { border-bottom: 1px solid #eee; padding: 7px 3px; text-align: left; vertical-align: middle; }
+    th { background: #f3e8ec; color: var(--maroon); font-size: 11px; }
+    .code-cell { font-weight: 700; white-space: nowrap; font-size: 12px; color: #111; }
+    tr.clickable-row { cursor: pointer; transition: background 0.15s; }
+    tr.clickable-row:hover, tr.clickable-row:active { background: #fff0f5; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-box { background: #fff8fa; border-left: 4px solid var(--maroon); padding: 9px; border-radius: 6px; }
+    .stat-box span { font-size: 11px; color: #666; display: block; }
+    .stat-box strong { font-size: 16px; color: var(--maroon); }
+
+    .galla-bar { display: flex; justify-content: space-between; background: #f3e8ec; padding: 8px 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; font-weight: 700; color: #333; flex-wrap: wrap; gap: 4px; }
+
+    #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; padding: 20px; text-align: center; }
+    #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
+
+    #billModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 90; padding: 12px; overflow-y: auto; }
+    .modal-content { background: #fff; max-width: 460px; margin: 15px auto; padding: 12px; border-radius: 10px; }
+
+    .exchange-item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 12px; background: #fdf8fa; border-radius: 4px; margin-bottom: 4px; }
+    .exchange-item-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0 8px 0 0; accent-color: var(--maroon); }
+
+    /* 80MM THERMAL RECEIPT CONTAINER */
+    #printZone { border: 2px dashed #333; padding: 8px; background: #fff; text-align: center; margin-top: 10px; overflow: hidden; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; color: #000; }
+    #printZone h2 { margin: 0; font-size: 16px; font-weight: 900; color: #000; }
+    #printZone p { margin: 2px 0; font-size: 10px; color: #000; }
+    .receipt-total { font-size: 13px; font-weight: 800; margin: 5px 0; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 3px 0; color: #000; }
+
+    .barcode-box { max-width: 190px; margin: 4px auto 0; text-align: center; }
+    .barcode-box svg { width: 100% !important; height: auto !important; max-height: 42px; }
+
+    .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .single-tag { border: 1.5px dashed #000; padding: 5px; background: #fff; text-align: center; border-radius: 4px; page-break-inside: avoid; overflow: hidden; color: #000; }
+    .single-tag h4 { margin: 0; font-size: 11px; color: #000; font-weight: 900; }
+    .single-tag p { margin: 1px 0; font-size: 9px; color: #000; }
+    .single-tag .tag-mrp { font-size: 12px; font-weight: 900; margin: 2px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; }
+
+    /* DEDICATED 80MM THERMAL PRINTER PAGE RULES */
+    @page {
+      size: 80mm auto;
+      margin: 0mm;
+    }
     @media print {
       .diwali-toran, #diwaliCanvas { display: none !important; }
+      html, body {
+        width: 80mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      body * { visibility: hidden; }
+      #printZone, #printZone * { visibility: visible; }
+      #printZone {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 76mm !important;
+        max-width: 76mm !important;
+        margin: 0 auto !important;
+        padding: 2mm !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; width: 74mm; }
+      .single-tag { border: 1px solid #000; }
     }
+  </style>
+</head>
+<body>
+
+<canvas id="diwaliCanvas"></canvas>
+
+<header>
+  <div class="header-info">
+    <h1>SHAKYA COSMETIC <span id="syncStatusBadge" class="sync-badge">🔄 Connecting...</span></h1>
+    <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | Mob: 8780234760</p>
+  </div>
+  <div class="header-actions">
+    <button id="diwaliBtn" class="slide-lock-btn" style="background:#b8860b; border-color:var(--gold);" onclick="toggleDiwaliMode()">🪔 Diwali: ON</button>
+    <button id="ownerLockBtn" class="slide-lock-btn" onclick="toggleOwnerMode()">🔒 Cost: OFF</button>
+    <button id="swipeLockBtn" class="slide-lock-btn" onclick="toggleSwipeLock()">👆 Slide: ON</button>
+    <button class="shutdown-btn" onclick="openShutdownModal()">🛑 Exit</button>
+  </div>
+</header>
+
+<div id="diwaliToranBar" class="diwali-toran">
+  <span class="diya-icon">🪔</span>
+  <span class="toran-flower">🌼</span>
+  <span>✨ शुभ दीपावली • महालक्ष्मी सदा सहाय ✨</span>
+  <span class="toran-flower">🌼</span>
+  <span class="diya-icon">🪔</span>
+</div>
+
+<!-- OWNER PIN MODAL -->
+<div id="pinModal">
+  <div class="dialog-box">
+    <h3 style="color:var(--maroon); margin-top:0;">🔐 Owner PIN Daalein</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0;">Asli Kharid (Cost) aur Munafa (Profit) dekhne ke liye 4-ank ka PIN daalein:</p>
+    <input type="password" id="ownerPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:6px;">
+    <div id="pinErrorMsg" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;">❌ Galat PIN! Dobara koshish karein.</div>
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closePinModal()">Cancel</button></div>
+      <div><button class="gold" style="margin:0;" onclick="verifyOwnerPin()">🔓 Unlock</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK EDIT STOCK MODAL -->
+<div id="editStockModal">
+  <div class="dialog-box" style="text-align:left;">
+    <h3 style="color:var(--maroon); margin-top:0; text-align:center;">✏️ Edit Stock Item</h3>
+    <input type="hidden" id="editOrigCode">
+    <div class="row">
+      <div>
+        <label>Item Code</label>
+        <input type="text" id="editCode" oninput="this.value = cleanCode(this.value)">
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="editCat">
+          <option value="Daily Saree">Daily Saree</option>
+          <option value="Fancy Saree">Fancy Saree</option>
+          <option value="Petticoat">Petticoat</option>
+          <option value="Blouse/Fall">Blouse/Fall</option>
+          <option value="Cosmetic">Cosmetic</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Colour</label>
+        <input type="text" id="editColor">
+      </div>
+      <div>
+        <label>Available Qty</label>
+        <input type="number" id="editQty">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Landing Cost (₹)</label>
+        <input type="number" id="editCost">
+      </div>
+      <div>
+        <label>Sticker MRP (₹)</label>
+        <input type="number" id="editMrp">
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closeEditStockModal()">Cancel</button></div>
+      <div><button class="gold" style="margin:0;" onclick="saveEditedStock()">💾 Update</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="shutdownModal">
+  <div class="dialog-box">
+    <h3 style="color:var(--maroon); margin-top:0;">⚠️ App Band Karein?</h3>
+    <p style="font-size:13px; color:#555; margin:10px 0 18px 0;">Kya aap Shakya POS app ko surakshit band karna chahte hain?</p>
+    <div class="row">
+      <div><button class="dark" style="margin:0;" onclick="closeShutdownModal()">Rukiye (Cancel)</button></div>
+      <div><button style="margin:0; background:#b30000;" onclick="confirmShutdown()">Haan, Band Karein</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="waPromptModal">
+  <div class="dialog-box">
+    <h3 style="color:var(--maroon); margin-top:0;">💬 WhatsApp Number</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0 6px 0;">Customer ka 10 ank ka Mobile Number daalein (Seedha unke WhatsApp par bill khulega):</p>
+    <input type="tel" id="waInputNumber" placeholder="Ex: 9876543210" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align:center; font-size:16px; font-weight:bold;">
+    <div id="waErrorMsg" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;"></div>
+    <div class="row" style="margin-top:14px;">
+      <div><button class="dark" style="margin:0;" onclick="closeWaModal()">Cancel</button></div>
+      <div><button class="whatsapp" style="margin:0;" onclick="submitWaNumber()">Seedha WA Bhejein</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- UDHAAR JAMA MODAL WITH PASSBOOK MODE & WHATSAPP -->
+<div id="udhaarModal">
+  <div class="dialog-box">
+    <h3 style="color:var(--maroon); margin-top:0;">💰 Udhaar Jama Karein</h3>
+    <p id="udhaarCustInfo" style="font-size:12px; color:#555; margin:6px 0; font-weight:bold;"></p>
+    <label style="text-align:left;">Kitne Rupaye Mile?</label>
+    <input type="number" id="udhaarReceiveInput" placeholder="Amount (₹)" style="text-align:center; font-size:16px; font-weight:bold;">
+    <label style="text-align:left;">Payment Mode</label>
+    <select id="udhaarPayMode">
+      <option value="Cash">💵 Cash (Nagad)</option>
+      <option value="UPI">📱 PhonePe / UPI</option>
+      <option value="AEPS Cash">🏦 Spice Money AEPS</option>
+    </select>
+    <div class="row" style="margin-top:12px;">
+      <div><button class="gold" style="margin:0;" onclick="confirmUdhaarPayment(false)">✅ Sirf Jama</button></div>
+      <div><button class="whatsapp" style="margin:0;" onclick="confirmUdhaarPayment(true)">💬 Jama + WA Raseed</button></div>
+    </div>
+    <button class="dark" style="margin-top:8px; padding:7px;" onclick="closeUdhaarModal()">Cancel</button>
+  </div>
+</div>
+
+<div id="appClosedScreen">
+  <div class="closed-box">
+    <div style="font-size:40px; margin-bottom:8px;">🔒</div>
+    <h2 style="margin:0; color:var(--gold); font-size:20px;">SHAKYA POS BAND HAI</h2>
+    <p style="font-size:13px; margin:10px 0; opacity:0.95;">✅ Aapka sara Stock aur Bill data Local + Cloud par surakshit save ho chuka hai.</p>
+    <p style="font-size:11px; color:#ffd9df; margin-bottom:18px;">Ab aap phone/tablet ka Home ya Back button dabakar bahar ja sakte hain.</p>
+    <button class="gold" onclick="reopenApp()">🔓 App Dobara Chalu Karein</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-billing" onclick="switchTab('billing', this)">🧾 Billing</div>
+  <div class="tab" id="tab-stock" onclick="switchTab('stock', this)">📦 Stock</div>
+  <div class="tab" id="tab-stats" onclick="switchTab('stats', this)">📊 Insights</div>
+  <div class="tab" id="tab-cust" onclick="switchTab('cust', this)">👥 Khata/Cust</div>
+  <div class="tab" id="tab-backup" onclick="switchTab('backup', this)">💾 Backup</div>
+</div>
+
+<div id="scannerModal">
+  <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
+  <div id="reader"></div>
+  <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
+</div>
+
+<!-- BILL DETAILS & SINGLE-ITEM EXCHANGE MODAL -->
+<div id="billModal">
+  <div class="modal-content">
+    <div id="modalInternalBox" style="background:#fff3cd; padding:10px; border-radius:6px; font-size:12px; margin-bottom:10px; border-left:4px solid var(--maroon);"></div>
+    <div id="modalReceiptBox"></div>
+
+    <!-- ITEM-WISE SELECTION FOR EXCHANGE -->
+    <div id="exchangeSectionBox" style="background:#fdf2f4; border:1px solid #e2b4c0; padding:10px; border-radius:8px; margin-top:10px;">
+      <b style="color:var(--maroon); font-size:12px; display:block; margin-bottom:6px;">🔄 Saree Return / Exchange (Item chunein):</b>
+      <div id="exchangeItemsList"></div>
+      <div class="row" style="margin-top:8px;">
+        <div><button style="background:#b30000; margin:0; font-size:11px; padding:8px;" onclick="exchangeSelectedItems()">🔄 Chune Hue Item Return Karein</button></div>
+        <div><button class="dark" style="margin:0; font-size:11px; padding:8px;" onclick="exchangeReturnBill()">🔄 Poora Bill Return</button></div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <div><button onclick="printFromModal()">🖨️ Print</button></div>
+      <div><button class="thermal" onclick="printDirect80mmFromModal()">⚡ 80mm RawBT</button></div>
+      <div><button class="whatsapp" onclick="sendWhatsAppLastBill('DIRECT')">💬 Direct WA</button></div>
+    </div>
+    <button class="dark" style="margin-top:6px; padding:8px;" onclick="closeBillModal()">❌ Band Karein (Close)</button>
+  </div>
+</div>
+
+<!-- 1. BILLING SECTION -->
+<div id="billing" class="section active">
+  <div class="card">
+    <h3>1. Scan / Enter Saree Code</h3>
+    <div class="row">
+      <div style="flex:2" class="suggest-wrap">
+        <input type="text" id="scanInput" placeholder="Code ya Colour likhein (Ex: SC101)" autocomplete="off" oninput="onScanInputType(this)" onfocus="onScanInputType(this)">
+        <div id="scanSuggestBox" class="suggest-box"></div>
+      </div>
+      <div style="flex:1">
+        <button style="margin:0;" onclick="addItemToBill()">+ Add</button>
+      </div>
+      <div style="flex:1">
+        <button class="dark" style="margin:0;" onclick="startScanner('BILL')">📷 Scan</button>
+      </div>
+    </div>
+
+    <!-- QUICK FUTTKAR / COSMETIC ITEM WITHOUT BARCODE -->
+    <div style="background:#fdf8fa; border:1px dashed #d9b8c4; padding:7px; border-radius:6px; margin-top:8px;">
+      <small style="color:var(--maroon); font-weight:700; display:block; margin-bottom:4px;">⚡ Bina Code ka Futtkar / Cosmetic / Fall-Pico Jodein:</small>
+      <div class="row">
+        <div style="flex:1.5;"><input type="text" id="qItemName" placeholder="Item (Ex: Chudi/Fall)" style="margin:0; padding:6px; font-size:12px;"></div>
+        <div style="flex:1;"><input type="number" id="qItemMrp" placeholder="Rate ₹" style="margin:0; padding:6px; font-size:12px;"></div>
+        <div style="flex:0.8;"><button class="gold" style="margin:0; padding:6px; font-size:11px;" onclick="addQuickCustomItem()">+ Jodein</button></div>
+      </div>
+    </div>
+
+    <div id="billMsg" class="inline-msg"></div>
+
+    <table id="cartTable">
+      <thead>
+        <tr><th>Code</th><th>Item/Colour</th><th>MRP (₹)</th><th></th></tr>
+      </thead>
+      <tbody id="cartBody"></tbody>
+    </table>
+
+    <div class="row" style="margin-top:10px;">
+      <div>
+        <label>Sticker Bill (₹)</label>
+        <input type="number" id="billTotalMrp" readonly value="0" style="background:#eee; font-weight:bold;">
+      </div>
+      <div>
+        <label style="color:var(--maroon);">ACC (Tay Rate ₹)</label>
+        <input type="number" id="accInput" placeholder="Tay hisaab" oninput="onAccInputChange()">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label style="color:#0f6b2f;">Mila Cash/UPI (Paid ₹)</label>
+        <input type="number" id="paidInput" placeholder="Abhi mile paise" oninput="updateLiveSplit()">
+      </div>
+      <div>
+        <label style="color:#b30000;">Baaki Udhaar (Due ₹)</label>
+        <input type="number" id="dueInput" readonly value="0" style="background:#ffeef0; color:#b30000; font-weight:bold;">
+      </div>
+    </div>
+
+    <!-- CUSTOMER NAME & VILLAGE WITH AUTO-SUGGESTION -->
+    <div class="row">
+      <div class="suggest-wrap">
+        <label>Customer Name</label>
+        <input type="text" id="custName" placeholder="Ex: Sunita Devi" autocomplete="off" oninput="onCustNameInputType(this)" onfocus="onCustNameInputType(this)">
+        <div id="nameSuggestBox" class="suggest-box"></div>
+      </div>
+      <div class="suggest-wrap">
+        <label>Gaon / City</label>
+        <input type="text" id="custVillage" placeholder="Ex: Niwari Kalan" autocomplete="off" oninput="onVillageInputType(this)" onfocus="onVillageInputType(this)">
+        <div id="villageSuggestBox" class="suggest-box"></div>
+      </div>
+    </div>
+
+    <!-- MOBILE NUMBER WITH AUTO-SUGGESTION & PAYMENT MODE -->
+    <div class="row">
+      <div class="suggest-wrap">
+        <label>Mobile Number (WhatsApp)</label>
+        <input type="tel" id="custMobile" placeholder="Ex: 9876543210" maxlength="10" autocomplete="off" oninput="onCustMobileInputType(this)" onfocus="onCustMobileInputType(this)">
+        <div id="mobileSuggestBox" class="suggest-box"></div>
+      </div>
+      <div>
+        <label>Payment Mode</label>
+        <select id="payMode" onchange="onPayModeChange()">
+          <option value="Cash">Cash</option>
+          <option value="UPI">PhonePe / UPI</option>
+          <option value="Split">Cash + UPI (Split)</option>
+          <option value="AEPS Cash">Spice Money AEPS</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SPLIT PAYMENT ROW -->
+    <div id="splitPayRow" class="row" style="display:none; background:#eef7ff; padding:8px; border-radius:6px; margin-top:6px;">
+      <div>
+        <label style="margin:0; color:#0f6b2f;">💵 Cash Mila (₹)</label>
+        <input type="number" id="splitCashInput" placeholder="Cash ₹" oninput="onSplitCashChange()">
+      </div>
+      <div>
+        <label style="margin:0; color:#0056b3;">📱 UPI Mila (₹)</label>
+        <input type="number" id="splitUpiInput" placeholder="UPI ₹" oninput="onSplitUpiChange()">
+      </div>
+    </div>
+
+    <!-- PREVIOUS UDHAAR LIVE ALERT -->
+    <div id="prevUdhaarAlert" style="display:none; background:#ffeef0; border:1.5px solid #b30000; color:#b30000; padding:8px; border-radius:6px; margin-top:8px; font-size:12px; font-weight:bold;"></div>
+
+    <div id="liveSplitBox" style="background:#fff3cd; padding:8px; border-radius:6px; margin-top:10px; font-size:12px; display:none;"></div>
+
+    <button class="gold" onclick="finalizeBill()">✅ Bill Banayein & Barcode Chhapein</button>
+  </div>
+
+  <div id="printCard" class="card" style="display:none;">
+    <div id="printZone"></div>
+    <div class="row" style="margin-top:10px;">
+      <div><button onclick="window.print()">🖨️ Browser 80mm Print</button></div>
+      <div><button class="thermal" onclick="printDirect80mm()">⚡ 80mm Direct (RawBT)</button></div>
+    </div>
+    <div class="row" style="margin-top:6px;">
+      <div style="flex:1.6;"><button class="whatsapp" style="margin:0;" onclick="sendWhatsAppLastBill('DIRECT')">💬 Direct Customer WA Bhejein</button></div>
+      <div style="flex:1;"><button class="dark" style="margin:0;" onclick="sendWhatsAppLastBill('IMAGE')">📸 Bill Photo</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. STOCK SECTION -->
+<div id="stock" class="section">
+  <div class="card">
+    <h3>+ Nayi Saree / Multi-Colour Set Stock Mein Jodein</h3>
+    <div class="row">
+      <div>
+        <label>Base Design Code</label>
+        <input type="text" id="sCode" placeholder="Ex: SC105" oninput="this.value = cleanCode(this.value)">
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="sCat">
+          <option value="Daily Saree">Daily Wear Saree</option>
+          <option value="Fancy Saree">Fancy / Wedding Saree</option>
+          <option value="Petticoat">Petticoat</option>
+          <option value="Blouse/Fall">Blouse Piece / Fall</option>
+          <option value="Cosmetic">Cosmetic / Bangles</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:2">
+        <label>Colours (Ek ya Poore Set ke Colours)</label>
+        <input type="text" id="sColor" placeholder="Ex: Red, Yellow, Green">
+      </div>
+      <div style="flex:1">
+        <label>Qty (Each)</label>
+        <input type="number" id="sQty" value="1">
+      </div>
+    </div>
+
+    <div style="margin-top:6px;">
+      <small style="color:#666; font-size:11px;">👇 Tap karke Colours jodein (Clear: <b style="color:#c00;cursor:pointer;" onclick="document.getElementById('sColor').value=''">✕ Saaf karein</b>):</small>
+      <div class="chip-wrap">
+        <span class="color-chip" onclick="addColorChip('Red')">🔴 Red</span>
+        <span class="color-chip" onclick="addColorChip('Rani Pink')">🩷 Rani Pink</span>
+        <span class="color-chip" onclick="addColorChip('Yellow')">🟡 Yellow</span>
+        <span class="color-chip" onclick="addColorChip('Green')">🟢 Green</span>
+        <span class="color-chip" onclick="addColorChip('Maroon')">🍷 Maroon</span>
+        <span class="color-chip" onclick="addColorChip('Royal Blue')">🔵 Royal Blue</span>
+        <span class="color-chip" onclick="addColorChip('Rama')">🩵 Rama</span>
+        <span class="color-chip" onclick="addColorChip('Orange')">🟠 Orange</span>
+        <span class="color-chip" onclick="addColorChip('Purple')">🟣 Purple</span>
+        <span class="color-chip" onclick="addColorChip('Black')">⚫ Black</span>
+        <span class="color-chip" onclick="addColorChip('White')">⚪ White</span>
+        <span class="color-chip" onclick="addColorChip('Golden')">✨ Golden</span>
+        <span class="color-chip" onclick="addColorChip('Multi')">🌈 Multi</span>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:6px;">
+      <div>
+        <label>Landing Cost (Asli Kharid ₹)</label>
+        <input type="number" id="sCost" placeholder="Ex: 210">
+      </div>
+      <div>
+        <label>Sticker MRP (Grahak Rate ₹)</label>
+        <input type="number" id="sMrp" placeholder="Ex: 380">
+      </div>
+    </div>
+
+    <div id="stockMsg" class="inline-msg"></div>
+
+    <button onclick="saveStockItem()">💾 Stock Mein Save Karein</button>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+      <h3 style="margin:0; border:none; padding:0;">🔍 Available Stock & Filter</h3>
+      <div>
+        <button class="whatsapp small" style="margin:0; padding:5px 8px; font-size:11px;" onclick="shareLowStockMandiList()">📝 Mandi List</button>
+        <button class="gold small" style="margin:0; padding:5px 9px; font-size:11px;" onclick="printAllStockTags()">🖨️ Filtered Tags Print</button>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="row">
+        <div style="flex:1.4;">
+          <input type="text" id="fSearch" placeholder="🔍 Code, Colour ya MRP..." oninput="renderStock()" style="margin-top:0; padding:7px; font-size:12px;">
+        </div>
+        <div style="flex:1;">
+          <select id="fCat" onchange="renderStock()" style="margin-top:0; padding:7px; font-size:12px;">
+            <option value="ALL">All Categories</option>
+            <option value="Daily Saree">Daily Saree</option>
+            <option value="Fancy Saree">Fancy Saree</option>
+            <option value="Petticoat">Petticoat</option>
+            <option value="Blouse/Fall">Blouse/Fall</option>
+            <option value="Cosmetic">Cosmetic</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div style="flex:1.4;">
+          <select id="fStatus" onchange="renderStock()" style="margin-top:0; padding:6px; font-size:12px;">
+            <option value="ALL">📦 Sabhi Stock</option>
+            <option value="INSTOCK">✅ Available (Qty > 0)</option>
+            <option value="LOW">⚠️ Kam Stock (1-2 Pcs)</option>
+            <option value="OUT">❌ Out of Stock (0)</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <button class="dark" style="margin:0; padding:6px; font-size:11px;" onclick="resetStockFilters()">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="stockSummaryBar" class="filter-summary"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Item & Colour</th>
+          <th>Cost</th>
+          <th>MRP</th>
+          <th>Qty</th>
+          <th style="text-align:right;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="stockTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 3. INSIGHTS SECTION -->
+<div id="stats" class="section">
+  <div class="card">
+    <h3>🔍 Verify / Exchange Bill (Bill No. ya Barcode Dalein)</h3>
+    <div class="row">
+      <div style="flex:2">
+        <input type="text" id="decodeInput" placeholder="Ex: INV101 ya 101" oninput="decodeAcc(this.value)">
+      </div>
+      <div style="flex:1">
+        <button style="margin:0;" onclick="decodeAcc(document.getElementById('decodeInput').value, true)">🔍 Khojein</button>
+      </div>
+      <div style="flex:1">
+        <button class="dark" style="margin:0;" onclick="startScanner('DECODE')">📷 Scan</button>
+      </div>
+    </div>
+    <div id="decodeResult" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px; margin-bottom:8px; flex-wrap:wrap; gap:4px;">
+      <h3 style="margin:0; border:none; padding:0;">📊 Galla & Business Insights</h3>
+      <div>
+        <button id="btnFilterToday" class="small" style="background:var(--maroon); color:#fff;" onclick="setStatsFilter('TODAY')">📅 Aaj</button>
+        <button id="btnFilterDate" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('DATE')">📆 Date</button>
+        <button id="btnFilterMonth" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('MONTH')">🗓️ Month</button>
+        <button id="btnFilterAll" class="small" style="background:#ddd; color:#333;" onclick="setStatsFilter('ALL')">📊 Kul</button>
+      </div>
+    </div>
+
+    <!-- DATE & MONTH PICKERS -->
+    <div id="statsDatePickerWrap" style="display:none; margin-bottom:10px;">
+      <input type="date" id="statsDateInput" onchange="renderStats()" style="padding:7px; font-size:13px; margin:0;">
+    </div>
+    <div id="statsMonthPickerWrap" style="display:none; margin-bottom:10px;">
+      <input type="month" id="statsMonthInput" onchange="renderStats()" style="padding:7px; font-size:13px; margin:0;">
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><span>Total Tay Bikri (ACC)</span><strong id="stAcc">₹0</strong></div>
+      <div class="stat-box"><span>Shuddh Munafa (Profit)</span><strong id="stProfit" style="color:green;">₹0</strong></div>
+      <div class="stat-box"><span>Galla Mila Cash/UPI</span><strong id="stPaid" style="color:#0f6b2f;">₹0</strong></div>
+      <div class="stat-box"><span>Market Mein Udhaar</span><strong id="stDue" style="color:#b30000;">₹0</strong></div>
+    </div>
+
+    <div id="gallaBreakdown" class="galla-bar">
+      <span>💵 Cash: ₹0</span>
+      <span>📱 UPI: ₹0</span>
+      <span>🏦 AEPS: ₹0</span>
+    </div>
+
+    <!-- DAILY EXPENSE (DUKAN KHARCHA) -->
+    <div style="background:#fdf8fa; border:1px solid #ecdce2; padding:8px; border-radius:8px; margin-top:10px;">
+      <small style="color:var(--maroon); font-weight:bold; display:block; margin-bottom:4px;">💸 Dukan Kharcha (Chai, Bhaada, Polythene aadi):</small>
+      <div class="row">
+        <div style="flex:1.5;"><input type="text" id="expNote" placeholder="Kharcha (Ex: Chai/Bhaada)" style="margin:0; padding:6px; font-size:12px;"></div>
+        <div style="flex:1;"><input type="number" id="expAmt" placeholder="₹ Amount" style="margin:0; padding:6px; font-size:12px;"></div>
+        <div style="flex:0.8;"><button class="dark" style="margin:0; padding:6px; font-size:11px;" onclick="addDailyExpense()">+ Kharcha</button></div>
+      </div>
+      <div id="expenseListBox" style="margin-top:6px; font-size:11px; color:#444;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎨 Top Bikne Wale Colours & Bill History</h3>
+    <div id="colorInsights" style="font-size:13px; margin-bottom:8px;"></div>
+    <small style="color:var(--maroon); font-weight:bold; display:block; margin-bottom:6px;">👇 Kisi bhi Bill par Tap karke dekhein ya Single Saree Exchange karein:</small>
+    <table>
+      <thead><tr><th>Bill#</th><th>Items (Real Rate)</th><th>ACC</th><th>Udhaar</th><th>Profit</th></tr></thead>
+      <tbody id="salesHistoryBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 4. CUSTOMER LEDGER, KHATA & CALL DIRECTORY SECTION -->
+<div id="cust" class="section">
+  <div class="card">
+    <h3>📓 Customer Khata Book, Call & Contact Directory</h3>
+    <label>Mobile Number Ya Naam Dalein</label>
+    <div class="row">
+      <div style="flex:2">
+        <input type="text" id="searchMobile" placeholder="Mobile No. ya Naam likhein..." oninput="lookupCustomer(this.value)">
+      </div>
+      <div style="flex:1">
+        <button style="margin:0;" onclick="lookupCustomer(document.getElementById('searchMobile').value)">🔍 Search</button>
+      </div>
+    </div>
+    <div id="customerLedgerResult" style="margin-top:12px; font-size:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Sabhi Customers, Call & Baki Udhaar List</h3>
+    <table>
+      <thead><tr><th>Customer</th><th>Gaon</th><th>Kul Kharid</th><th>Baaki Udhaar</th><th style="text-align:right;">Action</th></tr></thead>
+      <tbody id="allCustomersBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 5. BACKUP & SECURITY SECTION -->
+<div id="backup" class="section">
+  <div class="card">
+    <h3>🔐 Owner Security PIN Badlein</h3>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0;">Default Owner PIN <b>1234</b> hai. Aap apna naya 4-ank ka PIN yahan set kar sakte hain:</p>
+    <div class="row">
+      <div>
+        <input type="password" id="oldPinChange" placeholder="Purana PIN" maxlength="4" inputmode="numeric">
+      </div>
+      <div>
+        <input type="password" id="newPinChange" placeholder="Naya 4-ank PIN" maxlength="4" inputmode="numeric">
+      </div>
+      <div>
+        <button style="margin:0;" onclick="changeOwnerPin()">🔑 Save PIN</button>
+      </div>
+    </div>
+    <div id="pinChangeMsg" class="inline-msg"></div>
+  </div>
+
+  <div class="card">
+    <h3>💾 Surakshit Hybrid Backup (Local + Cloud) & Excel</h3>
+    <p style="font-size:12px; color:#555;">Data pehle aapke phone/browser (Local Storage) mein turant save hota hai aur internet milte hi Firebase Cloud (`shakyapos-default-rtdb`) par live sync ho jata hai.</p>
+    <div id="backupMsg" class="inline-msg"></div>
+    <button class="gold" onclick="exportSalesCSV()">📊 Download Sales Report (Excel .CSV)</button>
+    <button onclick="downloadBackupJSON()">⬇️ App Data Backup (.JSON)</button>
+
+    <hr style="margin:16px 0;">
+    <label>Purana Backup File (.JSON) Wapas Daalein (Restore):</label>
+    <input type="file" id="restoreFile" accept=".json" onchange="restoreBackupJSON(event)">
+  </div>
+</div>
+
+<script>
+  // --- FIREBASE REALTIME DATABASE & HYBRID LOCAL+CLOUD SETUP ---
+  const firebaseConfig = {
+    databaseURL: "https://shakyapos-default-rtdb.firebaseio.com/"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const dbRef = firebase.database().ref('shakya_pos_data');
+  const connectedRef = firebase.database().ref('.info/connected');
+
+  function normalizeList(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.filter(Boolean);
+    if (typeof val === 'object') return Object.values(val).filter(Boolean);
+    return [];
+  }
+
+  let inventory = JSON.parse(localStorage.getItem('sc_inventory')) || [
+    { code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
+    { code: 'SC102P', cat: 'Fancy Saree', color: 'Rani Pink', qty: 3, cost: 420, mrp: 750 },
+    { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
+  ];
+  let sales = JSON.parse(localStorage.getItem('sc_sales')) || [];
+  let udhaarLogs = JSON.parse(localStorage.getItem('sc_udhaar_logs')) || [];
+  let contacts = JSON.parse(localStorage.getItem('sc_contacts')) || [];
+  let expenses = JSON.parse(localStorage.getItem('sc_expenses')) || [];
+  let ownerPin = localStorage.getItem('sc_owner_pin') || '1234';
+  let ownerUnlocked = false;
+  let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
+  let statsFilterMode = 'TODAY';
+  let diwaliMode = JSON.parse(localStorage.getItem('sc_diwali_mode') ?? 'true');
+
+  let cart = [];
+  let html5QrCode = null;
+  let lastSavedSale = null;
+  let pendingWaMode = 'DIRECT';
+  let activeUdhaarMobile = "";
+  let activeUdhaarName = "";
+  let suggestedCustCache = [];
+  let customerTableCache = [];
+  let lookupCustCache = null;
+
+  // Set default values for Date & Month pickers
+  window.addEventListener('DOMContentLoaded', () => {
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const dInp = document.getElementById('statsDateInput');
+    const mInp = document.getElementById('statsMonthInput');
+    if (dInp) dInp.value = todayIso;
+    if (mInp) mInp.value = todayIso.slice(0, 7);
+    updateOwnerLockUI();
+    updateDiwaliUI();
+  });
+
+  function updateSyncBadge(status) {
+    const badge = document.getElementById('syncStatusBadge');
+    if (!badge) return;
+    if (status === 'ONLINE') {
+      badge.innerText = '🟢 Cloud Live';
+      badge.style.background = '#0f6b2f';
+    } else if (status === 'SYNCING') {
+      badge.innerText = '🔄 Syncing...';
+      badge.style.background = '#b8860b';
+    } else {
+      badge.innerText = '🟠 Offline (Local)';
+      badge.style.background = '#555';
+    }
+  }
+
+  connectedRef.on('value', (snap) => {
+    if (snap.val() === true) {
+      updateSyncBadge('ONLINE');
+      if (hasUnsyncedChanges) {
+        syncToCloud();
+      }
+    } else {
+      updateSyncBadge('OFFLINE');
+    }
+  });
+
+  // FIXED POINT #1: Properly sync even when last stock item is deleted (empty array in Firebase)
+  dbRef.on('value', (snapshot) => {
+    const cloudData = snapshot.val();
+    if (cloudData) {
+      if (cloudData.inventory !== undefined) {
+        inventory = normalizeList(cloudData.inventory);
+      } else if (cloudData.lastUpdated) {
+        inventory = [];
+      }
+      if (cloudData.sales !== undefined) {
+        sales = normalizeList(cloudData.sales);
+      } else if (cloudData.lastUpdated) {
+        sales = [];
+      }
+      if (cloudData.udhaarLogs !== undefined) {
+        udhaarLogs = normalizeList(cloudData.udhaarLogs);
+      }
+      if (cloudData.contacts !== undefined) {
+        contacts = normalizeList(cloudData.contacts);
+      }
+      if (cloudData.expenses !== undefined) {
+        expenses = normalizeList(cloudData.expenses);
+      }
+      if (cloudData.ownerPin) {
+        ownerPin = String(cloudData.ownerPin);
+        localStorage.setItem('sc_owner_pin', ownerPin);
+      }
+      localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+      localStorage.setItem('sc_sales', JSON.stringify(sales));
+      localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
+      localStorage.setItem('sc_contacts', JSON.stringify(contacts));
+      localStorage.setItem('sc_expenses', JSON.stringify(expenses));
+      localStorage.setItem('sc_unsynced', 'false');
+      hasUnsyncedChanges = false;
+      updateSyncBadge('ONLINE');
+
+      renderStock();
+      renderStats();
+      renderCustomerSection();
+    } else if (inventory.length > 0 || sales.length > 0) {
+      syncToCloud();
+    }
+  });
+
+  function syncToCloud() {
+    localStorage.setItem('sc_inventory', JSON.stringify(inventory));
+    localStorage.setItem('sc_sales', JSON.stringify(sales));
+    localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
+    localStorage.setItem('sc_contacts', JSON.stringify(contacts));
+    localStorage.setItem('sc_expenses', JSON.stringify(expenses));
+    localStorage.setItem('sc_owner_pin', ownerPin);
+    hasUnsyncedChanges = true;
+    localStorage.setItem('sc_unsynced', 'true');
+    updateSyncBadge('SYNCING');
+
+    dbRef.set({
+      inventory,
+      sales,
+      udhaarLogs,
+      contacts,
+      expenses,
+      ownerPin,
+      lastUpdated: new Date().toISOString()
+    }).then(() => {
+      hasUnsyncedChanges = false;
+      localStorage.setItem('sc_unsynced', 'false');
+      updateSyncBadge('ONLINE');
+    }).catch(() => {
+      updateSyncBadge('OFFLINE');
+    });
+  }
+
+  window.addEventListener('online', () => {
+    if (hasUnsyncedChanges) syncToCloud();
+  });
+  window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
+
+  // --- CUSTOMER DIRECTORY, AUTO-SUGGESTIONS & CONTACT SAVING ---
+  function getCustomerDirectory() {
+    let map = {};
+    contacts.forEach(c => {
+      if (!c) return;
+      const key = c.mobile || (c.name || '').toUpperCase().trim();
+      if (!key) return;
+      map[key] = {
+        mob: c.mobile || '',
+        name: c.name || 'Customer',
+        village: c.village || 'Niwari Kalan',
+        count: 0,
+        spend: 0,
+        due: 0
+      };
+    });
+
+    sales.forEach(s => {
+      if (!s) return;
+      const nameClean = (s.cust || '').trim();
+      const mobClean = (s.mobile || '').trim();
+      if (!mobClean && (!nameClean || nameClean.toUpperCase() === 'WALK-IN CUSTOMER')) return;
+      const key = mobClean || nameClean.toUpperCase();
+      if (!key) return;
+      if (!map[key]) {
+        map[key] = {
+          mob: mobClean,
+          name: nameClean || 'Customer',
+          village: s.village || 'Niwari Kalan',
+          count: 0,
+          spend: 0,
+          due: 0
+        };
+      } else {
+        if (nameClean && nameClean.toUpperCase() !== 'WALK-IN CUSTOMER') map[key].name = nameClean;
+        if (s.village) map[key].village = s.village;
+        if (mobClean) map[key].mob = mobClean;
+      }
+      if (!s.exchanged) {
+        map[key].count += 1;
+        map[key].spend += (s.acc || 0);
+        map[key].due += (s.due || 0);
+      }
+    });
+    return Object.values(map);
+  }
+
+  function saveContactToDirectory(name, mobile, village) {
+    const cleanName = (name || '').trim();
+    const cleanMob = (mobile || '').trim();
+    const cleanVil = (village || 'Niwari Kalan').trim();
+    if (!cleanMob && (!cleanName || cleanName.toUpperCase() === 'WALK-IN CUSTOMER')) return;
+
+    const existing = contacts.find(c =>
+      c && ((cleanMob && c.mobile === cleanMob) ||
+      (!cleanMob && (c.name || '').toUpperCase() === cleanName.toUpperCase()))
+    );
+    if (existing) {
+      if (cleanName && cleanName.toUpperCase() !== 'WALK-IN CUSTOMER') existing.name = cleanName;
+      if (cleanMob) existing.mobile = cleanMob;
+      if (cleanVil) existing.village = cleanVil;
+    } else {
+      contacts.unshift({
+        name: cleanName || 'Customer',
+        mobile: cleanMob,
+        village: cleanVil
+      });
+    }
+  }
+
+  function onCustNameInputType(inp) {
+    const q = (inp.value || '').trim().toUpperCase();
+    const box = document.getElementById('nameSuggestBox');
+    const allCusts = getCustomerDirectory();
+    suggestedCustCache = q
+      ? allCusts.filter(c => (c.name || '').toUpperCase().includes(q) || (c.mob && c.mob.includes(q))).slice(0, 7)
+      : allCusts.slice(0, 6);
+
+    if (suggestedCustCache.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.innerHTML = suggestedCustCache.map((c, idx) => `
+      <div class="suggest-item" onclick="selectSuggestedCustomer(${idx})">
+        <span>👤 <b>${c.name}</b> <small style="color:#555;">(${c.village})</small></span>
+        <span style="font-weight:bold; color:${c.due > 0 ? '#b30000' : '#0f6b2f'};">
+          ${c.mob ? '📱 ' + c.mob : ''} ${c.due > 0 ? '[Due: ₹' + c.due + ']' : ''}
+        </span>
+      </div>
+    `).join('');
+    box.style.display = 'block';
+  }
+
+  function onCustMobileInputType(inp) {
+    inp.value = inp.value.replace(/[^0-9]/g, '');
+    const q = inp.value.trim();
+    const box = document.getElementById('mobileSuggestBox');
+    const allCusts = getCustomerDirectory().filter(c => c.mob);
+
+    suggestedCustCache = q
+      ? allCusts.filter(c => c.mob.includes(q) || (c.name || '').toUpperCase().includes(q.toUpperCase())).slice(0, 7)
+      : allCusts.slice(0, 6);
+
+    if (q.length === 10) {
+      const exact = allCusts.find(c => c.mob === q);
+      if (exact) {
+        if (!document.getElementById('custName').value.trim()) {
+          document.getElementById('custName').value = exact.name;
+        }
+        if (!document.getElementById('custVillage').value.trim()) {
+          document.getElementById('custVillage').value = exact.village;
+        }
+        showPrevUdhaarBanner(exact.name, exact.mob, exact.due);
+      } else {
+        showPrevUdhaarBanner('', '', 0);
+      }
+    } else {
+      showPrevUdhaarBanner('', '', 0);
+    }
+
+    if (suggestedCustCache.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.innerHTML = suggestedCustCache.map((c, idx) => `
+      <div class="suggest-item" onclick="selectSuggestedCustomer(${idx})">
+        <span>📱 <b>${c.mob}</b> — ${c.name}</span>
+        <span style="font-weight:bold; color:${c.due > 0 ? '#b30000' : '#555'};">
+          ${c.due > 0 ? '⚠️ Udhaar: ₹' + c.due : c.village}
+        </span>
+      </div>
+    `).join('');
+    box.style.display = 'block';
+  }
+
+  function selectSuggestedCustomer(idx) {
+    const c = suggestedCustCache[idx];
+    if (!c) return;
+    document.getElementById('custName').value = c.name || '';
+    if (c.mob) document.getElementById('custMobile').value = c.mob;
+    if (c.village) document.getElementById('custVillage').value = c.village;
+    document.getElementById('nameSuggestBox').style.display = 'none';
+    document.getElementById('mobileSuggestBox').style.display = 'none';
+    showPrevUdhaarBanner(c.name, c.mob, c.due || 0);
+  }
+
+  function showPrevUdhaarBanner(name, mob, dueAmt) {
+    const alertBox = document.getElementById('prevUdhaarAlert');
+    if (!alertBox) return;
+    if (dueAmt > 0) {
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `⚠️ <b>Purana Udhaar Alert:</b> ${name} (${mob}) par pehle ka <b>₹${dueAmt}</b> udhaar baaki hai!`;
+    } else {
+      alertBox.style.display = 'none';
+      alertBox.innerHTML = '';
+    }
+  }
+
+  function callCustomerNumber(mob) {
+    if (!mob) return;
+    window.location.href = 'tel:+91' + mob;
+  }
+
+  function downloadVcfCard(name, mob, village) {
+    if (!mob) return;
+    const vcard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      'FN:' + (name || 'Customer') + ' (' + (village || 'Shakya POS') + ')',
+      'TEL;TYPE=CELL:+91' + mob,
+      'NOTE:Shakya Cosmetic Customer - ' + (village || ''),
+      'END:VCARD'
+    ].join('\n');
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Shakya_Cust_' + mob + '.vcf';
+    a.click();
+  }
+
+  // --- FEATURE 3: OWNER PIN & COST/PROFIT LOCK ---
+  function updateOwnerLockUI() {
+    const btn = document.getElementById('ownerLockBtn');
+    if (btn) {
+      btn.innerHTML = ownerUnlocked ? '🔓 Cost: ON' : '🔒 Cost: OFF';
+      btn.style.background = ownerUnlocked ? '#0f6b2f' : '#333';
+    }
+    updateLiveSplit();
+    renderStock();
+    renderStats();
+  }
+
+  function toggleOwnerMode() {
+    if (ownerUnlocked) {
+      ownerUnlocked = false;
+      updateOwnerLockUI();
+    } else {
+      document.getElementById('ownerPinInput').value = '';
+      document.getElementById('pinErrorMsg').style.display = 'none';
+      document.getElementById('pinModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('ownerPinInput').focus(), 100);
+    }
+  }
+
+  function closePinModal() {
+    document.getElementById('pinModal').style.display = 'none';
+  }
+
+  function verifyOwnerPin() {
+    const inp = document.getElementById('ownerPinInput').value.trim();
+    if (inp === ownerPin) {
+      ownerUnlocked = true;
+      closePinModal();
+      updateOwnerLockUI();
+      if (document.getElementById('billModal').style.display === 'block' && lastSavedSale) {
+        openBillModal(lastSavedSale.invId);
+      }
+    } else {
+      document.getElementById('pinErrorMsg').style.display = 'block';
+    }
+  }
+
+  function changeOwnerPin() {
+    const oldP = document.getElementById('oldPinChange').value.trim();
+    const newP = document.getElementById('newPinChange').value.trim();
+    if (oldP !== ownerPin) {
+      showInlineMsg('pinChangeMsg', '❌ Purana PIN galat hai!', 'error');
+      return;
+    }
+    if (newP.length < 4) {
+      showInlineMsg('pinChangeMsg', '⚠️ Naya PIN 4 ank ka hona chahiye!', 'error');
+      return;
+    }
+    ownerPin = newP;
+    syncToCloud();
+    document.getElementById('oldPinChange').value = '';
+    document.getElementById('newPinChange').value = '';
+    showInlineMsg('pinChangeMsg', '✅ Naya Owner PIN safaltapoorvak save ho gaya!', 'success');
+  }
+
+  let isAppClosed = false;
+  let backGuardArmed = false;
+
+  function armBackGuard() {
+    if (isAppClosed || backGuardArmed) return;
+    window.history.pushState({ shakyaLock: true }, '', window.location.href);
+    backGuardArmed = true;
+  }
+
+  window.history.pushState({ shakyaLock: true }, '', window.location.href);
+  document.addEventListener('touchstart', armBackGuard, { passive: true });
+  document.addEventListener('click', armBackGuard, true);
+
+  window.addEventListener('popstate', function(e) {
+    if (isAppClosed) return;
+    const billMod = document.getElementById('billModal');
+    const scanMod = document.getElementById('scannerModal');
+    const shutMod = document.getElementById('shutdownModal');
+    const waMod = document.getElementById('waPromptModal');
+    const udhMod = document.getElementById('udhaarModal');
+    const pinMod = document.getElementById('pinModal');
+    const editMod = document.getElementById('editStockModal');
+    if (billMod && billMod.style.display === 'block') { closeBillModal(); }
+    else if (scanMod && scanMod.style.display === 'block') { stopScanner(); }
+    else if (shutMod && shutMod.style.display === 'flex') { closeShutdownModal(); }
+    else if (waMod && waMod.style.display === 'flex') { closeWaModal(); }
+    else if (udhMod && udhMod.style.display === 'flex') { closeUdhaarModal(); }
+    else if (pinMod && pinMod.style.display === 'flex') { closePinModal(); }
+    else if (editMod && editMod.style.display === 'flex') { closeEditStockModal(); }
+    window.history.pushState({ shakyaLock: true }, '', window.location.href);
+  });
+
+  function openShutdownModal() { document.getElementById('shutdownModal').style.display = 'flex'; }
+  function closeShutdownModal() { document.getElementById('shutdownModal').style.display = 'none'; }
+
+  function confirmShutdown() {
+    closeShutdownModal();
+    isAppClosed = true;
+    backGuardArmed = false;
+    syncToCloud();
+    document.getElementById('appClosedScreen').style.display = 'flex';
+    try { window.close(); } catch (err) {}
+  }
+
+  function reopenApp() {
+    isAppClosed = false;
+    document.getElementById('appClosedScreen').style.display = 'none';
+    armBackGuard();
+  }
+
+  const tabOrder = ['billing', 'stock', 'stats', 'cust', 'backup'];
+  let swipeEnabled = JSON.parse(localStorage.getItem('sc_swipe_enabled') ?? 'true');
+  let touchStartX = 0, touchStartY = 0;
+  let touchEndX = 0, touchEndY = 0;
+  let ignoreSwipe = false;
+
+  function updateSwipeBtnUI() {
+    const btn = document.getElementById('swipeLockBtn');
+    if (!btn) return;
+    btn.innerHTML = swipeEnabled ? '👆 Slide: ON' : '🔒 Slide: OFF';
+    btn.style.background = swipeEnabled ? '#2e6b3e' : '#555';
+  }
+
+  function toggleSwipeLock() {
+    swipeEnabled = !swipeEnabled;
+    localStorage.setItem('sc_swipe_enabled', JSON.stringify(swipeEnabled));
+    updateSwipeBtnUI();
+  }
+  updateSwipeBtnUI();
+
+  document.addEventListener('touchstart', e => {
+    if (!swipeEnabled || isAppClosed) return;
+    if (e.target.closest('input, select, button, table, .chip-wrap, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #appClosedScreen')) {
+      ignoreSwipe = true;
+      return;
+    }
+    ignoreSwipe = false;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!swipeEnabled || ignoreSwipe || isAppClosed) return;
+    touchEndX = e.changedTouches[0].clientX;
+    touchEndY = e.changedTouches[0].clientY;
+    handleSwipeGesture();
+  }, { passive: true });
+
+  function handleSwipeGesture() {
+    const diffX = touchEndX - touchStartX;
+    const diffY = Math.abs(touchEndY - touchStartY);
+    if (Math.abs(diffX) < 135 || diffY > 35) return;
+    const activeSec = document.querySelector('.section.active');
+    if (!activeSec) return;
+    let idx = tabOrder.indexOf(activeSec.id);
+    if (idx === -1) return;
+    if (diffX > 0 && idx > 0) { idx--; }
+    else if (diffX < 0 && idx < tabOrder.length - 1) { idx++; }
+    else { return; }
+    const nextTabId = tabOrder[idx];
+    const tabEl = document.getElementById('tab-' + nextTabId);
+    if (tabEl) { switchTab(nextTabId, tabEl); }
+  }
+
+  function cleanCode(str) {
+    return (str || '').toString().toUpperCase().replace(/[-\s]/g, '');
+  }
+
+  let msgTimers = {};
+  function showInlineMsg(boxId, text, type = 'error') {
+    const el = document.getElementById(boxId);
+    if (!el) return;
+    el.className = 'inline-msg ' + type;
+    el.innerHTML = text;
+    if (msgTimers[boxId]) clearTimeout(msgTimers[boxId]);
+    msgTimers[boxId] = setTimeout(() => {
+      el.className = 'inline-msg';
+      el.innerHTML = '';
+    }, 3500);
+  }
+
+  inventory.forEach(i => { if (i) i.code = cleanCode(i.code); });
+  sales.forEach(s => {
+    if (s && s.items) s.items.forEach(i => { if (i) i.code = cleanCode(i.code); });
+  });
+
+  const colorCodeMap = {
+    'RED': 'R', 'RANI PINK': 'RP', 'PINK': 'P', 'YELLOW': 'Y', 'GREEN': 'G',
+    'MAROON': 'M', 'ROYAL BLUE': 'RB', 'BLUE': 'BL', 'RAMA': 'RM', 'ORANGE': 'O',
+    'PURPLE': 'PR', 'BLACK': 'BK', 'WHITE': 'W', 'GOLDEN': 'GD', 'MULTI': 'ML'
+  };
+
+  function getUniqueVillages() {
+    let villages = new Set(['NIWARI KALAN', 'ETAWAH', 'MAHESH PURA', 'BAKKEVAR']);
+    sales.forEach(s => {
+      if (s && s.village) villages.add(s.village.toUpperCase().trim());
+    });
+    contacts.forEach(c => {
+      if (c && c.village) villages.add(c.village.toUpperCase().trim());
+    });
+    return Array.from(villages);
+  }
+
+  let villageSuggestCache = [];
+  function onVillageInputType(inp) {
+    const q = inp.value.toUpperCase().trim();
+    const box = document.getElementById('villageSuggestBox');
+    const villages = getUniqueVillages();
+    villageSuggestCache = q ? villages.filter(v => v.includes(q)) : villages.slice(0, 6);
+    if (villageSuggestCache.length === 0) { box.style.display = 'none'; return; }
+    box.innerHTML = villageSuggestCache.map((v, idx) => `
+      <div class="suggest-item" onclick="selectVillageByIdx(${idx})">
+        <span>📍 <b>${v}</b></span>
+      </div>
+    `).join('');
+    box.style.display = 'block';
+  }
+
+  function selectVillageByIdx(idx) {
+    const v = villageSuggestCache[idx];
+    if (!v) return;
+    document.getElementById('custVillage').value = v;
+    document.getElementById('villageSuggestBox').style.display = 'none';
+  }
+
+  function onScanInputType(inp) {
+    inp.value = cleanCode(inp.value);
+    const q = inp.value;
+    const box = document.getElementById('scanSuggestBox');
+    if (!q) {
+      const avail = inventory.filter(i => i.qty > 0).slice(0, 6);
+      if (avail.length === 0) { box.style.display = 'none'; return; }
+      box.innerHTML = avail.map(i => `
+        <div class="suggest-item" onclick="selectSuggestion('${i.code}')">
+          <span><b>${i.code}</b> — ${i.cat} (${i.color})</span>
+          <span style="color:var(--maroon);font-weight:700;">₹${i.mrp} <small>[${i.qty} pcs]</small></span>
+        </div>
+      `).join('');
+      box.style.display = 'block';
+      return;
+    }
+
+    const matches = inventory.filter(i =>
+      i.code.includes(q) ||
+      (i.color && cleanCode(i.color).includes(q)) ||
+      String(i.mrp).includes(q)
+    ).slice(0, 8);
+
+    if (matches.length === 0) {
+      box.innerHTML = `<div class="suggest-item" style="color:#b30000;">❌ "${q}" Stock mein nahi mila</div>`;
+      box.style.display = 'block';
+      return;
+    }
+
+    box.innerHTML = matches.map(i => `
+      <div class="suggest-item" onclick="selectSuggestion('${i.code}')">
+        <span><b>${i.code}</b> — ${i.cat} (${i.color})</span>
+        <span style="color:${i.qty > 0 ? 'var(--maroon)' : 'red'};font-weight:700;">
+          ₹${i.mrp} <small>[${i.qty > 0 ? i.qty + ' pcs' : 'Out'}]</small>
+        </span>
+      </div>
+    `).join('');
+    box.style.display = 'block';
+  }
+
+  function selectSuggestion(code) {
+    document.getElementById('scanInput').value = code;
+    document.getElementById('scanSuggestBox').style.display = 'none';
+    addItemToBill();
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.suggest-wrap')) {
+      document.querySelectorAll('.suggest-box').forEach(b => b.style.display = 'none');
+    }
+  });
+
+  function addColorChip(colName) {
+    const inp = document.getElementById('sColor');
+    let current = inp.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (!current.includes(colName)) { current.push(colName); }
+    inp.value = current.join(', ');
+  }
+
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(id).classList.add('active');
+    renderStock(); renderStats(); renderCustomerSection();
+  }
+
+  function startScanner(mode) {
+    document.getElementById('scannerModal').style.display = 'block';
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 120 } },
+      (decodedText) => {
+        stopScanner();
+        if (mode === 'BILL') {
+          document.getElementById('scanInput').value = cleanCode(decodedText);
+          addItemToBill();
+        } else if (mode === 'DECODE') {
+          document.getElementById('decodeInput').value = decodedText.toUpperCase();
+          decodeAcc(decodedText, true);
+        }
+      },
+      () => {}
+    ).catch(err => {
+      stopScanner();
+      showInlineMsg('billMsg', '📷 Camera permission allow karein.', 'error');
+    });
+  }
+
+  function stopScanner() {
+    if (html5QrCode) {
+      html5QrCode.stop().then(() => {
+        html5QrCode.clear();
+        document.getElementById('scannerModal').style.display = 'none';
+      }).catch(() => {
+        document.getElementById('scannerModal').style.display = 'none';
+      });
+    } else {
+      document.getElementById('scannerModal').style.display = 'none';
+    }
+  }
+
+  function saveStockItem() {
+    const baseCode = cleanCode(document.getElementById('sCode').value);
+    const cat = document.getElementById('sCat').value;
+    const colorRaw = document.getElementById('sColor').value.trim();
+    const qty = parseInt(document.getElementById('sQty').value) || 1;
+    const cost = parseFloat(document.getElementById('sCost').value) || 0;
+    const mrp = parseFloat(document.getElementById('sMrp').value) || 0;
+
+    if (!baseCode || !cost || !mrp) {
+      showInlineMsg('stockMsg', '⚠️ Kripya Base Code, Cost aur MRP bharein!', 'error');
+      return;
+    }
+
+    const colors = colorRaw ? colorRaw.split(',').map(c => c.trim()).filter(Boolean) : ['Standard'];
+    let addedCodes = [];
+
+    colors.forEach(color => {
+      let finalCode = baseCode;
+      if (colorRaw) {
+        const upperCol = color.toUpperCase();
+        const suffix = colorCodeMap[upperCol] || cleanCode(upperCol).slice(0, 2);
+        if (!baseCode.endsWith(suffix)) {
+          finalCode = `${baseCode}${suffix}`;
+        }
+      }
+
+      const existing = inventory.find(i => i.code === finalCode);
+      if (existing) {
+        existing.qty += qty;
+        existing.cost = cost;
+        existing.mrp = mrp;
+        existing.color = color || existing.color;
+      } else {
+        inventory.push({ code: finalCode, cat, color, qty, cost, mrp });
+      }
+      addedCodes.push(`${finalCode} (${color})`);
+    });
+
+    syncToCloud();
+    renderStock();
+    document.getElementById('sCode').value = '';
+    document.getElementById('sColor').value = '';
+    showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
+  }
+
+  // --- FEATURE 5: QUICK EDIT STOCK MODAL ---
+  function openEditStockModal(code) {
+    const item = inventory.find(i => i.code === code);
+    if (!item) return;
+    document.getElementById('editOrigCode').value = item.code;
+    document.getElementById('editCode').value = item.code;
+    document.getElementById('editCat').value = item.cat || 'Daily Saree';
+    document.getElementById('editColor').value = item.color || 'Standard';
+    document.getElementById('editQty').value = item.qty;
+    document.getElementById('editCost').value = item.cost;
+    document.getElementById('editMrp').value = item.mrp;
+    document.getElementById('editStockModal').style.display = 'flex';
+  }
+
+  function closeEditStockModal() {
+    document.getElementById('editStockModal').style.display = 'none';
+  }
+
+  function saveEditedStock() {
+    const origCode = document.getElementById('editOrigCode').value;
+    const newCode = cleanCode(document.getElementById('editCode').value);
+    const cat = document.getElementById('editCat').value;
+    const color = document.getElementById('editColor').value.trim() || 'Standard';
+    const qty = parseInt(document.getElementById('editQty').value) || 0;
+    const cost = parseFloat(document.getElementById('editCost').value) || 0;
+    const mrp = parseFloat(document.getElementById('editMrp').value) || 0;
+
+    if (!newCode || !mrp) return;
+
+    const item = inventory.find(i => i.code === origCode);
+    if (item) {
+      item.code = newCode;
+      item.cat = cat;
+      item.color = color;
+      item.qty = qty;
+      if (cost > 0) item.cost = cost;
+      item.mrp = mrp;
+    }
+
+    syncToCloud();
+    closeEditStockModal();
+    renderStock();
+    showInlineMsg('stockMsg', `✅ ${newCode} safaltapoorvak update ho gaya!`, 'success');
+  }
+
+  function deleteStockItem(code, btnEl) {
+    if (btnEl && !btnEl.classList.contains('confirming')) {
+      btnEl.classList.add('confirming');
+      btnEl.innerText = 'Sure?';
+      setTimeout(() => {
+        if (btnEl) { btnEl.classList.remove('confirming'); btnEl.innerText = '✕'; }
+      }, 2500);
+      return;
+    }
+    inventory = inventory.filter(i => i.code !== code);
+    syncToCloud();
+    renderStock();
+  }
+
+  function shareLowStockMandiList() {
+    const lowItems = inventory.filter(i => i.qty <= 2);
+    if (lowItems.length === 0) {
+      showInlineMsg('stockMsg', '✅ Sabhi items paryapt stock mein hain!', 'success');
+      return;
+    }
+    const text = '📝 *SHAKYA COSMETIC - MANDI KHARIDARI LIST*\n' +
+      lowItems.map(i => '• *' + i.code + '* (' + i.cat + ' - ' + i.color + ') — Bacha Qty: *' + i.qty + '*').join('\n');
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  function getFilteredInventory() {
+    const q = (document.getElementById('fSearch')?.value || '').trim().toUpperCase();
+    const cat = document.getElementById('fCat')?.value || 'ALL';
+    const status = document.getElementById('fStatus')?.value || 'ALL';
+
+    return inventory.filter(item => {
+      const matchQuery = !q ||
+        item.code.toUpperCase().includes(q) ||
+        (item.color && item.color.toUpperCase().includes(q)) ||
+        (item.cat && item.cat.toUpperCase().includes(q)) ||
+        String(item.mrp).includes(q) ||
+        (ownerUnlocked && String(item.cost).includes(q));
+
+      const matchCat = (cat === 'ALL') || (item.cat === cat);
+
+      let matchStatus = true;
+      if (status === 'INSTOCK') matchStatus = item.qty > 0;
+      else if (status === 'LOW') matchStatus = item.qty > 0 && item.qty <= 2;
+      else if (status === 'OUT') matchStatus = item.qty <= 0;
+
+      return matchQuery && matchCat && matchStatus;
+    });
+  }
+
+  function resetStockFilters() {
+    document.getElementById('fSearch').value = '';
+    document.getElementById('fCat').value = 'ALL';
+    document.getElementById('fStatus').value = 'ALL';
+    renderStock();
+  }
+
+  function renderStock() {
+    const filtered = getFilteredInventory();
+    const tbody = document.getElementById('stockTableBody');
+
+    let totalPcs = 0, totalCostVal = 0;
+    filtered.forEach(i => {
+      const q = Math.max(0, i.qty);
+      totalPcs += q;
+      totalCostVal += (q * i.cost);
+    });
+
+    const sumBar = document.getElementById('stockSummaryBar');
+    if (sumBar) {
+      sumBar.innerHTML = `
+        <span>📋 Items: <b>${filtered.length}</b></span>
+        <span>📦 Kul Pcs: <b>${totalPcs}</b></span>
+        <span>💰 Kharid Value: <b>${ownerUnlocked ? '₹' + totalCostVal : '🔒 ***'}</b></span>
+      `;
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:14px; color:#888;">Is filter mein koi item nahi mila.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(item => `
+      <tr>
+        <td class="code-cell">${item.code}</td>
+        <td>${item.cat}<br><small style="color:var(--maroon);font-weight:600;">${item.color}</small></td>
+        <td>${ownerUnlocked ? '₹' + item.cost : '🔒 ***'}</td>
+        <td><b>₹${item.mrp}</b></td>
+        <td style="color:${item.qty <= 2 ? 'red' : 'black'}; font-weight:bold;">${item.qty}</td>
+        <td style="text-align:right; white-space:nowrap;">
+          <div class="action-group">
+            <button class="btn-action btn-bill" onclick="quickAdd('${item.code}')">+Bill</button>
+            <button class="btn-action btn-tag" onclick="printSareeTag('${item.code}')">Tag</button>
+            <button class="btn-action btn-edit" onclick="openEditStockModal('${item.code}')">✏️</button>
+            <button class="btn-action btn-del" onclick="deleteStockItem('${item.code}', this)">✕</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function printSareeTag(code) {
+    const item = inventory.find(i => i.code === code);
+    if (!item) return;
+    document.querySelectorAll('.tab')[0].click();
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    zone.innerHTML = `
+      <h2>SHAKYA COSMETIC</h2>
+      <p>${item.cat} - ${item.color} | Code: C${item.cost}X</p>
+      <div class="receipt-total">MRP: ₹${item.mrp}</div>
+      <div class="barcode-box"><svg id="tagBarcode"></svg></div>
+    `;
+    JsBarcode("#tagBarcode", item.code, { format: "CODE128", width: 1.3, height: 30, displayValue: true, fontSize: 11, margin: 2 });
+  }
+
+  function printAllStockTags() {
+    const listToPrint = getFilteredInventory();
+    if (listToPrint.length === 0) {
+      showInlineMsg('stockMsg', '⚠️ Print karne ke liye koi item nahi hai!', 'error');
+      return;
+    }
+    document.querySelectorAll('.tab')[0].click();
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+
+    let tagsHTML = `<h3 style="margin:0 0 8px 0; color:#000; font-size:12px;">SHAKYA COSMETIC - TAGS (${listToPrint.length})</h3><div class="batch-tag-container">`;
+    listToPrint.forEach((item, idx) => {
+      tagsHTML += `
+        <div class="single-tag">
+          <h4>SHAKYA COSMETIC</h4>
+          <p>${item.cat} - ${item.color}</p>
+          <p>Code: C${item.cost}X</p>
+          <div class="tag-mrp">MRP: ₹${item.mrp}</div>
+          <div class="barcode-box"><svg id="batchTag_${idx}"></svg></div>
+        </div>
+      `;
+    });
+    tagsHTML += `</div>`;
+    zone.innerHTML = tagsHTML;
+
+    listToPrint.forEach((item, idx) => {
+      try {
+        JsBarcode("#batchTag_" + idx, item.code, { format: "CODE128", width: 1.2, height: 26, displayValue: true, fontSize: 10, margin: 2 });
+      } catch (e) {}
+    });
+
+    window.print();
+  }
+
+  function quickAdd(code) {
+    document.getElementById('scanInput').value = cleanCode(code);
+    const tabEl = document.getElementById('tab-billing');
+    if (tabEl) switchTab('billing', tabEl);
+    addItemToBill();
+  }
+
+  function addItemToBill() {
+    const code = cleanCode(document.getElementById('scanInput').value);
+    const suggestBox = document.getElementById('scanSuggestBox');
+    if (suggestBox) suggestBox.style.display = 'none';
+
+    if (!code) {
+      const inp = document.getElementById('scanInput');
+      if (inp) onScanInputType(inp);
+      showInlineMsg('billMsg', '⚠️ Pehle Saree Code jodein!', 'error');
+      return;
+    }
+    const item = inventory.find(i => cleanCode(i.code) === code);
+    if (!item) {
+      showInlineMsg('billMsg', `❌ Code "${code}" Stock mein nahi mila!`, 'error');
+      return;
+    }
+
+    const existingCartItem = cart.find(c => c.code === item.code);
+    const currentCartQty = existingCartItem ? existingCartItem.qty : 0;
+
+    if (item.qty <= currentCartQty) {
+      showInlineMsg('billMsg', `⚠️ Stock khatam! Sirf ${item.qty} piece hi available hain.`, 'error');
+      return;
+    }
+
+    if (existingCartItem) {
+      existingCartItem.qty += 1;
+    } else {
+      cart.push({ ...item, qty: 1 });
+    }
+
+    document.getElementById('scanInput').value = '';
+    showInlineMsg('billMsg', `✅ ${item.code} (${item.color}) bill mein jud gaya!`, 'success');
+    renderCart();
+  }
+
+  function addQuickCustomItem() {
+    const name = document.getElementById('qItemName').value.trim() || 'Cosmetic/Futtkar';
+    const mrp = parseFloat(document.getElementById('qItemMrp').value) || 0;
+    if (mrp <= 0) {
+      showInlineMsg('billMsg', '⚠️ Futtkar item ka Rate (₹) daalein!', 'error');
+      return;
+    }
+    const customCode = 'QC' + Math.floor(10 + Math.random() * 89);
+    const estCost = Math.round(mrp * 0.7);
+    cart.push({
+      code: customCode,
+      cat: name,
+      color: 'Custom',
+      qty: 1,
+      cost: estCost,
+      mrp: mrp,
+      isCustom: true
+    });
+    document.getElementById('qItemName').value = '';
+    document.getElementById('qItemMrp').value = '';
+    renderCart();
+    showInlineMsg('billMsg', `✅ ${name} (₹${mrp}) bill mein jud gaya!`, 'success');
+  }
+
+  function changeCartQty(idx, delta) {
+    const c = cart[idx];
+    if (!c) return;
+    const newQty = c.qty + delta;
+    if (newQty <= 0) {
+      cart.splice(idx, 1);
+      renderCart();
+      return;
+    }
+    if (!c.isCustom) {
+      const st = inventory.find(i => i.code === c.code);
+      if (st && newQty > st.qty) {
+        showInlineMsg('billMsg', `⚠️ Stock mein sirf ${st.qty} pcs available hain!`, 'error');
+        return;
+      }
+    }
+    c.qty = newQty;
+    renderCart();
+  }
+
+  function removeCartItem(idx) {
+    cart.splice(idx, 1);
+    renderCart();
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartBody');
+    let totalMrp = 0;
+    tbody.innerHTML = cart.map((c, idx) => {
+      let itemTotalMrp = c.mrp * c.qty;
+      totalMrp += itemTotalMrp;
+      return `<tr>
+        <td class="code-cell">${c.code}</td>
+        <td>
+          ${c.cat} (${c.color})<br>
+          <button class="qty-btn" onclick="changeCartQty(${idx}, -1)">−</button>
+          <b style="color:var(--maroon);font-size:12px;">${c.qty}</b>
+          <button class="qty-btn" onclick="changeCartQty(${idx}, 1)">+</button>
+        </td>
+        <td>₹${itemTotalMrp}</td>
+        <td><button class="small" style="background:#c00" onclick="removeCartItem(${idx})">✕</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('billTotalMrp').value = totalMrp;
+    document.getElementById('accInput').value = totalMrp;
+    document.getElementById('paidInput').value = totalMrp;
+    document.getElementById('dueInput').value = 0;
+    onPayModeChange();
+    updateLiveSplit();
+  }
+
+  function onAccInputChange() {
+    const acc = parseFloat(document.getElementById('accInput').value) || 0;
+    document.getElementById('paidInput').value = acc;
+    onPayModeChange();
+    updateLiveSplit();
+  }
+
+  function onPayModeChange() {
+    const mode = document.getElementById('payMode').value;
+    const splitRow = document.getElementById('splitPayRow');
+    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    if (mode === 'Split') {
+      splitRow.style.display = 'flex';
+      const half = Math.round(paid / 2);
+      document.getElementById('splitCashInput').value = half;
+      document.getElementById('splitUpiInput').value = Math.max(0, paid - half);
+    } else {
+      splitRow.style.display = 'none';
+    }
+  }
+
+  function onSplitCashChange() {
+    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const cVal = parseFloat(document.getElementById('splitCashInput').value) || 0;
+    document.getElementById('splitUpiInput').value = Math.max(0, paid - cVal);
+  }
+
+  function onSplitUpiChange() {
+    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const uVal = parseFloat(document.getElementById('splitUpiInput').value) || 0;
+    document.getElementById('splitCashInput').value = Math.max(0, paid - uVal);
+  }
+
+  function updateLiveSplit() {
+    const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
+    const acc = parseFloat(document.getElementById('accInput').value) || 0;
+    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const due = Math.max(0, acc - paid);
+    document.getElementById('dueInput').value = due;
+
+    if (document.getElementById('payMode').value === 'Split') {
+      const cVal = parseFloat(document.getElementById('splitCashInput').value) || 0;
+      document.getElementById('splitUpiInput').value = Math.max(0, paid - cVal);
+    }
+
+    const box = document.getElementById('liveSplitBox');
+    if (!ownerUnlocked || cart.length === 0 || totalMrp === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    let totalCost = cart.reduce((s, i) => s + (i.cost * i.qty), 0);
+    let totalDiscount = totalMrp - acc;
+    let netProfit = acc - totalCost;
+
+    let itemBreakup = cart.map(i => {
+      let itemTotalMrp = i.mrp * i.qty;
+      let weight = itemTotalMrp / totalMrp;
+      let itemRealSale = Math.round(itemTotalMrp - (totalDiscount * weight));
+      let itemCostTotal = i.cost * i.qty;
+      return `${i.code} (Qty ${i.qty}): MRP ₹${itemTotalMrp} ➔ Asli Sale <b>₹${itemRealSale}</b> (Profit: ₹${itemRealSale - itemCostTotal})`;
+    }).join('<br>');
+
+    box.style.display = 'block';
+    box.innerHTML = `<b>🔒 Owner Internal Hisaab (Bill par nahi chhapega):</b><br>
+      Kharid: ₹${totalCost} | Chhoot: ₹${totalDiscount} | <b>Net Profit: ₹${netProfit}</b> ${due > 0 ? `| <b style="color:#b30000;">Baaki Udhaar: ₹${due}</b>` : ''}<hr style="margin:4px 0">
+      ${itemBreakup}`;
+  }
+
+  function buildReceiptHTML(saleRecord, svgId) {
+    const dueVal = saleRecord.due || 0;
+    const paidVal = saleRecord.paid !== undefined ? saleRecord.paid : saleRecord.acc;
+    return `
+      <h2>SHAKYA COSMETIC</h2>
+      <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
+      <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
+      <hr style="border-top:1px dashed #000;">
+      <p style="text-align:left; margin:4px 0;"><b>Bill No:</b> ${saleRecord.invId} ${saleRecord.exchanged ? '(EXCHANGED)' : ''} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.village || 'Niwari Kalan'})<br><b>Mobile:</b> ${saleRecord.mobile || 'N/A'} | <b>Mode:</b> ${saleRecord.mode}</p>
+      <table>
+        <thead><tr><th>Code</th><th>Item & Qty</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
+        <tbody>
+          ${saleRecord.items.map(i => `<tr style="${i.returned ? 'text-decoration:line-through; opacity:0.6;' : ''}"><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color}) ${i.returned ? '[RETURNED]' : ''}<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="receipt-total">TOTAL: ₹${saleRecord.totalMrp} | TAY: ₹${saleRecord.acc}</div>
+      ${dueVal > 0 ? `<p style="font-size:11px; font-weight:bold; color:#000; margin:2px 0;">JAMA (PAID): ₹${paidVal} | BAAKI UDHAAR: ₹${dueVal}</p>` : ''}
+      <p style="font-size:9px; margin:4px 0;">धन्यवाद! बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।</p>
+      ${diwaliMode ? `<p style="font-size:10px; font-weight:bold; margin:4px 0;">🪔 शुभ दीपावली की हार्दिक शुभकामनाएँ! 🪔</p>` : ''}
+      <div class="barcode-box"><svg id="${svgId}"></svg></div>
+    `;
+  }
+
+  function renderBarcodeOnSvg(svgId, saleRecord) {
+    const secretPayload = `${saleRecord.invId}A${saleRecord.acc}C${saleRecord.totalCost}`;
+    JsBarcode("#" + svgId, secretPayload, {
+      format: "CODE128",
+      width: 1.0,
+      height: 24,
+      displayValue: true,
+      text: `${saleRecord.invId} | SHAKYA COSMETIC`,
+      fontSize: 9,
+      margin: 1
+    });
+  }
+
+  // --- FEATURE 2: 1-TAP 80MM RAWBT THERMAL PRINT ---
+  function printDirect80mm() {
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+      const base64Data = canvas.toDataURL('image/png');
+      window.location.href = 'rawbt:' + base64Data;
+    }).catch(() => {
+      window.print();
+    });
+  }
+
+  function printDirect80mmFromModal() {
+    closeBillModal();
+    const tabEl = document.getElementById('tab-billing');
+    if (tabEl) switchTab('billing', tabEl);
+    printDirect80mm();
+  }
+
+  function finalizeBill() {
+    if (cart.length === 0) {
+      const inp = document.getElementById('scanInput');
+      if (inp) {
+        inp.focus();
+        onScanInputType(inp);
+      }
+      showInlineMsg('billMsg', '⚠️ Pehle Saree Code jodein!', 'error');
+      return;
+    }
+    const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
+    const acc = parseFloat(document.getElementById('accInput').value) || totalMrp;
+    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const due = Math.max(0, acc - paid);
+    const mob = document.getElementById('custMobile').value.trim();
+    const custName = document.getElementById('custName').value.trim() || 'Walk-in Customer';
+    const custVil = document.getElementById('custVillage').value.trim() || 'Niwari Kalan';
+    const mode = document.getElementById('payMode').value;
+
+    if (due > 0 && (!mob || mob.length < 10)) {
+      showInlineMsg('billMsg', '⚠️ Udhaar (Due) rakhne ke liye Customer ka 10-ank ka Mobile Number zaroori hai!', 'error');
+      document.getElementById('custMobile').focus();
+      return;
+    }
+
+    let splitCash = 0, splitUpi = 0;
+    if (mode === 'Split') {
+      splitCash = parseFloat(document.getElementById('splitCashInput').value) || 0;
+      splitUpi = parseFloat(document.getElementById('splitUpiInput').value) || 0;
+    }
+
+    let totalCost = 0;
+    cart.forEach(i => { totalCost += (i.cost * i.qty); });
+    const invId = 'INV' + (sales.length + 101);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('hi-IN');
+    const isoDate = now.toISOString().slice(0, 10);
+
+    const itemsSold = cart.map(i => {
+      if (!i.isCustom) {
+        const st = inventory.find(x => x.code === i.code);
+        if (st) st.qty -= i.qty;
+      }
+      let itemTotalMrp = i.mrp * i.qty;
+      const realSale = Math.round((itemTotalMrp / totalMrp) * acc);
+      return { code: i.code, cat: i.cat, color: i.color, qty: i.qty, mrp: i.mrp, cost: i.cost, realSale, returned: false };
+    });
+
+    const saleRecord = {
+      invId, date: dateStr, isoDate,
+      cust: custName,
+      village: custVil,
+      mobile: mob,
+      mode, splitCash, splitUpi,
+      totalMrp, acc, paid, due, totalCost, profit: acc - totalCost,
+      exchanged: false,
+      items: itemsSold
+    };
+
+    saveContactToDirectory(custName, mob, custVil);
+
+    sales.unshift(saleRecord);
+    lastSavedSale = saleRecord;
+    syncToCloud();
+
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+    zone.innerHTML = buildReceiptHTML(saleRecord, 'accBarcode');
+    renderBarcodeOnSvg('accBarcode', saleRecord);
+
+    cart = [];
+    renderCart();
+    document.getElementById('custName').value = '';
+    document.getElementById('custVillage').value = '';
+    document.getElementById('custMobile').value = '';
+    showPrevUdhaarBanner('', '', 0);
+
+    if (diwaliMode) {
+      launchDiwaliFireworks(5);
+    }
+
+    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Local + Cloud par sync ho gaya!`, 'success');
+  }
+
+  // --- DIRECT WHATSAPP TO CUSTOMER WITHOUT MANUAL CONTACT SELECTION ---
+  function buildWhatsAppBillText(s) {
+    const paidVal = s.paid !== undefined ? s.paid : s.acc;
+    const dueVal = s.due || 0;
+    const itemsText = s.items
+      .filter(i => !i.returned)
+      .map(i => '• ' + i.code + ' - ' + i.cat + ' (' + i.color + ') [' + i.qty + ' pcs]: ₹' + (i.mrp * i.qty))
+      .join('\n');
+
+    let lines = [
+      '🙏 *SHAKYA COSMETIC & SAREE COLLECTION*',
+      '📍 निवाड़ी कलां, इटावा | 📞 8780234760',
+      '━━━━━━━━━━━━━━━━━━',
+      '🧾 *Bill No:* ' + s.invId,
+      '📅 *Date:* ' + s.date,
+      '👤 *Customer:* ' + s.cust + ' (' + (s.village || 'Niwari Kalan') + ')',
+      '━━━━━━━━━━━━━━━━━━',
+      '*Items:*',
+      itemsText,
+      '━━━━━━━━━━━━━━━━━━',
+      '💰 *Total MRP:* ₹' + s.totalMrp,
+      '✅ *Tay Hisaab (ACC):* ₹' + s.acc,
+      '💵 *Jama (Paid):* ₹' + paidVal + ' (' + s.mode + ')'
+    ];
+    if (dueVal > 0) {
+      lines.push('❗ *Baaki Udhaar (Due):* ₹' + dueVal);
+    }
+    lines.push('━━━━━━━━━━━━━━━━━━');
+    lines.push('धन्यवाद! बिकी हुई साड़ी 3 दिन में केवल बदली जाएगी।');
+    if (diwaliMode) {
+      lines.push('🪔 *शुभ दीपावली की हार्दिक शुभकामनाएँ!* 🪔');
+    }
+    return lines.join('\n');
+  }
+
+  function sendWhatsAppLastBill(mode = 'DIRECT') {
+    if (!lastSavedSale) {
+      showInlineMsg('billMsg', '⚠️ Abhi koi naya bill nahi bana hai!', 'error');
+      return;
+    }
+    pendingWaMode = mode;
+    let mob = lastSavedSale.mobile;
+    if (!mob || mob.length < 10) {
+      document.getElementById('waInputNumber').value = '';
+      document.getElementById('waErrorMsg').style.display = 'none';
+      document.getElementById('waPromptModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('waInputNumber').focus(), 100);
+      return;
+    }
+    if (mode === 'IMAGE') {
+      generateAndDownloadBillImage(mob);
+    } else {
+      openDirectCustomerWhatsApp(mob);
+    }
+  }
+
+  function closeWaModal() { document.getElementById('waPromptModal').style.display = 'none'; }
+
+  function submitWaNumber() {
+    const mob = document.getElementById('waInputNumber').value.trim();
+    const errEl = document.getElementById('waErrorMsg');
+    if (!mob || mob.length < 10) {
+      if (errEl) {
+        errEl.innerText = '⚠️ Kripya sahi 10 ank ka mobile number daalein!';
+        errEl.style.display = 'block';
+      }
+      return;
+    }
+    if (errEl) errEl.style.display = 'none';
+    closeWaModal();
+    if (lastSavedSale) {
+      lastSavedSale.mobile = mob;
+      saveContactToDirectory(lastSavedSale.cust, mob, lastSavedSale.village);
+      syncToCloud();
+    }
+    if (pendingWaMode === 'IMAGE') {
+      generateAndDownloadBillImage(mob);
+    } else {
+      openDirectCustomerWhatsApp(mob);
+    }
+  }
+
+  function openDirectCustomerWhatsApp(mob) {
+    const msg = buildWhatsAppBillText(lastSavedSale);
+    window.open('https://wa.me/91' + mob + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  function generateAndDownloadBillImage(mob) {
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+
+    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+      canvas.toBlob(blob => {
+        const file = new File([blob], `Shakya_Bill_${lastSavedSale.invId}.png`, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: `Bill ${lastSavedSale.invId}`,
+            text: buildWhatsAppBillText(lastSavedSale)
+          }).catch(() => {});
+        } else {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `Shakya_Bill_${lastSavedSale.invId}.png`;
+          link.click();
+          openDirectCustomerWhatsApp(mob);
+        }
+      });
+    });
+  }
+
+  function openBillModal(invId) {
+    const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
+    if (!s) return;
+
+    lastSavedSale = s;
+    const dueVal = s.due || 0;
+    const paidVal = s.paid !== undefined ? s.paid : s.acc;
+
+    const internalBox = document.getElementById('modalInternalBox');
+    if (ownerUnlocked) {
+      internalBox.style.display = 'block';
+      internalBox.innerHTML = `
+        <b>🔒 अंदरूनी हिसाब (${s.invId}) ${s.exchanged ? '<span style="color:red;">[EXCHANGED/RETURNED]</span>' : ''}:</b><br>
+        Sticker MRP: ₹${s.totalMrp} | <b>Tay ACC: ₹${s.acc}</b><br>
+        Mila Cash: <b style="color:green;">₹${paidVal}</b> | Baaki Udhaar: <b style="color:red;">₹${dueVal}</b><br>
+        Kharid: ₹${s.totalCost} | <b style="color:green;">Net Profit: ₹${s.profit}</b><hr style="margin:5px 0;">
+        <b>Items Asli Bikri Rate:</b><br>
+        ${s.items.map(i => `• <b>${i.code}</b> (${i.color}) [${i.qty} pcs] ${i.returned ? '<b style="color:red;">(Returned)</b>' : ''}: Sticker ₹${i.mrp * i.qty} ➔ Asli Sale <b>₹${i.realSale}</b>`).join('<br>')}
+      `;
+    } else {
+      internalBox.style.display = 'block';
+      internalBox.innerHTML = `<b>🔒 Owner Hisaab Hidden:</b> Asli Kharid aur Profit dekhne ke liye upar <b>🔒 Cost: OFF</b> button dabayein.`;
+    }
+
+    // Build Item-wise Exchange List
+    const exSec = document.getElementById('exchangeSectionBox');
+    const exList = document.getElementById('exchangeItemsList');
+    const activeItems = s.items.filter(i => !i.returned);
+    if (s.exchanged || activeItems.length === 0) {
+      exSec.style.display = 'none';
+    } else {
+      exSec.style.display = 'block';
+      exList.innerHTML = s.items.map((item, idx) => {
+        if (item.returned) {
+          return `<div class="exchange-item-row" style="opacity:0.5;"><span>✔ <b>${item.code}</b> (${item.color}) - Already Returned</span></div>`;
+        }
+        return `
+          <label class="exchange-item-row" style="margin:0; cursor:pointer;">
+            <span style="display:flex; align-items:center;">
+              <input type="checkbox" class="ex-item-chk" value="${idx}">
+              <span><b>${item.code}</b> - ${item.cat} (${item.color}) [${item.qty} pcs]</span>
+            </span>
+            <b style="color:var(--maroon);">Tay: ₹${item.realSale}</b>
+          </label>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('modalReceiptBox').innerHTML = `<div style="border:2px dashed #333; padding:10px; text-align:center;">` + buildReceiptHTML(s, 'modalBarcodeSvg') + `</div>`;
+    document.getElementById('billModal').style.display = 'block';
+    renderBarcodeOnSvg('modalBarcodeSvg', s);
+
+    document.getElementById('printZone').innerHTML = buildReceiptHTML(s, 'printBarcodeSvg');
+    renderBarcodeOnSvg('printBarcodeSvg', s);
+  }
+
+  function closeBillModal() { document.getElementById('billModal').style.display = 'none'; }
+
+  function printFromModal() {
+    closeBillModal();
+    const tabEl = document.getElementById('tab-billing');
+    if (tabEl) switchTab('billing', tabEl);
+    document.getElementById('printCard').style.display = 'block';
+    window.print();
+  }
+
+  // --- FEATURE 1: SINGLE-ITEM OR PARTIAL BILL EXCHANGE ---
+  function exchangeSelectedItems() {
+    if (!lastSavedSale || lastSavedSale.exchanged) return;
+    const chks = Array.from(document.querySelectorAll('.ex-item-chk:checked'));
+    if (chks.length === 0) {
+      alert('⚠️ Kripya return karne wali Saree/Item par tick (✔) lagayein!');
+      return;
+    }
+
+    const selectedIndexes = chks.map(c => parseInt(c.value));
+    const remainingUnreturned = lastSavedSale.items.filter((it, idx) => !it.returned && !selectedIndexes.includes(idx));
+
+    // If all remaining items are selected, perform full bill return
+    if (remainingUnreturned.length === 0) {
+      exchangeReturnBill();
+      return;
+    }
+
+    if (!confirm(`Kya aap chune hue ${selectedIndexes.length} item(s) wapas Stock (+Qty) mein jodna chahte hain?`)) return;
+
+    let refundRealSale = 0;
+    selectedIndexes.forEach(idx => {
+      const soldItem = lastSavedSale.items[idx];
+      if (!soldItem || soldItem.returned) return;
+
+      const st = inventory.find(x => x.code === soldItem.code);
+      if (st) {
+        st.qty += soldItem.qty;
+      } else {
+        inventory.push({
+          code: soldItem.code,
+          cat: soldItem.cat,
+          color: soldItem.color,
+          qty: soldItem.qty,
+          cost: soldItem.cost,
+          mrp: soldItem.mrp
+        });
+      }
+
+      soldItem.returned = true;
+      refundRealSale += (soldItem.realSale || 0);
+      lastSavedSale.totalMrp = Math.max(0, lastSavedSale.totalMrp - (soldItem.mrp * soldItem.qty));
+      lastSavedSale.totalCost = Math.max(0, lastSavedSale.totalCost - (soldItem.cost * soldItem.qty));
+      lastSavedSale.acc = Math.max(0, lastSavedSale.acc - (soldItem.realSale || 0));
+    });
+
+    lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
+    if (lastSavedSale.due > 0) {
+      const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
+      lastSavedSale.due -= dueReduce;
+      const remRefund = refundRealSale - dueReduce;
+      lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
+    } else {
+      lastSavedSale.paid = lastSavedSale.acc;
+    }
+
+    syncToCloud();
+    openBillModal(lastSavedSale.invId);
+    renderStock();
+    renderStats();
+    renderCustomerSection();
+    alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
+  }
+
+  function exchangeReturnBill() {
+    if (!lastSavedSale || lastSavedSale.exchanged) return;
+    if (!confirm(`Kya aap Bill ${lastSavedSale.invId} ki saari Saree/Items wapas Stock (+Qty) mein jodna chahte hain?`)) return;
+
+    lastSavedSale.items.forEach(soldItem => {
+      if (soldItem.returned) return;
+      const st = inventory.find(x => x.code === soldItem.code);
+      if (st) {
+        st.qty += soldItem.qty;
+      } else {
+        inventory.push({
+          code: soldItem.code,
+          cat: soldItem.cat,
+          color: soldItem.color,
+          qty: soldItem.qty,
+          cost: soldItem.cost,
+          mrp: soldItem.mrp
+        });
+      }
+      soldItem.returned = true;
+    });
+
+    lastSavedSale.exchanged = true;
+    lastSavedSale.acc = 0;
+    lastSavedSale.paid = 0;
+    lastSavedSale.due = 0;
+    lastSavedSale.profit = 0;
+
+    syncToCloud();
+    closeBillModal();
+    renderStock();
+    renderStats();
+    renderCustomerSection();
+    alert(`✅ Bill ${lastSavedSale.invId} ke sabhi items wapas Stock mein jud gaye hain!`);
+  }
+
+  function decodeAcc(val, openPopup = false) {
+    const res = document.getElementById('decodeResult');
+    const clean = cleanCode(val);
+    if (!clean) { res.innerHTML = ''; return; }
+
+    const fullMatch = clean.match(/(INV\d+)A(\d+)C(\d+)/);
+    let targetInv = fullMatch ? fullMatch[1] : (clean.startsWith('INV') ? clean : 'INV' + clean);
+
+    const found = sales.find(s => cleanCode(s.invId) === targetInv);
+    if (found) {
+      res.innerHTML = `
+        <div style="background:#fff8fa; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
+          ✅ <b>${found.invId} (${found.date}) - ${found.cust}</b> ${found.exchanged ? '<b style="color:red;">[EXCHANGED]</b>' : ''}<br>
+          Sticker Bill: ₹${found.totalMrp} | <b style="color:var(--maroon);">ACC: ₹${found.acc}</b> | <b style="color:red;">Udhaar: ₹${found.due || 0}</b><br>
+          ${found.items.map(i => `• ${i.code} (${i.color}) [${i.qty} pcs]: ₹${i.mrp * i.qty} ${i.returned ? '(Returned)' : ''}`).join('<br>')}
+          <button class="small gold" style="margin-top:8px; width:100%;" onclick="openBillModal('${found.invId}')">📄 Bill Kholein / Item Exchange Karein</button>
+        </div>
+      `;
+      if (openPopup) openBillModal(found.invId);
+    } else {
+      res.innerHTML = `<span style="color:#888;">Bill <b>${targetInv}</b> nahi mila.</span>`;
+    }
+  }
+
+  // --- FEATURE 4: UDHAAR PASSBOOK, CALL & CONTACT ACTIONS ---
+  function openUdhaarModal(mob, name, totalDue) {
+    activeUdhaarMobile = mob;
+    activeUdhaarName = name;
+    document.getElementById('udhaarCustInfo').innerText = `${name} (${mob}) — Kul Baaki Udhaar: ₹${totalDue}`;
+    document.getElementById('udhaarReceiveInput').value = totalDue;
+    document.getElementById('udhaarPayMode').value = 'Cash';
+    document.getElementById('udhaarModal').style.display = 'flex';
+  }
+
+  function openUdhaarByTableIdx(idx) {
+    const c = customerTableCache[idx];
+    if (!c) return;
+    openUdhaarModal(c.mob, c.name, c.due);
+  }
+
+  function remindUdhaarByTableIdx(idx) {
+    const c = customerTableCache[idx];
+    if (!c) return;
+    sendUdhaarReminder(c.mob, c.name, c.due);
+  }
+
+  function saveContactByTableIdx(idx) {
+    const c = customerTableCache[idx];
+    if (!c) return;
+    downloadVcfCard(c.name, c.mob, c.village);
+  }
+
+  function selectCustomerSearchByIdx(idx) {
+    const c = customerTableCache[idx];
+    if (!c) return;
+    const q = c.mob || c.name;
+    document.getElementById('searchMobile').value = q;
+    lookupCustomer(q);
+  }
+
+  function closeUdhaarModal() {
+    document.getElementById('udhaarModal').style.display = 'none';
+  }
+
+  function confirmUdhaarPayment(sendWa = false) {
+    let recAmt = parseFloat(document.getElementById('udhaarReceiveInput').value) || 0;
+    const payMode = document.getElementById('udhaarPayMode').value || 'Cash';
+    if (recAmt <= 0 || !activeUdhaarMobile) return;
+
+    const origRecAmt = recAmt;
+    sales.forEach(s => {
+      if (s.mobile === activeUdhaarMobile && (s.due || 0) > 0 && recAmt > 0) {
+        let settle = Math.min(s.due, recAmt);
+        s.due -= settle;
+        s.paid = (s.paid !== undefined ? s.paid : (s.acc - s.due)) + settle;
+        recAmt -= settle;
+      }
+    });
+
+    const actuallySettled = origRecAmt - recAmt;
+    const remainingDue = sales
+      .filter(s => s.mobile === activeUdhaarMobile)
+      .reduce((sum, s) => sum + (s.due || 0), 0);
+
+    const now = new Date();
+    udhaarLogs.unshift({
+      id: 'UDH' + Date.now().toString().slice(-5),
+      date: now.toLocaleDateString('hi-IN'),
+      isoDate: now.toISOString().slice(0, 10),
+      mobile: activeUdhaarMobile,
+      cust: activeUdhaarName,
+      amount: actuallySettled,
+      mode: payMode,
+      remainingDue
+    });
+
+    syncToCloud();
+    closeUdhaarModal();
+    lookupCustomer(activeUdhaarMobile);
+    renderCustomerSection();
+    renderStats();
+
+    if (sendWa && activeUdhaarMobile.length >= 10) {
+      const msg = `🙏 नमस्कार *${activeUdhaarName}* जी,\n*SHAKYA COSMETIC & SAREE COLLECTION* (निवाड़ी कलां) में आज आपके उधार खाते में *₹${actuallySettled}* (${payMode}) जमा प्राप्त हुए।\nअब आपका कुल बाकी उधार: *₹${remainingDue}* है। धन्यवाद!`;
+      window.open(`https://wa.me/91${activeUdhaarMobile}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+  }
+
+  function sendUdhaarReminder(mob, name, dueAmt) {
+    const msg = `🙏 नमस्कार *${name}* जी,\n*SHAKYA COSMETIC & SAREE COLLECTION* (निवाड़ी कलां) की तरफ से याद दिलाया जाता है कि आपका *₹${dueAmt}* का हिसाब बाकी (उधार) है। कृपया सुविधा अनुसार जल्द जमा करने का कष्ट करें। धन्यवाद!`;
+    window.open(`https://wa.me/91${mob}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  function lookupCustomer(query) {
+    const q = (query || '').trim().toUpperCase();
+    const res = document.getElementById('customerLedgerResult');
+    if (!q || q.length < 2) {
+      res.innerHTML = '';
+      return;
+    }
+
+    const matchedBills = sales.filter(s =>
+      (s.mobile && s.mobile.includes(q)) ||
+      (s.cust && s.cust.toUpperCase().includes(q))
+    );
+
+    if (matchedBills.length === 0) {
+      res.innerHTML = `<div style="color:#b30000; padding:8px; background:#fff3cd; border-radius:6px;">❌ "${query}" naam ya mobile se koi bill nahi mila.</div>`;
+      return;
+    }
+
+    let totalSpend = matchedBills.reduce((acc, s) => acc + (s.acc || 0), 0);
+    let totalDue = matchedBills.reduce((acc, s) => acc + (s.due || 0), 0);
+    let custName = matchedBills[0].cust;
+    let village = matchedBills[0].village;
+    let mob = matchedBills[0].mobile || '';
+    lookupCustCache = { name: custName, village: village, mob: mob, totalDue: totalDue };
+
+    const custPayments = udhaarLogs.filter(l =>
+      (mob && l.mobile === mob) || (l.cust && l.cust.toUpperCase().includes(q))
+    );
+
+    res.innerHTML = `
+      <div style="background:#f3e8ec; border:1.5px solid var(--maroon); padding:10px; border-radius:8px;">
+        👤 <b>Name:</b> ${custName} | 📍 <b>Gaon:</b> ${village} | 📱 <b>Mob:</b> ${mob || 'N/A'}<br>
+        📦 <b>Kul Bills:</b> ${matchedBills.length} | 💰 <b>Kul Kharid:</b> ₹${totalSpend} | <b style="color:#b30000;">Baaki Udhaar: ₹${totalDue}</b>
+        ${mob ? `
+          <div class="row" style="margin-top:8px;">
+            <div><button class="callbtn small" style="width:100%; margin:0;" onclick="callCustomerNumber('${mob}')">📞 Call Karein</button></div>
+            <div><button class="dark small" style="width:100%; margin:0;" onclick="downloadVcfCard(lookupCustCache.name, lookupCustCache.mob, lookupCustCache.village)">👤 Save Contact</button></div>
+          </div>
+        ` : ''}
+        ${totalDue > 0 && mob ? `
+          <div class="row" style="margin-top:6px;">
+            <div><button class="gold small" style="width:100%; margin:0;" onclick="openUdhaarModal(lookupCustCache.mob, lookupCustCache.name, lookupCustCache.totalDue)">💰 Udhaar Jama Karein</button></div>
+            <div><button class="whatsapp small" style="width:100%; margin:0;" onclick="sendUdhaarReminder(lookupCustCache.mob, lookupCustCache.name, lookupCustCache.totalDue)">💬 WhatsApp Reminder</button></div>
+          </div>
+        ` : ''}
+        <hr style="margin:6px 0;">
+        <b>🧾 Purane Bills ki List:</b>
+        ${matchedBills.map(b => `<div style="margin-top:4px; cursor:pointer; color:var(--maroon); text-decoration:underline;" onclick="openBillModal('${b.invId}')"><b>${b.invId}</b> (${b.date}) - Tay: ₹${b.acc} ${(b.due || 0) > 0 ? `<b style="color:red;">[Udhaar: ₹${b.due}]</b>` : ''}</div>`).join('')}
+        ${custPayments.length > 0 ? `
+          <hr style="margin:6px 0;">
+          <b style="color:#0f6b2f;">📓 Udhaar Jama Passbook History:</b>
+          ${custPayments.map(p => `<div style="margin-top:3px; font-size:11px; color:#222;">✅ <b>${p.date}</b>: <b>₹${p.amount}</b> jama (${p.mode}) — Baaki बचा: ₹${p.remainingDue}</div>`).join('')}
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function renderCustomerSection() {
+    customerTableCache = getCustomerDirectory().sort((a, b) => (b.due || 0) - (a.due || 0));
+    const tbody = document.getElementById('allCustomersBody');
+
+    if (customerTableCache.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px; color:#888;">Abhi koi customer record nahi hai.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = customerTableCache.map((c, idx) => `
+      <tr>
+        <td onclick="selectCustomerSearchByIdx(${idx})" style="cursor:pointer;">
+          <b>${c.name}</b><br><small style="color:#555;">${c.mob || 'No Mob'}</small>
+        </td>
+        <td>${c.village}</td>
+        <td>₹${c.spend}</td>
+        <td><b style="color:${c.due > 0 ? '#b30000' : 'green'};">₹${c.due}</b></td>
+        <td style="text-align:right; white-space:nowrap;">
+          <div class="action-group">
+            ${c.mob ? `<button class="btn-action" style="background:#0f6b2f; color:#fff;" onclick="callCustomerNumber('${c.mob}')" title="Call">📞</button>` : ''}
+            ${c.mob ? `<button class="btn-action" style="background:#333; color:#fff;" onclick="saveContactByTableIdx(${idx})" title="Save Contact">👤</button>` : ''}
+            ${c.due > 0 && c.mob ? `
+              <button class="btn-action" style="background:var(--gold); color:#222;" onclick="openUdhaarByTableIdx(${idx})">💰</button>
+              <button class="btn-action" style="background:#25d366; color:#fff;" onclick="remindUdhaarByTableIdx(${idx})">💬</button>
+            ` : `<span style="color:green; font-size:10px; font-weight:bold;">✔</span>`}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // --- DAILY EXPENSE & INSIGHTS ---
+  function addDailyExpense() {
+    const note = document.getElementById('expNote').value.trim();
+    const amt = parseFloat(document.getElementById('expAmt').value) || 0;
+    if (!note || amt <= 0) return;
+    const now = new Date();
+    expenses.unshift({
+      id: 'EXP' + Date.now().toString().slice(-4),
+      date: now.toLocaleDateString('hi-IN'),
+      isoDate: now.toISOString().slice(0, 10),
+      note: note,
+      amount: amt
+    });
+    document.getElementById('expNote').value = '';
+    document.getElementById('expAmt').value = '';
+    syncToCloud();
+    renderStats();
+  }
+
+  function deleteExpense(id) {
+    expenses = expenses.filter(e => e && e.id !== id);
+    syncToCloud();
+    renderStats();
+  }
+
+  // --- FEATURE 6: DATE & MONTH FILTERS IN INSIGHTS ---
+  function getSaleIsoDate(s) {
+    if (s.isoDate) return s.isoDate;
+    if (!s.date) return '';
+    const parts = s.date.split('/');
+    if (parts.length === 3) {
+      const d = parts[0].padStart(2, '0');
+      const m = parts[1].padStart(2, '0');
+      const y = parts[2];
+      return `${y}-${m}-${d}`;
+    }
+    return '';
+  }
+
+  function setStatsFilter(mode) {
+    statsFilterMode = mode;
+    ['TODAY', 'DATE', 'MONTH', 'ALL'].forEach(m => {
+      const btn = document.getElementById('btnFilter' + m.charAt(0) + m.slice(1).toLowerCase());
+      if (btn) {
+        btn.style.background = (mode === m) ? 'var(--maroon)' : '#ddd';
+        btn.style.color = (mode === m) ? '#fff' : '#333';
+      }
+    });
+    document.getElementById('statsDatePickerWrap').style.display = (mode === 'DATE') ? 'block' : 'none';
+    document.getElementById('statsMonthPickerWrap').style.display = (mode === 'MONTH') ? 'block' : 'none';
+    renderStats();
+  }
+
+  function renderStats() {
+    const todayStr = new Date().toLocaleDateString('hi-IN');
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const selDate = document.getElementById('statsDateInput')?.value || todayIso;
+    const selMonth = document.getElementById('statsMonthInput')?.value || todayIso.slice(0, 7);
+
+    const matchDateFn = (item) => {
+      const sIso = getSaleIsoDate(item);
+      if (statsFilterMode === 'TODAY') return item.date === todayStr || sIso === todayIso;
+      if (statsFilterMode === 'DATE') return sIso === selDate;
+      if (statsFilterMode === 'MONTH') return sIso.startsWith(selMonth);
+      return true;
+    };
+
+    const filteredSales = sales.filter(matchDateFn);
+    const filteredExpenses = expenses.filter(matchDateFn);
+
+    let tAcc = 0, tProfit = 0, tPaid = 0, tDue = 0;
+    let gCash = 0, gUpi = 0, gAeps = 0;
+    let colorCount = {};
+
+    filteredSales.forEach(s => {
+      if (s.exchanged) return;
+      const paidVal = s.paid !== undefined ? s.paid : s.acc;
+      const dueVal = s.due || 0;
+      tAcc += s.acc;
+      tProfit += s.profit;
+      tPaid += paidVal;
+      tDue += dueVal;
+
+      if (s.mode === 'UPI') gUpi += paidVal;
+      else if (s.mode === 'AEPS Cash') gAeps += paidVal;
+      else if (s.mode === 'Split') {
+        gCash += (s.splitCash || 0);
+        gUpi += (s.splitUpi || 0);
+      } else {
+        gCash += paidVal;
+      }
+
+      s.items.forEach(i => {
+        if (!i.returned) colorCount[i.color] = (colorCount[i.color] || 0) + i.qty;
+      });
+    });
+
+    const totalExp = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const netGallaCash = gCash - totalExp;
+
+    document.getElementById('stAcc').innerText = '₹' + tAcc;
+    document.getElementById('stProfit').innerText = ownerUnlocked ? ('₹' + (tProfit - totalExp)) : '🔒 ***';
+    document.getElementById('stPaid').innerText = '₹' + tPaid;
+    document.getElementById('stDue').innerText = '₹' + tDue;
+
+    document.getElementById('gallaBreakdown').innerHTML = `
+      <span>💵 Cash: ₹${gCash}</span>
+      <span>📱 UPI: ₹${gUpi}</span>
+      <span>🏦 AEPS: ₹${gAeps}</span>
+      <span style="color:#b30000;">💸 Kharcha: ₹${totalExp}</span>
+      <span style="color:#0f6b2f;">✅ Net Cash: ₹${netGallaCash}</span>
+    `;
+
+    const expBox = document.getElementById('expenseListBox');
+    if (expBox) {
+      expBox.innerHTML = filteredExpenses.length > 0
+        ? filteredExpenses.map(e => `<div style="display:flex; justify-content:space-between; padding:2px 0;"><span>• ${e.note} (${e.date})</span><span><b>₹${e.amount}</b> <b style="color:red; cursor:pointer; margin-left:6px;" onclick="deleteExpense('${e.id}')">✕</b></span></div>`).join('')
+        : '<small style="color:#888;">Is avadhi mein koi dukan kharcha darj nahi hai.</small>';
+    }
+
+    const topColors = Object.entries(colorCount).sort((a,b) => b[1]-a[1]).map(c => `<b>${c[0]}</b> (${c[1]} pcs)`).join(', ');
+    document.getElementById('colorInsights').innerHTML = topColors ? `🔥 Bikne Wale Colours: ${topColors}` : 'Is avadhi mein koi sale record nahi hai.';
+
+    document.getElementById('salesHistoryBody').innerHTML = filteredSales.map(s => `
+      <tr class="clickable-row" onclick="openBillModal('${s.invId}')" style="${s.exchanged ? 'opacity:0.5; text-decoration:line-through;' : ''}">
+        <td><b style="color:var(--maroon); text-decoration:underline;">${s.invId} 🔍</b><br><small>${s.date}</small></td>
+        <td>${s.items.map(i => `${i.code} [${i.qty}p] (₹${i.realSale}) ${i.returned ? '🔄' : ''}`).join('<br>')}</td>
+        <td><b>₹${s.acc}</b></td>
+        <td style="color:${(s.due || 0) > 0 ? '#b30000' : '#888'}; font-weight:bold;">₹${s.due || 0}</td>
+        <td style="color:green;font-weight:bold;">${ownerUnlocked ? '₹' + s.profit : '🔒 ***'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function exportSalesCSV() {
+    if (sales.length === 0) {
+      showInlineMsg('backupMsg', '⚠️ Abhi koi sale record nahi hai!', 'error');
+      return;
+    }
+    let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
+    sales.forEach(s => {
+      const itemsStr = s.items.map(i => `${i.code}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
+      const paidVal = s.paid !== undefined ? s.paid : s.acc;
+      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Shakya_Sales_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    showInlineMsg('backupMsg', '✅ Sales Excel (.CSV) download ho gayi!', 'success');
+  }
+
+  function downloadBackupJSON() {
+    const data = JSON.stringify({ inventory, sales, udhaarLogs, contacts, expenses, ownerPin });
+    const blob = new Blob([data], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Shakya_POS_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    showInlineMsg('backupMsg', '✅ Full Backup (.JSON) download ho gaya!', 'success');
+  }
+
+  function restoreBackupJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.inventory && parsed.sales) {
+          inventory = parsed.inventory;
+          sales = parsed.sales;
+          if (parsed.udhaarLogs) udhaarLogs = parsed.udhaarLogs;
+          if (parsed.contacts) contacts = parsed.contacts;
+          if (parsed.expenses) expenses = parsed.expenses;
+          if (parsed.ownerPin) ownerPin = String(parsed.ownerPin);
+          syncToCloud();
+          renderStock(); renderStats(); renderCustomerSection();
+          showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore aur Cloud par sync ho gaya!', 'success');
+        }
+      } catch (err) {
+        showInlineMsg('backupMsg', '❌ Invalid backup file!', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // --- DIWALI FIREWORKS & FESTIVE GREETING ENGINE ---
+  const fwCanvas = document.getElementById('diwaliCanvas');
+  const fwCtx = fwCanvas ? fwCanvas.getContext('2d') : null;
+  let fwParticles = [];
+  let fwAnimId = null;
+
+  function resizeFwCanvas() {
+    if (!fwCanvas) return;
+    fwCanvas.width = window.innerWidth;
+    fwCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeFwCanvas);
+  resizeFwCanvas();
+
+  function updateDiwaliUI() {
+    const btn = document.getElementById('diwaliBtn');
+    const toran = document.getElementById('diwaliToranBar');
+    if (btn) {
+      btn.innerHTML = diwaliMode ? '🪔 Diwali: ON' : '🪔 Diwali: OFF';
+      btn.style.background = diwaliMode ? '#b8860b' : '#555';
+    }
+    if (toran) {
+      toran.classList.toggle('hidden', !diwaliMode);
+    }
+  }
+
+  function toggleDiwaliMode() {
+    diwaliMode = !diwaliMode;
+    localStorage.setItem('sc_diwali_mode', JSON.stringify(diwaliMode));
+    updateDiwaliUI();
+    if (diwaliMode) launchDiwaliFireworks(3);
+  }
+
+  function createFireworkBurst(x, y) {
+    const colors = ['#f5c542', '#ff3366', '#00ffcc', '#ff9900', '#ffffff', '#ff0055'];
+    for (let i = 0; i < 36; i++) {
+      const angle = (Math.PI * 2 * i) / 36;
+      const speed = 2 + Math.random() * 4.5;
+      fwParticles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        alpha: 1,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 2.5 + Math.random() * 2
+      });
+    }
+    if (!fwAnimId) animateFireworks();
+  }
+
+  function animateFireworks() {
+    if (!fwCtx || !fwCanvas) return;
+    fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+    for (let i = fwParticles.length - 1; i >= 0; i--) {
+      const p = fwParticles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.08;
+      p.alpha -= 0.018;
+      if (p.alpha <= 0) {
+        fwParticles.splice(i, 1);
+        continue;
+      }
+      fwCtx.save();
+      fwCtx.globalAlpha = Math.max(0, p.alpha);
+      fwCtx.fillStyle = p.color;
+      fwCtx.shadowBlur = 8;
+      fwCtx.shadowColor = p.color;
+      fwCtx.beginPath();
+      fwCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      fwCtx.fill();
+      fwCtx.restore();
+    }
+    if (fwParticles.length > 0) {
+      fwAnimId = requestAnimationFrame(animateFireworks);
+    } else {
+      fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+      fwAnimId = null;
+    }
+  }
+
+  function launchDiwaliFireworks(burstCount = 4) {
+    if (!diwaliMode || !fwCanvas) return;
+    for (let b = 0; b < burstCount; b++) {
+      setTimeout(() => {
+        const rx = (0.2 + Math.random() * 0.6) * window.innerWidth;
+        const ry = (0.15 + Math.random() * 0.4) * window.innerHeight;
+        createFireworkBurst(rx, ry);
+      }, b * 320);
+    }
+  }
+
+  updateDiwaliUI();
+  renderStock();
+  if (diwaliMode) setTimeout(() => launchDiwaliFireworks(2), 500);
+</script>
+</body>
+</html>
