@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -10,13 +9,13 @@
   <title>दीदी की दुकान | Shakya POS</title>
 
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236b092b' stroke='%23f5c542' stroke-width='6'/><text x='50' y='44' font-family='sans-serif' font-size='26' font-weight='900' fill='%23f5c542' text-anchor='middle'>दीदी</text><text x='50' y='74' font-family='sans-serif' font-size='16' font-weight='800' fill='%23ffffff' text-anchor='middle'>SHAKYA</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236b092b' stroke='%23f5c542' stroke-width='6'/><text x='50' y='44' font-family='sans-serif' font-size='26' font-weight='900' fill='%23f5c542' text-anchor='middle'>दीदी</text><text x='50' y='74' font-family='sans-serif' font-size='16' font-weight='800' fill='%23ffffff' text-anchor='middle'>SHAKYA</text></svg>">
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-          try { reg.update(); } catch (e) {}
-        }).catch(() => {});
+        navigator.serviceWorker.register('sw.js').catch(() => {});
       });
     }
   </script>
@@ -37,7 +36,6 @@
       --maroon-dark: #47041b;
       --maroon-light: #fdf5f8;
       --gold: #f5c542;
-      --gold-dark: #d4a017;
       --bg: #f6f3f0;
       --green: #0f6b2f;
       --red: #b30000;
@@ -47,28 +45,6 @@
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
     body { margin: 0; background: var(--bg); color: #222; padding-bottom: 70px; user-select: none; -webkit-tap-highlight-color: transparent; }
 
-    /* STARTUP APP ACCESS LOCK GATE */
-    #appStartupGate {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: linear-gradient(145deg, var(--maroon-dark), var(--maroon) 65%, #8a0e3a);
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-    .gate-card {
-      width: min(100%, 360px);
-      background: #fff;
-      border-radius: 16px;
-      padding: 22px 18px;
-      text-align: center;
-      border: 2.5px solid var(--gold);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.4);
-    }
-
-    /* ROYAL BOUTIQUE HEADER */
     header {
       background: linear-gradient(135deg, var(--maroon-dark) 0%, var(--maroon) 60%, #8a0e3a 100%);
       color: white;
@@ -145,7 +121,6 @@
       white-space: nowrap;
     }
 
-    /* STICKY NAVIGATION TABS */
     .tabs {
       display: flex;
       background: #fff;
@@ -185,7 +160,6 @@
     .section { display: none; padding: 10px; max-width: 620px; margin: auto; }
     .section.active { display: block; }
 
-    /* CARDS & CONTAINERS */
     .card {
       background: white;
       padding: 12px;
@@ -207,7 +181,6 @@
       gap: 4px;
     }
 
-    /* LIVE MINI GALLA RIBBON ON BILLING */
     .mini-galla-strip {
       display: flex;
       justify-content: space-between;
@@ -264,12 +237,11 @@
     button.callbtn { background: var(--green); color: #fff; font-size: 13px; }
     button.small { padding: 5px 8px; font-size: 11px; width: auto; margin: 2px; }
 
-    /* MODALS */
-    #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #bulkStockModal, #upiQrModal {
+    #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #bulkStockModal, #upiQrModal, #startupLockModal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.82);
+      background: rgba(0,0,0,0.84);
       z-index: 1000;
       padding: 14px;
       align-items: center;
@@ -309,7 +281,6 @@
       width: 100%;
     }
 
-    /* AUTO-SUGGEST DROPDOWNS */
     .suggest-wrap { position: relative; }
     .suggest-box {
       display: none;
@@ -337,7 +308,6 @@
     }
     .suggest-item:active, .suggest-item:hover { background: #fff0f5; }
 
-    /* QUICK TAP CATALOG PILLS */
     .quick-catalog-strip {
       display: flex;
       gap: 5px;
@@ -361,7 +331,6 @@
     }
     .q-pill:active { background: var(--maroon); color: #fff; }
 
-    /* GORILLA HINT BAR */
     .gorilla-hint {
       background: #fff8e6;
       border: 1px solid #f0d78c;
@@ -377,7 +346,6 @@
       gap: 4px;
     }
 
-    /* INLINE ALERTS & LOSS WARNING */
     .inline-msg { display: none; padding: 8px 10px; border-radius: 7px; font-size: 12px; font-weight: 700; margin-top: 6px; }
     .inline-msg.error { display: block; background: #ffeef0; color: var(--red); border-left: 4px solid var(--red); }
     .inline-msg.success { display: block; background: #e8f8ee; color: var(--green); border-left: 4px solid var(--green); }
@@ -395,7 +363,6 @@
       box-shadow: 0 2px 8px rgba(179,0,0,0.35);
     }
 
-    /* ACTION BUTTON GROUPS */
     .action-group { display: inline-flex; gap: 3px; align-items: center; justify-content: flex-end; flex-wrap: nowrap; }
     .btn-action { padding: 5px 6px; font-size: 10px; border-radius: 5px; font-weight: 700; border: none; cursor: pointer; width: auto; margin: 0; line-height: 1.1; }
     .btn-bill { background: var(--maroon); color: #fff; }
@@ -431,7 +398,6 @@
     .filter-box { background: #fdf8fa; border: 1px solid #ecdce2; padding: 8px; border-radius: 8px; margin-top: 8px; }
     .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: #444; background: #f3e8ec; padding: 6px 8px; border-radius: 6px; margin-top: 8px; font-weight: 700; flex-wrap: wrap; gap: 4px; }
 
-    /* TABLES & BULK GRID */
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; table-layout: auto; }
     th, td { border-bottom: 1px solid #eee; padding: 7px 3px; text-align: left; vertical-align: middle; }
     th { background: #f3e8ec; color: var(--maroon); font-size: 11px; font-weight: 800; }
@@ -442,7 +408,6 @@
     .bulk-grid-table input, .bulk-grid-table select { padding: 5px; font-size: 11px; margin: 0; }
     .bulk-grid-table th, .bulk-grid-table td { padding: 4px 2px; }
 
-    /* INSIGHTS & 7-DAY TREND CHART */
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-box { background: #fff8fa; border-left: 4px solid var(--maroon); padding: 9px; border-radius: 7px; }
     .stat-box span { font-size: 11px; color: #666; display: block; font-weight: 600; }
@@ -467,6 +432,39 @@
     .trend-val { font-size: 9px; font-weight: 700; color: var(--maroon); margin-bottom: 2px; white-space: nowrap; }
     .trend-lbl { font-size: 9px; color: #666; margin-top: 3px; font-weight: 600; }
 
+    /* PRINTER HUB STYLING */
+    .printer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .printer-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #f3e8ec;
+      color: var(--maroon);
+    }
+    .chk-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      background: #fdf8fa;
+      padding: 8px;
+      border-radius: 7px;
+      border: 1px solid #ecdce2;
+    }
+    .chk-row label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+    .chk-row input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--maroon); }
+
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 100; padding: 20px; text-align: center; }
     #reader { width: 100%; max-width: 400px; margin: 20px auto; background: #000; border-radius: 10px; overflow: hidden; }
 
@@ -476,7 +474,7 @@
     .exchange-item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 12px; background: #fdf8fa; border-radius: 4px; margin-bottom: 4px; }
     .exchange-item-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0 8px 0 0; accent-color: var(--maroon); }
 
-    /* 80MM THERMAL RECEIPT CONTAINER */
+    /* THERMAL / MULTI-SIZE RECEIPT CONTAINER */
     #printZone { border: 2px dashed #222; padding: 8px; background: #fff; text-align: center; margin-top: 10px; overflow: hidden; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; color: #000; }
     #printZone .receipt-didi { font-size: 13px; font-weight: 900; color: #000; letter-spacing: 0.5px; margin: 0; }
     #printZone h2 { margin: 1px 0 0; font-size: 16px; font-weight: 900; color: #000; }
@@ -494,14 +492,8 @@
     .single-tag p { margin: 1px 0; font-size: 9px; color: #000; }
     .single-tag .tag-mrp { font-size: 12px; font-weight: 900; margin: 2px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; }
 
-    /* DEDICATED 80MM THERMAL PRINTER PAGE RULES */
-    @page {
-      size: 80mm auto;
-      margin: 0mm;
-    }
     @media print {
       html, body {
-        width: 80mm;
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
@@ -512,29 +504,29 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 76mm !important;
-        max-width: 76mm !important;
         margin: 0 auto !important;
         padding: 2mm !important;
         border: none !important;
         box-shadow: none !important;
       }
-      .batch-tag-container { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; width: 74mm; }
       .single-tag { border: 1px solid #000; }
     }
+  </style>
+  <style id="dynamicPrintPageStyle">
+    @page { size: 80mm auto; margin: 0mm; }
   </style>
 </head>
 <body>
 
-<!-- OPTIONAL STARTUP PIN GATE (PROTECTS SHOP LINK WITHOUT COMPLEX FIREBASE AUTH SETUP) -->
-<div id="appStartupGate">
-  <div class="gate-card">
+<!-- OPTIONAL STARTUP PIN LOCK MODAL -->
+<div id="startupLockModal">
+  <div class="dialog-box">
     <div class="didi-badge" style="margin-bottom:6px;">✨ दीदी की दुकान ✨</div>
-    <h2 style="margin:0; color:var(--maroon); font-size:19px;">SHAKYA POS</h2>
-    <p style="font-size:12px; color:#555; margin:6px 0 14px;">दुकान का ऐप खोलने के लिए 4-अंक का Owner PIN डालें:</p>
-    <input type="password" id="startupPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:22px; font-weight:bold; letter-spacing:8px;" onkeydown="if(event.key==='Enter') unlockStartupGate()">
-    <div id="startupPinErr" style="color:var(--red); font-size:11.5px; font-weight:bold; margin-top:6px; display:none;">❌ गलत PIN! कृपया सही PIN डालें।</div>
-    <button class="gold" style="margin-top:14px;" onclick="unlockStartupGate()">🔓 ऐप खोलें (Unlock)</button>
+    <h3 style="color:var(--maroon); margin-top:0;">🔒 Shakya POS Security Lock</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0;">Dukaan ka App kholne ke liye apna 4-ank ka PIN daalein:</p>
+    <input type="password" id="startupPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:6px;" onkeydown="if(event.key==='Enter') verifyStartupPin()">
+    <div id="startupPinErr" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;">❌ Galat PIN! Dobara koshish karein.</div>
+    <button class="gold" style="margin-top:12px;" onclick="verifyStartupPin()">🔓 App Kholein</button>
   </div>
 </div>
 
@@ -545,6 +537,7 @@
     <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | निवाड़ी कलां | Mob: 8780234760</p>
   </div>
   <div class="header-actions">
+    <button id="printerHeaderBtn" class="slide-lock-btn" onclick="openPrinterSettingsTab()" title="Printer Settings">🖨️ 80mm • RawBT</button>
     <button id="soundToggleBtn" class="slide-lock-btn" onclick="toggleSoundBeep()" title="Scanner Beep Sound">🔊 Beep</button>
     <button id="ownerLockBtn" class="slide-lock-btn" onclick="toggleOwnerMode()">🔒 Cost: OFF</button>
     <button id="swipeLockBtn" class="slide-lock-btn" onclick="toggleSwipeLock()">👆 Slide: ON</button>
@@ -647,7 +640,6 @@
         <input type="number" id="editMrp">
       </div>
     </div>
-    <div id="editStockErr" style="color:var(--red); font-size:11px; font-weight:bold; margin-top:6px; display:none;"></div>
     <div class="row" style="margin-top:14px;">
       <div><button class="dark" style="margin:0;" onclick="closeEditStockModal()">Cancel</button></div>
       <div><button class="gold" style="margin:0;" onclick="saveEditedStock()">💾 Update</button></div>
@@ -681,7 +673,7 @@
   </div>
 </div>
 
-<!-- UDHAAR JAMA MODAL WITH PASSBOOK MODE & WHATSAPP -->
+<!-- UDHAAR JAMA MODAL -->
 <div id="udhaarModal">
   <div class="dialog-box">
     <h3 style="color:var(--maroon); margin-top:0;">💰 Udhaar Jama Karein</h3>
@@ -720,7 +712,7 @@
   <div class="tab" id="tab-stock" onclick="switchTab('stock', this)">📦 Stock <span id="lowStockBadge" class="tab-badge" style="display:none;">0</span></div>
   <div class="tab" id="tab-stats" onclick="switchTab('stats', this)">📊 Insights</div>
   <div class="tab" id="tab-cust" onclick="switchTab('cust', this)">👥 Khata/Cust</div>
-  <div class="tab" id="tab-backup" onclick="switchTab('backup', this)">💾 Backup</div>
+  <div class="tab" id="tab-backup" onclick="switchTab('backup', this)">🖨️ Printer/Backup</div>
 </div>
 
 <!-- BARCODE CAMERA SCANNER MODAL -->
@@ -748,8 +740,8 @@
     </div>
 
     <div class="row" style="margin-top:10px;">
-      <div><button onclick="printFromModal()">🖨️ Print</button></div>
-      <div><button class="thermal" onclick="printDirect80mmFromModal()">⚡ 80mm RawBT</button></div>
+      <div><button class="thermal" onclick="printDirect80mmFromModal()">🖨️ Smart Print</button></div>
+      <div><button onclick="printFromModal()">🌐 Browser Print</button></div>
       <div><button class="whatsapp" onclick="sendWhatsAppLastBill('DIRECT')">💬 Direct WA</button></div>
     </div>
     <button class="dark" style="margin-top:6px; padding:8px;" onclick="closeBillModal()">❌ Band Karein (Close)</button>
@@ -759,7 +751,6 @@
 <!-- ================= 1. BILLING SECTION ================= -->
 <div id="billing" class="section active">
 
-  <!-- LIVE MINI GALLA & HOLD BILL STRIP -->
   <div class="mini-galla-strip">
     <span id="miniTodaySale">📅 Aaj Bikri: ₹0 (0 Bills)</span>
     <span id="miniGallaCash" style="color:var(--green);">💵 Net Cash: ₹0</span>
@@ -768,10 +759,9 @@
 
   <div class="card">
     <h3>
-      <span>1. Scan / Code / Short-Code</span>
+      <span>1. Scan / Code / Gorilla Short-Code</span>
       <span class="color-chip" style="padding:2px 8px; font-size:10px; background:#e8f8ee; color:var(--green); border-color:var(--green);" onclick="quickAddFallPico()">🧵 + Fall-Pico (₹50)</span>
     </h3>
-
     <div class="row">
       <div style="flex:2.1" class="suggest-wrap">
         <input type="text" id="scanInput" placeholder="Code ya S+450, C+60 likhein..." autocomplete="off" oninput="onScanInputType(this)" onfocus="onScanInputType(this)" onkeydown="if(event.key==='Enter') addItemToBill()">
@@ -785,15 +775,12 @@
       </div>
     </div>
 
-    <!-- SHORT-CODE FAST BILLING BAR -->
     <div class="gorilla-hint">
-      <span>⚡ <b>Short-Code Bill:</b> <code>S+450</code> (Saree ₹450), <code>F+850</code> (Fancy), <code>C+50</code> (Cosmetic), <code>P+120</code> (Petticoat)</span>
+      <span>🦍 <b>Gorilla Fast Bill:</b> <code>S+450</code> (Saree ₹450), <code>F+850</code> (Fancy), <code>C+50</code> (Cosmetic), <code>P+120</code> (Petticoat)</span>
     </div>
 
-    <!-- 1-TAP QUICK STOCK CHIPS -->
     <div id="quickCatalogStrip" class="quick-catalog-strip"></div>
 
-    <!-- QUICK LOOSE ITEM (BINA STOCK KE) -->
     <div class="loose-box">
       <div style="font-size:11px; font-weight:700; color:var(--maroon); margin-bottom:4px;">⚡ Bina Code / Futtkar Item Jodein (Cosmetic, Fall-Pico, Chudi):</div>
       <div class="row">
@@ -812,7 +799,6 @@
       </div>
     </div>
 
-    <!-- EXCHANGE CREDIT BANNER -->
     <div id="exchangeCreditBanner" class="credit-banner">
       <span id="exchangeCreditText">🔄 Exchange Credit Applied: ₹0</span>
       <button class="small" style="background:#b30000; color:#fff; margin:0; padding:3px 7px;" onclick="clearExchangeCredit()">✕ Hatayein</button>
@@ -838,12 +824,10 @@
       </div>
     </div>
 
-    <!-- LOSS SALE RED WARNING -->
     <div id="lossWarningBox" class="loss-warning-box">
       🚨 सावधान! तय रेट (ACC) आपकी असली खरीद (Cost) से भी कम है! (घाटे की बिक्री)
     </div>
 
-    <!-- QUICK DISCOUNT CHIPS -->
     <div id="quickDiscountRow" style="display:none; gap:5px; margin-top:6px; flex-wrap:wrap; align-items:center;">
       <small style="font-size:10px; color:#666; font-weight:bold;">⚡ Chhoot:</small>
       <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(20)">-₹20</span>
@@ -863,7 +847,6 @@
       </div>
     </div>
 
-    <!-- CUSTOMER NAME & VILLAGE WITH AUTO-SUGGEST -->
     <div class="row">
       <div class="suggest-wrap">
         <label>Customer Name</label>
@@ -877,7 +860,6 @@
       </div>
     </div>
 
-    <!-- MOBILE NUMBER WITH AUTO-SUGGEST & PAYMENT MODE -->
     <div class="row">
       <div class="suggest-wrap">
         <label>Mobile Number (WhatsApp)</label>
@@ -895,7 +877,6 @@
       </div>
     </div>
 
-    <!-- SPLIT PAYMENT ROW -->
     <div id="splitPayRow" class="row" style="display:none; background:#eef7ff; padding:8px; border-radius:6px; margin-top:6px; border:1px solid #b8daff;">
       <div>
         <label style="margin:0; color:#0f6b2f;">💵 Cash Mila (₹)</label>
@@ -907,7 +888,6 @@
       </div>
     </div>
 
-    <!-- PREVIOUS UDHAAR ALERT IN BILLING -->
     <div id="custPrevUdhaarBanner" class="udhaar-alert-banner"></div>
 
     <div id="liveSplitBox" style="background:#fff3cd; padding:8px; border-radius:6px; margin-top:10px; font-size:12px; display:none;"></div>
@@ -926,8 +906,8 @@
   <div id="printCard" class="card" style="display:none;">
     <div id="printZone"></div>
     <div class="row" style="margin-top:10px;">
-      <div><button onclick="window.print()">🖨️ Browser 80mm Print</button></div>
-      <div><button class="thermal" onclick="printDirect80mm()">⚡ 80mm Direct (RawBT)</button></div>
+      <div><button class="thermal" onclick="printDirect80mm()">🖨️ Smart Printer Print</button></div>
+      <div><button onclick="window.print()">🌐 Browser / PDF Print</button></div>
     </div>
     <div class="row" style="margin-top:6px;">
       <div style="flex:1.5;"><button class="whatsapp" style="margin:0;" onclick="sendWhatsAppLastBill('DIRECT')">💬 Direct Customer WA Bhejein</button></div>
@@ -967,7 +947,7 @@
       </div>
       <div style="flex:1">
         <label>Qty (Each)</label>
-        <input type="number" id="sQty" value="1" min="1">
+        <input type="number" id="sQty" value="1">
       </div>
     </div>
 
@@ -993,11 +973,11 @@
     <div class="row" style="margin-top:6px;">
       <div>
         <label>Landing Cost (Asli Kharid ₹)</label>
-        <input type="number" id="sCost" placeholder="Ex: 210" min="0">
+        <input type="number" id="sCost" placeholder="Ex: 210">
       </div>
       <div>
         <label>Sticker MRP (Grahak Rate ₹)</label>
-        <input type="number" id="sMrp" placeholder="Ex: 380" min="1">
+        <input type="number" id="sMrp" placeholder="Ex: 380">
       </div>
     </div>
 
@@ -1094,7 +1074,6 @@
       </div>
     </div>
 
-    <!-- DATE & MONTH PICKERS -->
     <div id="statsDatePickerWrap" style="display:none; margin-bottom:10px;">
       <input type="date" id="statsDateInput" onchange="renderStats()" style="padding:7px; font-size:13px; margin:0;">
     </div>
@@ -1116,14 +1095,12 @@
     </div>
     <div id="gallaNetBar" class="galla-bar" style="background:#fff3cd; border:1px solid #ecd996; margin-top:5px;"></div>
 
-    <!-- 7-DAY VISUAL SALES TREND -->
     <div style="margin-top:10px;">
       <small style="color:var(--maroon); font-weight:800; font-size:11px;">📈 Pichhle 7 Dinon ki Bikri (7-Day Trend):</small>
       <div id="sevenDayChart" class="trend-chart"></div>
     </div>
   </div>
 
-  <!-- ROZANA DUKAAN KHARCHA (EXPENSE) TRACKER -->
   <div class="card">
     <h3>☕ Rozana Dukaan Kharcha (Chai, Bhaada, Polythene)</h3>
     <div class="row">
@@ -1169,7 +1146,7 @@
 
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:6px;">
-      <h3 style="margin:0; border:none; padding:0;">📋 Sabhi Customers & Baaki Udhaar</h3>
+      <h3 style="margin:0; border:none; padding:0;">📋 Sabhi Customers & Udhaar List</h3>
       <div>
         <button id="custFilterAllBtn" class="small" style="background:var(--maroon); color:#fff; margin:0;" onclick="setCustFilter('ALL')">Sabhi</button>
         <button id="custFilterDueBtn" class="small" style="background:#ddd; color:#333; margin:0;" onclick="setCustFilter('DUE')">⚠️ Sirf Udhaar</button>
@@ -1182,8 +1159,104 @@
   </div>
 </div>
 
-<!-- ================= 5. BACKUP & SECURITY SECTION ================= -->
+<!-- ================= 5. UNIVERSAL PRINTER HUB & BACKUP SECTION ================= -->
 <div id="backup" class="section">
+
+  <!-- UNIVERSAL MARKET PRINTER HUB -->
+  <div class="card">
+    <h3>
+      <span>🖨️ Universal Printer Hub (All Market Printers)</span>
+      <span id="printerLiveBadge" class="printer-status-pill">⚡ RawBT Ready</span>
+    </h3>
+    <p style="font-size:11.5px; color:#555; margin:0 0 8px 0;">
+      Bazaar mein milne wale sabhi <b>58mm (2"), 80mm (3"), 76mm Dot-Matrix, Barcode Label aur A4/A5 Laser/Inkjet</b> printers (Retsol, Rugtek, TVS, Everycom, Xprinter, Posiflex, Shreyans, Epson, HP, Canon) yahan se connect karein:
+    </p>
+
+    <div class="row">
+      <div>
+        <label>1. Market Printer Brand / Profile</label>
+        <select id="printerBrandProfile" onchange="onPrinterProfileChange()">
+          <option value="GENERIC_80">🖨️ 80mm Thermal POS (TVS / Retsol / Epson / Xprinter)</option>
+          <option value="MINI_58">📱 58mm Mini Bluetooth (Shreyans / Everycom / Rugtek)</option>
+          <option value="RAWBT_ANDROID">⚡ RawBT Android App Bridge (All Mobile Printers)</option>
+          <option value="DOT_76">🧾 76mm Impact / Dot-Matrix (Epson TM-U220 / TVS)</option>
+          <option value="A4_LASER">📄 A4 / A5 Full Shop Printer (HP / Canon / Brother Wi-Fi)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>2. Connection Method</label>
+        <select id="printerConnMode" onchange="savePrinterPrefs()">
+          <option value="RAWBT">⚡ RawBT App Bridge (Android Best)</option>
+          <option value="BLUETOOTH">🔵 Direct Bluetooth (Web BLE)</option>
+          <option value="USB">🔌 Direct USB Cable (OTG / PC WebUSB)</option>
+          <option value="SERIAL">🖥️ Direct Serial / COM Port (Desktop POS)</option>
+          <option value="NETWORK">🌐 Wi-Fi / LAN IP Thermal (Port 9100 / HTTP)</option>
+          <option value="BROWSER">🖨️ System / AirPrint / Mopria / PDF</option>
+        </select>
+      </div>
+      <div>
+        <label>3. Paper Size & Width</label>
+        <select id="printerPaperSize" onchange="savePrinterPrefs()">
+          <option value="80mm">80mm (3 Inch Roll - 48 Cols)</option>
+          <option value="58mm">58mm (2 Inch Roll - 32 Cols)</option>
+          <option value="76mm">76mm (Dot Matrix - 42 Cols)</option>
+          <option value="A5">A5 Half Page Counter Bill</option>
+          <option value="A4">A4 Full Page Invoice</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>4. Print Language / Format</label>
+        <select id="printerRenderMode" onchange="savePrinterPrefs()">
+          <option value="GRAPHIC">🖼️ Hindi + Barcode Graphic Mode (Sabse Saaf)</option>
+          <option value="ESCPOS">⚡ Fast ESC/POS Text Mode (High Speed English)</option>
+        </select>
+      </div>
+      <div>
+        <label>5. Extra Feed Lines (Margin)</label>
+        <select id="printerFeedLines" onchange="savePrinterPrefs()">
+          <option value="3">3 Lines (Standard)</option>
+          <option value="1">1 Line (Paper Bachayein)</option>
+          <option value="5">5 Lines (Tear Bar ke liye)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- NETWORK IP ROW -->
+    <div id="networkIpRow" class="row" style="display:none; background:#eef7ff; padding:8px; border-radius:7px; margin-top:8px; border:1px solid #b8daff;">
+      <div style="flex:2;">
+        <label style="margin:0; color:#0056b3;">🌐 Network Printer IP Address</label>
+        <input type="text" id="printerNetIp" placeholder="Ex: 192.168.1.100" oninput="savePrinterPrefs()">
+      </div>
+      <div style="flex:1;">
+        <label style="margin:0; color:#0056b3;">Port</label>
+        <input type="number" id="printerNetPort" value="9100" oninput="savePrinterPrefs()">
+      </div>
+    </div>
+
+    <div class="chk-row">
+      <label><input type="checkbox" id="chkAutoPrint" onchange="savePrinterPrefs()"> ⚡ Bill Bante Hi Auto-Print</label>
+      <label><input type="checkbox" id="chkAutoCut" checked onchange="savePrinterPrefs()"> ✂️ Auto Paper Cutter</label>
+      <label><input type="checkbox" id="chkCashDrawer" onchange="savePrinterPrefs()"> 💵 Open Cash Drawer (RJ11 Kick)</label>
+    </div>
+
+    <!-- HARDWARE PAIR & ACTION BUTTONS -->
+    <div class="printer-grid">
+      <button class="thermal" style="margin:0;" onclick="connectBluetoothPrinter()">🔵 Pair Bluetooth (BLE)</button>
+      <button class="dark" style="margin:0;" onclick="connectUsbPrinter()">🔌 Connect USB (OTG)</button>
+      <button class="dark" style="margin:0; background:#4a154b;" onclick="connectSerialPrinter()">🖥️ Connect Serial COM</button>
+      <button class="gold" style="margin:0;" onclick="testThermalPrinter()">🧾 Test Receipt Print</button>
+    </div>
+
+    <div id="printerStatusMsg" class="inline-msg"></div>
+  </div>
+
+  <!-- DYNAMIC UPI SETUP -->
   <div class="card">
     <h3>📱 Dynamic UPI QR Code Setup</h3>
     <p style="font-size:12px; color:#555; margin:0 0 6px 0;">Apna PhonePe / Paytm / GPay UPI ID yahan daalein. Har bill par exact rakam ka <b>Dynamic QR Code</b> ban jayega:</p>
@@ -1198,8 +1271,12 @@
     <div id="upiSaveMsg" class="inline-msg"></div>
   </div>
 
+  <!-- OWNER PIN & STARTUP LOCK -->
   <div class="card">
-    <h3>🔐 Owner Security PIN, Startup Lock & Tag Secret Key</h3>
+    <h3>
+      <span>🔐 Owner Security PIN & Startup Lock</span>
+      <button id="startupLockToggleBtn" class="small" style="margin:0; background:#333; color:#fff;" onclick="toggleStartupPinLock()">🔒 Startup Lock: OFF</button>
+    </h3>
     <p style="font-size:12px; color:#555; margin:0 0 8px 0;">Default Owner PIN <b>1234</b> hai. Tag par chhapne wala Secret Cost Code Key: <b>1=S, 2=H, 3=A, 4=K, 5=Y, 6=B, 7=C, 8=D, 9=E, 0=Z</b> (Ex: ₹190 = <b>SEZ</b>).</p>
     <div class="row">
       <div>
@@ -1213,13 +1290,9 @@
       </div>
     </div>
     <div id="pinChangeMsg" class="inline-msg"></div>
-
-    <div style="margin-top:10px; padding-top:8px; border-top:1px solid #eee; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-      <span style="font-size:12px; font-weight:700; color:#333;">🔒 ऐप खोलते समय PIN लॉक मांगें (Startup Lock):</span>
-      <button id="startupLockToggleBtn" class="small" style="margin:0; padding:6px 12px;" onclick="toggleStartupPinLock()">🔒 Startup Lock: OFF</button>
-    </div>
   </div>
 
+  <!-- HYBRID BACKUP -->
   <div class="card">
     <h3>💾 Surakshit Hybrid Backup (Local + Cloud) & Excel</h3>
     <p style="font-size:12px; color:#555;">Data pehle aapke phone/browser (Local Storage) mein turant save hota hai aur internet milte hi Firebase Cloud (`shakyapos-default-rtdb`) par live sync ho jata hai.</p>
@@ -1234,7 +1307,7 @@
 </div>
 
 <script>
-  // --- 1. CORE DATA & FIREBASE HYBRID SETUP ---
+  // --- 1. FIREBASE REALTIME DATABASE & HYBRID LOCAL+CLOUD SETUP ---
   const firebaseConfig = {
     databaseURL: "https://shakyapos-default-rtdb.firebaseio.com/"
   };
@@ -1251,32 +1324,28 @@
     return [];
   }
 
-  function cleanCode(str) {
-    return (str || '').toString().toUpperCase().replace(/[-\s]/g, '');
-  }
-
-  let inventory = normalizeArray(JSON.parse(localStorage.getItem('sc_inventory') || 'null')) || [];
-  if (!localStorage.getItem('sc_inventory') && inventory.length === 0) {
+  let inventory = normalizeArray(JSON.parse(localStorage.getItem('sc_inventory'))) || [];
+  if (inventory.length === 0 && !localStorage.getItem('sc_initialized')) {
     inventory = [
       { code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 4, cost: 190, mrp: 350 },
       { code: 'SC102P', cat: 'Fancy Saree', color: 'Rani Pink', qty: 3, cost: 420, mrp: 750 },
       { code: 'PT01R', cat: 'Petticoat', color: 'Red', qty: 10, cost: 65, mrp: 120 }
     ];
+    localStorage.setItem('sc_initialized', 'true');
   }
-  let sales = normalizeArray(JSON.parse(localStorage.getItem('sc_sales') || '[]'));
-  let udhaarLogs = normalizeArray(JSON.parse(localStorage.getItem('sc_udhaar_logs') || '[]'));
-  let expenses = normalizeArray(JSON.parse(localStorage.getItem('sc_expenses') || '[]'));
-  let contacts = normalizeArray(JSON.parse(localStorage.getItem('sc_contacts') || '[]'));
+  let sales = normalizeArray(JSON.parse(localStorage.getItem('sc_sales')));
+  let udhaarLogs = normalizeArray(JSON.parse(localStorage.getItem('sc_udhaar_logs')));
+  let expenses = normalizeArray(JSON.parse(localStorage.getItem('sc_expenses')));
+  let contacts = normalizeArray(JSON.parse(localStorage.getItem('sc_contacts')));
   let ownerPin = localStorage.getItem('sc_owner_pin') || '1234';
-  let requireStartupPin = JSON.parse(localStorage.getItem('sc_require_startup_pin') || 'false');
   let merchantUpiId = localStorage.getItem('sc_merchant_upi') || '8780234760@ybl';
+  let startupLockEnabled = JSON.parse(localStorage.getItem('sc_startup_lock') || 'false');
   let ownerUnlocked = false;
   let hasUnsyncedChanges = JSON.parse(localStorage.getItem('sc_unsynced') || 'false');
   let statsFilterMode = 'TODAY';
   let custFilterMode = 'ALL';
   let soundBeepEnabled = JSON.parse(localStorage.getItem('sc_sound_beep') ?? 'true');
 
-  // Cart, Hold Cart & Exchange State
   let cart = [];
   let heldCartData = JSON.parse(localStorage.getItem('sc_held_cart') || 'null');
   let activeExchangeCredit = 0;
@@ -1287,7 +1356,6 @@
   let activeUdhaarMobile = "";
   let activeUdhaarName = "";
 
-  // Safe caches for index-based clicks
   let suggestCustListCache = [];
   let villageSuggestCache = [];
   let customerTableCache = [];
@@ -1298,22 +1366,6 @@
     return String(Math.round(Number(costVal) || 0)).split('').map(d => costCipherMap[d] || d).join('');
   }
 
-  // Generate collision-safe numeric Invoice ID (e.g. INV105) so barcode regex /(INV\d+)A(\d+)C(\d+)/ always works across multiple devices
-  function generateNextInvId() {
-    let maxNum = 100;
-    sales.forEach(s => {
-      if (s && s.invId) {
-        const m = String(s.invId).match(/^INV(\d+)$/i);
-        if (m) {
-          const n = parseInt(m[1], 10);
-          if (n > maxNum) maxNum = n;
-        }
-      }
-    });
-    return 'INV' + (maxNum + 1);
-  }
-
-  // Web Audio Beep for Scanner & Cart Actions
   function playPosBeep(freq = 880, duration = 0.07) {
     if (!soundBeepEnabled) return;
     try {
@@ -1346,35 +1398,6 @@
     if (soundBeepEnabled) playPosBeep(950, 0.08);
   }
 
-  // Startup PIN Gate Functions
-  function updateStartupLockBtnUI() {
-    const btn = document.getElementById('startupLockToggleBtn');
-    if (!btn) return;
-    btn.innerHTML = requireStartupPin ? '🔒 Startup Lock: ON' : '🔓 Startup Lock: OFF';
-    btn.style.background = requireStartupPin ? 'var(--green)' : '#555';
-    btn.style.color = '#fff';
-  }
-
-  function toggleStartupPinLock() {
-    requireStartupPin = !requireStartupPin;
-    localStorage.setItem('sc_require_startup_pin', JSON.stringify(requireStartupPin));
-    updateStartupLockBtnUI();
-    syncToCloud();
-    showInlineMsg('pinChangeMsg', requireStartupPin ? '🔒 Startup PIN Lock chalu ho gaya!' : '🔓 Startup PIN Lock band kar diya gaya.', 'success');
-  }
-
-  function unlockStartupGate() {
-    const inp = document.getElementById('startupPinInput').value.trim();
-    if (inp === ownerPin) {
-      sessionStorage.setItem('sc_session_unlocked', 'true');
-      document.getElementById('appStartupGate').style.display = 'none';
-      document.getElementById('startupPinErr').style.display = 'none';
-      playPosBeep(980, 0.08);
-    } else {
-      document.getElementById('startupPinErr').style.display = 'block';
-    }
-  }
-
   window.addEventListener('DOMContentLoaded', () => {
     const todayIso = new Date().toISOString().slice(0, 10);
     const dInp = document.getElementById('statsDateInput');
@@ -1387,10 +1410,36 @@
     updateHoldBtnUI();
     updateOwnerLockUI();
     updateStartupLockBtnUI();
-    if (requireStartupPin && sessionStorage.getItem('sc_session_unlocked') !== 'true') {
-      document.getElementById('appStartupGate').style.display = 'flex';
+    initPrinterSettingsUI();
+    if (startupLockEnabled) {
+      document.getElementById('startupLockModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('startupPinInput')?.focus(), 100);
     }
   });
+
+  function updateStartupLockBtnUI() {
+    const btn = document.getElementById('startupLockToggleBtn');
+    if (!btn) return;
+    btn.innerHTML = startupLockEnabled ? '🔒 Startup Lock: ON' : '🔓 Startup Lock: OFF';
+    btn.style.background = startupLockEnabled ? '#0f6b2f' : '#333';
+  }
+
+  function toggleStartupPinLock() {
+    startupLockEnabled = !startupLockEnabled;
+    localStorage.setItem('sc_startup_lock', JSON.stringify(startupLockEnabled));
+    updateStartupLockBtnUI();
+    showInlineMsg('pinChangeMsg', startupLockEnabled ? '🔒 Startup PIN Lock chalu ho gaya!' : '🔓 Startup PIN Lock band kar diya gaya.', 'success');
+  }
+
+  function verifyStartupPin() {
+    const inp = document.getElementById('startupPinInput').value.trim();
+    if (inp === ownerPin) {
+      document.getElementById('startupLockModal').style.display = 'none';
+      document.getElementById('startupPinErr').style.display = 'none';
+    } else {
+      document.getElementById('startupPinErr').style.display = 'block';
+    }
+  }
 
   function updateSyncBadge(status) {
     const badge = document.getElementById('syncStatusBadge');
@@ -1410,9 +1459,7 @@
   connectedRef.on('value', (snap) => {
     if (snap.val() === true) {
       updateSyncBadge('ONLINE');
-      if (hasUnsyncedChanges) {
-        syncToCloud();
-      }
+      if (hasUnsyncedChanges) syncToCloud();
     } else {
       updateSyncBadge('OFFLINE');
     }
@@ -1433,21 +1480,22 @@
       }
       if (cloudData.udhaarLogs !== undefined) {
         udhaarLogs = normalizeArray(cloudData.udhaarLogs);
+      } else if (cloudData.lastUpdated) {
+        udhaarLogs = [];
       }
       if (cloudData.expenses !== undefined) {
         expenses = normalizeArray(cloudData.expenses);
+      } else if (cloudData.lastUpdated) {
+        expenses = [];
       }
       if (cloudData.contacts !== undefined) {
         contacts = normalizeArray(cloudData.contacts);
+      } else if (cloudData.lastUpdated) {
+        contacts = [];
       }
       if (cloudData.ownerPin) {
         ownerPin = String(cloudData.ownerPin);
         localStorage.setItem('sc_owner_pin', ownerPin);
-      }
-      if (cloudData.requireStartupPin !== undefined) {
-        requireStartupPin = Boolean(cloudData.requireStartupPin);
-        localStorage.setItem('sc_require_startup_pin', JSON.stringify(requireStartupPin));
-        updateStartupLockBtnUI();
       }
       if (cloudData.merchantUpiId) {
         merchantUpiId = String(cloudData.merchantUpiId);
@@ -1455,6 +1503,7 @@
         const upiInp = document.getElementById('merchantUpiInput');
         if (upiInp) upiInp.value = merchantUpiId;
       }
+
       localStorage.setItem('sc_inventory', JSON.stringify(inventory));
       localStorage.setItem('sc_sales', JSON.stringify(sales));
       localStorage.setItem('sc_udhaar_logs', JSON.stringify(udhaarLogs));
@@ -1479,7 +1528,6 @@
     localStorage.setItem('sc_expenses', JSON.stringify(expenses));
     localStorage.setItem('sc_contacts', JSON.stringify(contacts));
     localStorage.setItem('sc_owner_pin', ownerPin);
-    localStorage.setItem('sc_require_startup_pin', JSON.stringify(requireStartupPin));
     localStorage.setItem('sc_merchant_upi', merchantUpiId);
     hasUnsyncedChanges = true;
     localStorage.setItem('sc_unsynced', 'true');
@@ -1492,7 +1540,6 @@
       expenses,
       contacts,
       ownerPin,
-      requireStartupPin,
       merchantUpiId,
       lastUpdated: new Date().toISOString()
     }).then(() => {
@@ -1509,7 +1556,364 @@
   });
   window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
 
-  // --- 2. DYNAMIC UPI QR CODE GENERATOR ---
+  // --- 2. UNIVERSAL MARKET PRINTER HUB ENGINE (BT, USB, SERIAL, WIFI/IP, RAWBT, BROWSER) ---
+  let btDevice = null, btChar = null;
+  let usbDevice = null, usbEndpoint = null;
+  let serialPort = null, serialWriter = null;
+
+  let printerPrefs = JSON.parse(localStorage.getItem('sc_printer_prefs') || JSON.stringify({
+    profile: 'GENERIC_80',
+    mode: 'RAWBT',
+    size: '80mm',
+    render: 'GRAPHIC',
+    feed: 3,
+    netIp: '',
+    netPort: 9100,
+    autoPrint: false,
+    autoCut: true,
+    cashDrawer: false
+  }));
+
+  function initPrinterSettingsUI() {
+    const profEl = document.getElementById('printerBrandProfile');
+    const modeEl = document.getElementById('printerConnMode');
+    const sizeEl = document.getElementById('printerPaperSize');
+    const rendEl = document.getElementById('printerRenderMode');
+    const feedEl = document.getElementById('printerFeedLines');
+    const ipEl = document.getElementById('printerNetIp');
+    const portEl = document.getElementById('printerNetPort');
+    const chkAuto = document.getElementById('chkAutoPrint');
+    const chkCut = document.getElementById('chkAutoCut');
+    const chkDraw = document.getElementById('chkCashDrawer');
+
+    if (profEl) profEl.value = printerPrefs.profile || 'GENERIC_80';
+    if (modeEl) modeEl.value = printerPrefs.mode || 'RAWBT';
+    if (sizeEl) sizeEl.value = printerPrefs.size || '80mm';
+    if (rendEl) rendEl.value = printerPrefs.render || 'GRAPHIC';
+    if (feedEl) feedEl.value = String(printerPrefs.feed || 3);
+    if (ipEl) ipEl.value = printerPrefs.netIp || '';
+    if (portEl) portEl.value = printerPrefs.netPort || 9100;
+    if (chkAuto) chkAuto.checked = !!printerPrefs.autoPrint;
+    if (chkCut) chkCut.checked = printerPrefs.autoCut !== false;
+    if (chkDraw) chkDraw.checked = !!printerPrefs.cashDrawer;
+
+    const netRow = document.getElementById('networkIpRow');
+    if (netRow) netRow.style.display = printerPrefs.mode === 'NETWORK' ? 'flex' : 'none';
+
+    applyPaperSizeCSS(printerPrefs.size || '80mm');
+    updatePrinterHeaderBadge();
+  }
+
+  function onPrinterProfileChange() {
+    const prof = document.getElementById('printerBrandProfile').value;
+    if (prof === 'MINI_58') {
+      document.getElementById('printerPaperSize').value = '58mm';
+      document.getElementById('printerConnMode').value = 'BLUETOOTH';
+    } else if (prof === 'GENERIC_80') {
+      document.getElementById('printerPaperSize').value = '80mm';
+    } else if (prof === 'RAWBT_ANDROID') {
+      document.getElementById('printerConnMode').value = 'RAWBT';
+    } else if (prof === 'DOT_76') {
+      document.getElementById('printerPaperSize').value = '76mm';
+      document.getElementById('printerRenderMode').value = 'ESCPOS';
+    } else if (prof === 'A4_LASER') {
+      document.getElementById('printerPaperSize').value = 'A4';
+      document.getElementById('printerConnMode').value = 'BROWSER';
+    }
+    savePrinterPrefs();
+  }
+
+  function applyPaperSizeCSS(size) {
+    const pz = document.getElementById('printZone');
+    const pageStyle = document.getElementById('dynamicPrintPageStyle');
+    if (!pz) return;
+    if (size === '58mm') {
+      pz.style.maxWidth = '210px';
+      if (pageStyle) pageStyle.innerHTML = '@page { size: 58mm auto; margin: 0mm; } @media print { #printZone { width: 54mm !important; max-width: 54mm !important; } }';
+    } else if (size === '76mm') {
+      pz.style.maxWidth = '275px';
+      if (pageStyle) pageStyle.innerHTML = '@page { size: 76mm auto; margin: 0mm; } @media print { #printZone { width: 72mm !important; max-width: 72mm !important; } }';
+    } else if (size === 'A5') {
+      pz.style.maxWidth = '420px';
+      if (pageStyle) pageStyle.innerHTML = '@page { size: A5 portrait; margin: 5mm; } @media print { #printZone { width: 135mm !important; max-width: 135mm !important; } }';
+    } else if (size === 'A4') {
+      pz.style.maxWidth = '540px';
+      if (pageStyle) pageStyle.innerHTML = '@page { size: A4 portrait; margin: 8mm; } @media print { #printZone { width: 190mm !important; max-width: 190mm !important; } }';
+    } else {
+      pz.style.maxWidth = '300px';
+      if (pageStyle) pageStyle.innerHTML = '@page { size: 80mm auto; margin: 0mm; } @media print { #printZone { width: 76mm !important; max-width: 76mm !important; } }';
+    }
+  }
+
+  function updatePrinterHeaderBadge() {
+    const btn = document.getElementById('printerHeaderBtn');
+    const pill = document.getElementById('printerLiveBadge');
+    let label = `🖨️ ${printerPrefs.size} • ${printerPrefs.mode}`;
+    let bg = 'rgba(0,0,0,0.45)';
+
+    if (btChar) {
+      label = `🟢 BT: ${(btDevice?.name || 'Ready').slice(0, 9)}`;
+      bg = '#0f6b2f';
+    } else if (usbDevice) {
+      label = `🟢 USB: Ready`;
+      bg = '#0f6b2f';
+    } else if (serialWriter) {
+      label = `🟢 COM: Ready`;
+      bg = '#0f6b2f';
+    }
+    if (btn) {
+      btn.innerHTML = label;
+      btn.style.background = bg;
+    }
+    if (pill) {
+      pill.innerHTML = label;
+    }
+  }
+
+  function openPrinterSettingsTab() {
+    const tabEl = document.getElementById('tab-backup');
+    if (tabEl) switchTab('backup', tabEl);
+  }
+
+  function savePrinterPrefs() {
+    printerPrefs.profile = document.getElementById('printerBrandProfile')?.value || 'GENERIC_80';
+    printerPrefs.mode = document.getElementById('printerConnMode')?.value || 'RAWBT';
+    printerPrefs.size = document.getElementById('printerPaperSize')?.value || '80mm';
+    printerPrefs.render = document.getElementById('printerRenderMode')?.value || 'GRAPHIC';
+    printerPrefs.feed = parseInt(document.getElementById('printerFeedLines')?.value) || 3;
+    printerPrefs.netIp = (document.getElementById('printerNetIp')?.value || '').trim();
+    printerPrefs.netPort = parseInt(document.getElementById('printerNetPort')?.value) || 9100;
+    printerPrefs.autoPrint = !!document.getElementById('chkAutoPrint')?.checked;
+    printerPrefs.autoCut = !!document.getElementById('chkAutoCut')?.checked;
+    printerPrefs.cashDrawer = !!document.getElementById('chkCashDrawer')?.checked;
+
+    const netRow = document.getElementById('networkIpRow');
+    if (netRow) netRow.style.display = printerPrefs.mode === 'NETWORK' ? 'flex' : 'none';
+
+    localStorage.setItem('sc_printer_prefs', JSON.stringify(printerPrefs));
+    applyPaperSizeCSS(printerPrefs.size);
+    updatePrinterHeaderBadge();
+    showInlineMsg('printerStatusMsg', `✅ Printer Settings (${printerPrefs.size} • ${printerPrefs.mode}) save ho gayi!`, 'success');
+  }
+
+  async function connectBluetoothPrinter() {
+    if (!navigator.bluetooth) {
+      showInlineMsg('printerStatusMsg', '⚠️ Web Bluetooth ke liye Android/PC Chrome use karein ya RawBT mode chunein.', 'error');
+      return;
+    }
+    try {
+      btDevice = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          '000018f0-0000-1000-8000-00805f9b34fb',
+          'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+          '0000ff00-0000-1000-8000-00805f9b34fb',
+          '0000ffe0-0000-1000-8000-00805f9b34fb'
+        ]
+      });
+      const server = await btDevice.gatt.connect();
+      const services = await server.getPrimaryServices();
+      btChar = null;
+      for (const srv of services) {
+        const chars = await srv.getCharacteristics();
+        for (const ch of chars) {
+          if (ch.properties.write || ch.properties.writeWithoutResponse) {
+            btChar = ch;
+            break;
+          }
+        }
+        if (btChar) break;
+      }
+      if (btChar) {
+        document.getElementById('printerConnMode').value = 'BLUETOOTH';
+        savePrinterPrefs();
+        playPosBeep(1020, 0.09);
+        showInlineMsg('printerStatusMsg', `✅ Bluetooth Printer "${btDevice.name || 'Thermal'}" connect ho gaya!`, 'success');
+      } else {
+        showInlineMsg('printerStatusMsg', '⚠️ Printer mila par BLE write channel nahi mila. RawBT mode chunein.', 'error');
+      }
+    } catch (err) {
+      showInlineMsg('printerStatusMsg', '❌ Bluetooth connect cancel ya fail hua: ' + (err.message || ''), 'error');
+    }
+  }
+
+  async function connectUsbPrinter() {
+    if (!navigator.usb) {
+      showInlineMsg('printerStatusMsg', '⚠️ USB OTG ke liye Android/PC Chrome browser use karein.', 'error');
+      return;
+    }
+    try {
+      usbDevice = await navigator.usb.requestDevice({ filters: [] });
+      await usbDevice.open();
+      if (usbDevice.configuration === null) await usbDevice.selectConfiguration(1);
+      await usbDevice.claimInterface(0);
+      const intf = usbDevice.configuration.interfaces[0].alternates[0];
+      const ep = intf.endpoints.find(e => e.direction === 'out');
+      usbEndpoint = ep ? ep.endpointNumber : 1;
+      document.getElementById('printerConnMode').value = 'USB';
+      savePrinterPrefs();
+      playPosBeep(1020, 0.09);
+      showInlineMsg('printerStatusMsg', '✅ USB Thermal Printer connect ho gaya!', 'success');
+    } catch (err) {
+      showInlineMsg('printerStatusMsg', '❌ USB Printer connect nahi hua: ' + (err.message || ''), 'error');
+    }
+  }
+
+  async function connectSerialPrinter() {
+    if (!navigator.serial) {
+      showInlineMsg('printerStatusMsg', '⚠️ Serial COM Port ke liye Desktop Chrome/Edge use karein.', 'error');
+      return;
+    }
+    try {
+      serialPort = await navigator.serial.requestPort();
+      await serialPort.open({ baudRate: 9600 });
+      serialWriter = serialPort.writable.getWriter();
+      document.getElementById('printerConnMode').value = 'SERIAL';
+      savePrinterPrefs();
+      playPosBeep(1020, 0.09);
+      showInlineMsg('printerStatusMsg', '✅ Serial COM Port Printer connect ho gaya!', 'success');
+    } catch (err) {
+      showInlineMsg('printerStatusMsg', '❌ Serial Port connect nahi hua: ' + (err.message || ''), 'error');
+    }
+  }
+
+  function buildEscPosBytes(sale) {
+    const enc = new TextEncoder();
+    const s = sale || lastSavedSale || {
+      invId: 'TEST-101', date: new Date().toLocaleDateString('hi-IN'),
+      cust: 'Test Customer', village: 'Niwari Kalan', mobile: '9876543210', mode: 'Cash',
+      totalMrp: 350, acc: 350, paid: 350, due: 0,
+      items: [{ code: 'SC101R', cat: 'Daily Saree', color: 'Red', qty: 1, mrp: 350 }]
+    };
+    const cols = printerPrefs.size === '58mm' ? 32 : (printerPrefs.size === '76mm' ? 42 : 48);
+    const div = '-'.repeat(cols) + '\n';
+    let cmd = '\x1B\x40'; // Initialize printer
+    if (printerPrefs.cashDrawer) {
+      cmd += '\x1B\x70\x00\x19\xFA'; // RJ11 Cash Drawer Kick Pulse
+    }
+    cmd += '\x1B\x61\x01'; // Center align
+    cmd += '\x1B\x45\x01DIDI KI DUKAN\nSHAKYA COSMETIC & SAREE\x1B\x45\x00\n';
+    cmd += 'Niwari Kalan, Etawah | 8780234760\n' + div;
+    cmd += '\x1B\x61\x00'; // Left align
+    cmd += `Bill: ${s.invId} | Date: ${s.date}\n`;
+    cmd += `Cust: ${s.cust} (${s.village || 'Niwari'})\n` + div;
+    (s.items || []).filter(i => !i.returned).forEach(i => {
+      const lineL = `${i.code} ${i.cat}(${i.color}) x${i.qty}`;
+      const lineR = `Rs.${i.mrp * i.qty}`;
+      const spaces = Math.max(1, cols - lineL.length - lineR.length);
+      cmd += lineL + ' '.repeat(spaces) + lineR + '\n';
+    });
+    cmd += div + '\x1B\x61\x01\x1B\x45\x01';
+    cmd += `TOTAL MRP: Rs.${s.totalMrp} | TAY: Rs.${s.acc}\x1B\x45\x00\n`;
+    if ((s.due || 0) > 0) {
+      cmd += `PAID: Rs.${s.paid} | DUE UDHAAR: Rs.${s.due}\n`;
+    }
+    cmd += div + 'Thank You! Exchange within 3 days.\n';
+    cmd += '\n'.repeat(printerPrefs.feed || 3);
+    if (printerPrefs.autoCut) {
+      cmd += '\x1D\x56\x41\x10'; // GS V A partial cut
+    }
+    return enc.encode(cmd);
+  }
+
+  async function sendEscPosToHardware(bytes) {
+    if (printerPrefs.mode === 'BLUETOOTH' && btChar) {
+      const chunk = 90;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        const slice = bytes.slice(i, i + chunk);
+        if (btChar.properties.writeWithoutResponse) await btChar.writeValueWithoutResponse(slice);
+        else await btChar.writeValue(slice);
+      }
+      return true;
+    }
+    if (printerPrefs.mode === 'USB' && usbDevice) {
+      await usbDevice.transferOut(usbEndpoint || 1, bytes);
+      return true;
+    }
+    if (printerPrefs.mode === 'SERIAL' && serialWriter) {
+      await serialWriter.write(bytes);
+      return true;
+    }
+    if (printerPrefs.mode === 'NETWORK' && printerPrefs.netIp) {
+      const url = `http://${printerPrefs.netIp}:${printerPrefs.netPort || 9100}/`;
+      await fetch(url, { method: 'POST', mode: 'no-cors', body: bytes });
+      return true;
+    }
+    return false;
+  }
+
+  async function printDirect80mm() {
+    const zone = document.getElementById('printZone');
+    document.getElementById('printCard').style.display = 'block';
+
+    // 1. Hardware ESC/POS channels (Bluetooth, USB, Serial, Network IP)
+    if (['BLUETOOTH', 'USB', 'SERIAL', 'NETWORK'].includes(printerPrefs.mode)) {
+      try {
+        const ok = await sendEscPosToHardware(buildEscPosBytes(lastSavedSale));
+        if (ok) {
+          showInlineMsg('billMsg', `🖨️ ${printerPrefs.mode} Printer se bill chhap gaya!`, 'success');
+          return;
+        }
+      } catch (err) {
+        showInlineMsg('billMsg', '⚠️ Direct Hardware Printer busy, fallback print chalu...', 'error');
+      }
+    }
+
+    // 2. Browser / AirPrint / Wi-Fi A4-A5-80mm System Print
+    if (printerPrefs.mode === 'BROWSER') {
+      window.print();
+      return;
+    }
+
+    // 3. RawBT Android App Bridge (Graphic Hindi + Barcode OR Fast Text)
+    if (printerPrefs.render === 'ESCPOS') {
+      const bytes = buildEscPosBytes(lastSavedSale);
+      const b64 = btoa(String.fromCharCode(...bytes));
+      window.location.href = 'rawbt:base64,' + b64;
+      return;
+    }
+
+    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+      const base64Data = canvas.toDataURL('image/png');
+      window.location.href = 'rawbt:' + base64Data;
+    }).catch(() => {
+      window.print();
+    });
+  }
+
+  function printDirect80mmFromModal() {
+    closeBillModal();
+    const tabEl = document.getElementById('tab-billing');
+    if (tabEl) switchTab('billing', tabEl);
+    printDirect80mm();
+  }
+
+  async function testThermalPrinter() {
+    const bytes = buildEscPosBytes(null);
+    try {
+      const sent = await sendEscPosToHardware(bytes);
+      if (sent) {
+        showInlineMsg('printerStatusMsg', `✅ Test Parchi ${printerPrefs.mode} Printer par chhap gayi!`, 'success');
+        return;
+      }
+    } catch (e) {}
+
+    if (printerPrefs.mode === 'RAWBT') {
+      const b64 = btoa(String.fromCharCode(...bytes));
+      window.location.href = 'rawbt:base64,' + b64;
+      showInlineMsg('printerStatusMsg', '⚡ RawBT par Test Receipt bhej di gayi!', 'success');
+    } else {
+      const zone = document.getElementById('printZone');
+      document.getElementById('printCard').style.display = 'block';
+      if (!zone.innerHTML.trim()) {
+        zone.innerHTML = `<p class="receipt-didi">✨ दीदी की दुकान ✨</p><h2>SHAKYA COSMETIC</h2><p>Printer Test Receipt (${printerPrefs.size})</p>`;
+      }
+      window.print();
+    }
+  }
+
+  // --- 3. DYNAMIC UPI QR CODE GENERATOR ---
   function saveMerchantUpiId() {
     const val = document.getElementById('merchantUpiInput').value.trim();
     if (!val || !val.includes('@')) {
@@ -1551,7 +1955,7 @@
     document.getElementById('upiQrModal').style.display = 'none';
   }
 
-  // --- 3. OWNER PIN & COST/PROFIT LOCK ---
+  // --- 4. OWNER PIN & COST/PROFIT LOCK ---
   function updateOwnerLockUI() {
     const btn = document.getElementById('ownerLockBtn');
     if (btn) {
@@ -1611,7 +2015,7 @@
     showInlineMsg('pinChangeMsg', '✅ Naya Owner PIN safaltapoorvak save ho gaya!', 'success');
   }
 
-  // --- 4. BACK GUARD & SWIPE GESTURES ---
+  // --- 5. BACK GUARD & SWIPE GESTURES ---
   let isAppClosed = false;
   let backGuardArmed = false;
 
@@ -1655,7 +2059,6 @@
     closeShutdownModal();
     isAppClosed = true;
     backGuardArmed = false;
-    sessionStorage.removeItem('sc_session_unlocked');
     syncToCloud();
     document.getElementById('appClosedScreen').style.display = 'flex';
     try { window.close(); } catch (err) {}
@@ -1664,10 +2067,6 @@
   function reopenApp() {
     isAppClosed = false;
     document.getElementById('appClosedScreen').style.display = 'none';
-    if (requireStartupPin) {
-      document.getElementById('startupPinInput').value = '';
-      document.getElementById('appStartupGate').style.display = 'flex';
-    }
     armBackGuard();
   }
 
@@ -1693,7 +2092,7 @@
 
   document.addEventListener('touchstart', e => {
     if (!swipeEnabled || isAppClosed) return;
-    if (e.target.closest('input, select, button, table, .chip-wrap, .quick-catalog-strip, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #bulkStockModal, #upiQrModal, #appClosedScreen, #appStartupGate')) {
+    if (e.target.closest('input, select, button, table, .chip-wrap, .quick-catalog-strip, .suggest-box, #billModal, #scannerModal, #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #bulkStockModal, #upiQrModal, #startupLockModal, #appClosedScreen')) {
       ignoreSwipe = true;
       return;
     }
@@ -1725,6 +2124,10 @@
     if (tabEl) { switchTab(nextTabId, tabEl); }
   }
 
+  function cleanCode(str) {
+    return (str || '').toString().toUpperCase().replace(/[-\s]/g, '');
+  }
+
   let msgTimers = {};
   function showInlineMsg(boxId, text, type = 'error') {
     const el = document.getElementById(boxId);
@@ -1749,7 +2152,7 @@
     'PURPLE': 'PR', 'BLACK': 'BK', 'WHITE': 'W', 'GOLDEN': 'GD', 'MULTI': 'ML'
   };
 
-  // --- 5. CUSTOMER DIRECTORY & AUTO-SUGGEST ---
+  // --- 6. CUSTOMER DIRECTORY & AUTO-SUGGEST ---
   function getUniqueVillages() {
     let villages = new Set(['NIWARI KALAN', 'ETAWAH', 'MAHESH PURA', 'BAKKEVAR', 'BHARTHANA', 'TAKHA']);
     sales.forEach(s => {
@@ -1964,7 +2367,7 @@
     a.click();
   }
 
-  // --- 6. STOCK SEARCH, SHORT-CODE & EXCEL BULK STOCK ENTRY ---
+  // --- 7. STOCK SEARCH, GORILLA SHORT-CODE & EXCEL BULK STOCK ENTRY ---
   function renderQuickCatalogStrip() {
     const strip = document.getElementById('quickCatalogStrip');
     if (!strip) return;
@@ -1991,7 +2394,7 @@
       const catLabel = mapNames[prefix] || 'Quick Item';
       box.innerHTML = `
         <div class="suggest-item" style="background:#e8f8ee;" onclick="addItemToBill()">
-          <span>⚡ <b>Instant Add:</b> ${catLabel}</span>
+          <span>🦍 <b>Gorilla Instant Add:</b> ${catLabel}</span>
           <span style="color:var(--green); font-weight:900;">Rate: ₹${rate} (+ Add)</span>
         </div>
       `;
@@ -2020,7 +2423,7 @@
     ).slice(0, 8);
 
     if (matches.length === 0) {
-      box.innerHTML = `<div class="suggest-item" style="color:#b30000;">❌ "${q}" Stock mein nahi mila (Short-code ke liye S+${q} likhein)</div>`;
+      box.innerHTML = `<div class="suggest-item" style="color:#b30000;">❌ "${q}" Stock mein nahi mila (Gorilla code ke liye S+${q} likhein)</div>`;
       box.style.display = 'block';
       return;
     }
@@ -2100,7 +2503,6 @@
     }
   }
 
-  // EXCEL-STYLE BULK STOCK MODAL FUNCTIONS
   function openBulkStockModal() {
     const tbody = document.getElementById('bulkStockRows');
     tbody.innerHTML = '';
@@ -2128,9 +2530,9 @@
           </select>
         </td>
         <td><input type="text" class="b-col" placeholder="Red"></td>
-        <td><input type="number" class="b-qty" value="1" min="1"></td>
-        <td><input type="number" class="b-cost" placeholder="200" min="0"></td>
-        <td><input type="number" class="b-mrp" placeholder="350" min="1"></td>
+        <td><input type="number" class="b-qty" value="1"></td>
+        <td><input type="number" class="b-cost" placeholder="200"></td>
+        <td><input type="number" class="b-mrp" placeholder="350"></td>
       `;
       tbody.appendChild(tr);
     }
@@ -2147,7 +2549,7 @@
       const cost = parseFloat(tr.querySelector('.b-cost').value) || 0;
       const mrp = parseFloat(tr.querySelector('.b-mrp').value) || 0;
 
-      if (!baseCode || !Number.isInteger(qty) || qty <= 0 || cost < 0 || mrp <= 0) return;
+      if (!baseCode || !Number.isInteger(qty) || qty <= 0 || !mrp) return;
       const upperCol = color.toUpperCase();
       const suffix = color !== 'Standard' ? (colorCodeMap[upperCol] || cleanCode(upperCol).slice(0, 2)) : '';
       const finalCode = (suffix && !baseCode.endsWith(suffix)) ? `${baseCode}${suffix}` : baseCode;
@@ -2164,7 +2566,7 @@
     });
 
     if (addedCount === 0) {
-      alert('⚠️ Kam se kam 1 row mein valid Code, Qty (>0) aur MRP (>0) zaroor bharein!');
+      alert('⚠️ Kam se kam 1 row mein Code, Qty (>0) aur MRP zaroor bharein!');
       return;
     }
     playPosBeep(950, 0.09);
@@ -2179,11 +2581,11 @@
     const cat = document.getElementById('sCat').value;
     const colorRaw = document.getElementById('sColor').value.trim();
     const qty = parseInt(document.getElementById('sQty').value, 10);
-    const cost = parseFloat(document.getElementById('sCost').value);
-    const mrp = parseFloat(document.getElementById('sMrp').value);
+    const cost = parseFloat(document.getElementById('sCost').value) || 0;
+    const mrp = parseFloat(document.getElementById('sMrp').value) || 0;
 
-    if (!baseCode || !Number.isInteger(qty) || qty <= 0 || !Number.isFinite(cost) || cost <= 0 || !Number.isFinite(mrp) || mrp <= 0) {
-      showInlineMsg('stockMsg', '⚠️ Kripya sahi Base Code, Qty (>0), Cost (>0) aur MRP (>0) bharein!', 'error');
+    if (!baseCode || !Number.isInteger(qty) || qty <= 0 || cost <= 0 || !mrp) {
+      showInlineMsg('stockMsg', '⚠️ Kripya sahi Base Code, Qty (>0), Cost aur MRP bharein!', 'error');
       return;
     }
 
@@ -2230,7 +2632,6 @@
     document.getElementById('editQty').value = item.qty;
     document.getElementById('editCost').value = item.cost;
     document.getElementById('editMrp').value = item.mrp;
-    document.getElementById('editStockErr').style.display = 'none';
     document.getElementById('editStockModal').style.display = 'flex';
   }
 
@@ -2246,16 +2647,10 @@
     const qty = parseInt(document.getElementById('editQty').value, 10);
     const cost = parseFloat(document.getElementById('editCost').value) || 0;
     const mrp = parseFloat(document.getElementById('editMrp').value) || 0;
-    const errEl = document.getElementById('editStockErr');
 
-    if (!newCode || !Number.isInteger(qty) || qty < 0 || mrp <= 0 || cost < 0) {
-      errEl.innerText = '⚠️ Kripya sahi Code, Qty (0 ya adhik) aur MRP (>0) bharein!';
-      errEl.style.display = 'block';
-      return;
-    }
+    if (!newCode || !Number.isInteger(qty) || qty < 0 || !mrp) return;
     if (newCode !== origCode && inventory.some(i => i.code === newCode)) {
-      errEl.innerText = `❌ Code "${newCode}" pehle se stock mein maujood hai!`;
-      errEl.style.display = 'block';
+      showInlineMsg('stockMsg', '⚠️ Ye stock code pehle se maujood hai!', 'error');
       return;
     }
 
@@ -2400,7 +2795,7 @@
     }).join('');
   }
 
-  // --- 7. PRINTED TAGS WITH "दीदी की दुकान" & SECRET COST CIPHER ---
+  // --- 8. PRINTED TAGS WITH "दीदी की दुकान" & SECRET COST CIPHER ---
   function printSareeTag(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
@@ -2453,7 +2848,7 @@
     window.print();
   }
 
-  // --- 8. BILLING, SHORT-CODE, HOLD CART, SPLIT PAY & STRICT VALIDATION ---
+  // --- 9. BILLING, GORILLA SHORT-CODE, HOLD CART, SPLIT PAY & LOSS ALERT ---
   function updateHoldBtnUI() {
     const btn = document.getElementById('holdBillBtn');
     if (!btn) return;
@@ -2537,7 +2932,7 @@
         cart.push({
           code: gCode,
           cat: catName,
-          color: 'Quick',
+          color: 'Gorilla Quick',
           qty: 1,
           cost: Math.round(mrp * 0.68),
           mrp: mrp,
@@ -2545,7 +2940,7 @@
         });
         playPosBeep(960, 0.07);
         document.getElementById('scanInput').value = '';
-        showInlineMsg('billMsg', `⚡ Quick Bill: ${catName} (₹${mrp}) jud gaya!`, 'success');
+        showInlineMsg('billMsg', `🦍 Gorilla Fast Bill: ${catName} (₹${mrp}) jud gaya!`, 'success');
         renderCart();
         return;
       }
@@ -2555,7 +2950,7 @@
     if (!code) {
       const inp = document.getElementById('scanInput');
       if (inp) onScanInputType(inp);
-      showInlineMsg('billMsg', '⚠️ Pehle Saree Code ya Short-Code (Ex: S+450) daalein!', 'error');
+      showInlineMsg('billMsg', '⚠️ Pehle Saree Code ya Gorilla Code (Ex: S+450) daalein!', 'error');
       return;
     }
     const item = inventory.find(i => cleanCode(i.code) === code);
@@ -2725,7 +3120,7 @@
   function onPayModeChange() {
     const mode = document.getElementById('payMode').value;
     const splitRow = document.getElementById('splitPayRow');
-    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const paid = document.getElementById('paidInput').value === '' ? 0 : Number(document.getElementById('paidInput').value);
     if (mode === 'Split') {
       splitRow.style.display = 'flex';
       const half = Math.round(paid / 2);
@@ -2737,13 +3132,13 @@
   }
 
   function onSplitCashChange() {
-    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const paid = document.getElementById('paidInput').value === '' ? 0 : Number(document.getElementById('paidInput').value);
     const cVal = parseFloat(document.getElementById('splitCashInput').value) || 0;
     document.getElementById('splitUpiInput').value = Math.max(0, paid - cVal);
   }
 
   function onSplitUpiChange() {
-    const paid = parseFloat(document.getElementById('paidInput').value) || 0;
+    const paid = document.getElementById('paidInput').value === '' ? 0 : Number(document.getElementById('paidInput').value);
     const uVal = parseFloat(document.getElementById('splitUpiInput').value) || 0;
     document.getElementById('splitCashInput').value = Math.max(0, paid - uVal);
   }
@@ -2751,14 +3146,8 @@
   function updateLiveSplit() {
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
     const acc = parseFloat(document.getElementById('accInput').value) || 0;
-    const paidRaw = document.getElementById('paidInput').value;
-    const paid = paidRaw === '' ? 0 : Number(paidRaw);
+    const paid = document.getElementById('paidInput').value === '' ? 0 : Number(document.getElementById('paidInput').value);
     const netTarget = Math.max(0, acc - activeExchangeCredit);
-
-    if (paid > netTarget && cart.length > 0) {
-      showInlineMsg('billMsg', `⚠️ Mila Cash (₹${paid}) Tay Rate (₹${netTarget}) se zyada nahi ho sakta!`, 'error');
-    }
-
     const due = Math.max(0, netTarget - paid);
     document.getElementById('dueInput').value = due;
 
@@ -2842,22 +3231,18 @@
     });
   }
 
-  function printDirect80mm() {
-    const zone = document.getElementById('printZone');
-    document.getElementById('printCard').style.display = 'block';
-    html2canvas(zone, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-      const base64Data = canvas.toDataURL('image/png');
-      window.location.href = 'rawbt:' + base64Data;
-    }).catch(() => {
-      window.print();
+  function generateNextInvId() {
+    let maxNum = 100;
+    sales.forEach(s => {
+      if (s && s.invId) {
+        const m = String(s.invId).match(/^INV(\d+)$/);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      }
     });
-  }
-
-  function printDirect80mmFromModal() {
-    closeBillModal();
-    const tabEl = document.getElementById('tab-billing');
-    if (tabEl) switchTab('billing', tabEl);
-    printDirect80mm();
+    return 'INV' + (maxNum + 1);
   }
 
   function finalizeBill() {
@@ -2873,13 +3258,11 @@
     const totalMrp = parseFloat(document.getElementById('billTotalMrp').value) || 0;
     const accRaw = document.getElementById('accInput').value;
     const acc = accRaw === '' ? totalMrp : Number(accRaw);
-    const paidRaw = document.getElementById('paidInput').value;
-    const paid = paidRaw === '' ? 0 : Number(paidRaw);
+    const paid = document.getElementById('paidInput').value === '' ? 0 : Number(document.getElementById('paidInput').value);
     const netTarget = Math.max(0, acc - activeExchangeCredit);
 
-    // Strict Amount Validation (Suggested from ChatGPT Review)
     if (!Number.isFinite(acc) || !Number.isFinite(paid) || acc < 0 || paid < 0 || paid > netTarget) {
-      showInlineMsg('billMsg', `⚠️ Rashi jaanchein: Mila Cash (₹${paid}) Tay Payable (₹${netTarget}) se zyada ya negative nahi ho sakta!`, 'error');
+      showInlineMsg('billMsg', '⚠️ Galat Rakam: Paid amount Tay Payable (₹' + netTarget + ') se zyada ya minus mein nahi ho sakta!', 'error');
       return;
     }
 
@@ -2900,7 +3283,7 @@
       splitCash = parseFloat(document.getElementById('splitCashInput').value) || 0;
       splitUpi = parseFloat(document.getElementById('splitUpiInput').value) || 0;
       if (splitCash < 0 || splitUpi < 0 || Math.abs((splitCash + splitUpi) - paid) > 0.01) {
-        showInlineMsg('billMsg', `⚠️ Split Cash (₹${splitCash}) + UPI (₹${splitUpi}) ka jod Paid (₹${paid}) ke barabar hona chahiye!`, 'error');
+        showInlineMsg('billMsg', '⚠️ Split Cash + UPI ka jod Paid amount (₹' + paid + ') ke barabar hona chahiye!', 'error');
         return;
       }
     }
@@ -2956,10 +3339,14 @@
     document.getElementById('custMobile').value = '';
     document.getElementById('custPrevUdhaarBanner').style.display = 'none';
 
-    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Customer Contact + Cloud sync ho gaya!`, 'success');
+    showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Cloud par sync ho gaya!`, 'success');
+
+    if (printerPrefs.autoPrint) {
+      setTimeout(() => printDirect80mm(), 250);
+    }
   }
 
-  // --- 9. DIRECT WHATSAPP TO CUSTOMER & BILL IMAGE SHARE ---
+  // --- 10. DIRECT WHATSAPP TO CUSTOMER & BILL IMAGE SHARE ---
   function buildWhatsAppBillText(s) {
     const paidVal = s.paid !== undefined ? s.paid : s.acc;
     const dueVal = s.due || 0;
@@ -3073,7 +3460,7 @@
     });
   }
 
-  // --- 10. BILL MODAL & SINGLE-ITEM EXCHANGE ---
+  // --- 11. BILL MODAL & SINGLE-ITEM EXCHANGE ---
   function openBillModal(invId) {
     const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
     if (!s) return;
@@ -3281,7 +3668,7 @@
     }
   }
 
-  // --- 11. UDHAAR PASSBOOK, CALL & CONTACT DIRECTORY ---
+  // --- 12. UDHAAR PASSBOOK, CALL & CONTACT DIRECTORY ---
   function openUdhaarModal(mob, name, totalDue) {
     activeUdhaarMobile = mob;
     activeUdhaarName = name;
@@ -3454,7 +3841,7 @@
       <tr>
         <td onclick="selectCustomerSearchByIdx(${idx})" style="cursor:pointer;">
           <b>${c.name}</b><br>
-          <small style="color:#555;">${c.mobile || 'No Mob'} (${c.count} Bills)</small>
+          <small style="color:#555;">${c.mobile || 'No Mob'}</small>
         </td>
         <td>${c.village}</td>
         <td>₹${c.spend}</td>
@@ -3473,7 +3860,7 @@
     `).join('');
   }
 
-  // --- 12. ROZANA DUKAAN KHARCHA & INSIGHTS WITH 7-DAY CHART ---
+  // --- 13. ROZANA DUKAAN KHARCHA & INSIGHTS WITH 7-DAY CHART ---
   function addExpense() {
     const note = document.getElementById('expNote').value.trim();
     const amt = parseFloat(document.getElementById('expAmt').value) || 0;
@@ -3678,7 +4065,7 @@
     `).join('');
   }
 
-  // --- 13. SAFE EXCEL CSV & CLOUD/LOCAL JSON BACKUP ---
+  // --- 14. EXCEL CSV & CLOUD/LOCAL JSON BACKUP ---
   function exportSalesCSV() {
     if (sales.length === 0) {
       showInlineMsg('backupMsg', '⚠️ Abhi koi sale record nahi hai!', 'error');
@@ -3686,11 +4073,9 @@
     }
     let csv = 'Invoice,Date,Customer,Village,Mobile,PaymentMode,StickerMRP,ActualSale_ACC,ExchangeCredit,Paid,Due_Udhaar,Cost,NetProfit,Status,Items\n';
     sales.forEach(s => {
-      const itemsStr = s.items.map(i => `${String(i.code || '').replace(/[=+@"-]/g, '')}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
+      const itemsStr = s.items.map(i => `${String(i.code||'').replace(/[=+@\\-]/g,'')}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
       const paidVal = s.paid !== undefined ? s.paid : s.acc;
-      const safeCust = String(s.cust || '').replace(/"/g, '""');
-      const safeVil = String(s.village || '').replace(/"/g, '""');
-      csv += `${s.invId},${s.date},"${safeCust}","${safeVil}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${s.exchangeCredit || 0},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
+      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${s.exchangeCredit || 0},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -3701,7 +4086,7 @@
   }
 
   function downloadBackupJSON() {
-    const data = JSON.stringify({ version: 2, inventory, sales, udhaarLogs, expenses, contacts, ownerPin, requireStartupPin, merchantUpiId });
+    const data = JSON.stringify({ version: 3, inventory, sales, udhaarLogs, expenses, contacts, ownerPin, merchantUpiId, printerPrefs });
     const blob = new Blob([data], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -3724,9 +4109,12 @@
           if (parsed.expenses) expenses = normalizeArray(parsed.expenses);
           if (parsed.contacts) contacts = normalizeArray(parsed.contacts);
           if (parsed.ownerPin) ownerPin = String(parsed.ownerPin);
-          if (parsed.requireStartupPin !== undefined) requireStartupPin = Boolean(parsed.requireStartupPin);
           if (parsed.merchantUpiId) merchantUpiId = String(parsed.merchantUpiId);
-          updateStartupLockBtnUI();
+          if (parsed.printerPrefs) {
+            printerPrefs = parsed.printerPrefs;
+            localStorage.setItem('sc_printer_prefs', JSON.stringify(printerPrefs));
+            initPrinterSettingsUI();
+          }
           syncToCloud();
           renderStock(); renderStats(); renderCustomerSection();
           showInlineMsg('backupMsg', '✅ Backup safaltapoorvak Restore aur Cloud par sync ho gaya!', 'success');
@@ -3744,4 +4132,3 @@
 </script>
 </body>
 </html>
-```
