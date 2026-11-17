@@ -558,73 +558,6 @@
     #camColorVideo { width: 100%; max-height: 170px; object-fit: cover; display: block; }
     .cam-crosshair { position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border: 2.5px solid #fde047; border-radius: 8px; box-shadow: 0 0 0 999px rgba(0,0,0,0.35); pointer-events: none; }
     /* [ANCHOR:COLOR_CSS_END] */
-    /* PERMANENT NAKAD BILLING STYLES */
-    .cash-input-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-    .cash-input-row input {
-      flex: 1;
-      margin: 0;
-    }
-    .unlock-check-label {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--maroon);
-      background: var(--maroon-light);
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid var(--chip-border);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-      user-select: none;
-    }
-    .due-alert-box {
-      display: none;
-      margin-top: 6px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: var(--red);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 11.5px;
-      font-weight: 800;
-      text-align: center;
-      animation: fadeInSheet 0.15s ease;
-    }
-    .due-alert-box.show { display: block; }
-    /* [ANCHOR:PERM_NAKAD_CSS_END] */
-    /* NAKAD-FIRST MODE STYLES */
-    .nakad-mode-toggle {
-      display: flex;
-      justify-content: flex-end;
-      margin: 6px 0 2px;
-    }
-    .nakad-toggle-btn {
-      background: #f8fafc;
-      color: #64748b;
-      border: 1px dashed #cbd5e1;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .nakad-collapsible {
-      display: none;
-      background: #fef2f2;
-      border: 1.5px dashed #fca5a5;
-      padding: 8px;
-      border-radius: 10px;
-      margin-top: 6px;
-      animation: fadeInSheet 0.15s ease;
-    }
-    .nakad-collapsible.open { display: block; }
-    /* [ANCHOR:NAKAD_CSS_END] */
     /* CUSTOM SELECT BOTTOM SHEET POPUP */
     #customSelectModal {
       display: none;
@@ -1114,144 +1047,170 @@
      [HTML-05: SECTION 1 - BILLING & CART START]
      ===================================================================== -->
 <div id="billing" class="section active">
-  <div class="card" style="padding:12px;">
-    <!-- QUICK STATS BANNER -->
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:8px 10px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:10px;">
-      <div style="font-size:11.5px; font-weight:800; color:var(--maroon);" id="aajBikriSummary">🛒 Aaj Bikri: ₹0 (0 Bills)</div>
-      <div style="display:flex; gap:6px;">
-        <button class="gold small" style="margin:0; padding:4px 8px; font-size:10.5px;" onclick="openHoldBillsModal()">⏸️ Hold</button>
-        <button class="dark small" style="margin:0; padding:4px 8px; font-size:10.5px;" onclick="openQuickExpenseModal()">💸 Kharcha</button>
+
+  <div class="mini-galla-strip">
+    <span id="miniTodaySale">📅 Aaj Bikri: ₹0 (0 Bills)</span>
+    <span id="miniGallaCash" style="color:var(--green);">💵 Net Cash: ₹0</span>
+    <button id="holdBillBtn" class="small" style="background:var(--maroon); color:#fff; margin:0; padding:4px 9px;" onclick="toggleHoldCart()">⏸️ Hold Bill</button>
+  </div>
+
+  <div class="card">
+    <h3>
+      <span>1. Scan / Code / Gorilla Short-Code</span>
+      <span class="color-chip" style="padding:2px 8px; font-size:10px; background:#ecfdf5; color:var(--green); border-color:var(--green);" onclick="quickAddFallPico()">🧵 + Fall-Pico (₹50)</span>
+    </h3>
+    <div class="row">
+      <div style="flex:2.1" class="suggest-wrap">
+        <input type="text" id="scanInput" placeholder="Code ya S+450, C+60 likhein..." autocomplete="off" oninput="onScanInputType(this)" onfocus="onScanInputType(this)" onkeydown="if(event.key==='Enter') addItemToBill()">
+        <div id="scanSuggestBox" class="suggest-box"></div>
+      </div>
+      <div style="flex:0.9">
+        <button style="margin:0;" onclick="addItemToBill()">+ Add</button>
+      </div>
+      <div style="flex:0.9">
+        <button class="dark" style="margin:0;" onclick="startScanner('BILL')">📷 Scan</button>
       </div>
     </div>
 
-    <!-- 1. SCAN / QUICK CODE INPUT -->
-    <div style="font-size:12px; font-weight:900; color:var(--maroon); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-      <span>1. Saree / Item Scan ya Code Likhein</span>
-      <button class="gold small" style="margin:0; padding:3px 8px; font-size:10.5px;" onclick="addFallPicoQuick()">+ Fall-Pico (₹50)</button>
+    <div class="gorilla-hint">
+      <span>🦍 <b>Gorilla Fast Bill:</b> <code>S+450</code> (Saree ₹450), <code>F+850</code> (Fancy), <code>C+50</code> (Cosmetic), <code>P+120</code> (Petticoat)</span>
+    </div>
+
+    <div id="quickCatalogStrip" class="quick-catalog-strip"></div>
+
+    <div class="loose-box">
+      <div style="font-size:11px; font-weight:700; color:var(--maroon); margin-bottom:4px;">⚡ Bina Code / Futtkar Item Jodein (Cosmetic, Fall-Pico, Chudi):</div>
+      <div class="row">
+        <div style="flex:1.6;">
+          <input type="text" id="looseName" placeholder="Item (Ex: Chudi/Fall)" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:1;">
+          <input type="number" id="looseMrp" placeholder="Rate ₹" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:0.9;">
+          <input type="number" id="looseCost" placeholder="Cost ₹" style="margin:0; padding:6px; font-size:12px;">
+        </div>
+        <div style="flex:0.8;">
+          <button class="gold" style="margin:0; padding:6px; font-size:11px;" onclick="addLooseItemToBill()">+ Jodein</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="exchangeCreditBanner" class="credit-banner">
+      <span id="exchangeCreditText">🔄 Exchange Credit Applied: ₹0</span>
+      <button class="small" style="background:#dc2626; color:#fff; margin:0; padding:3px 7px;" onclick="clearExchangeCredit()">✕ Hatayein</button>
+    </div>
+
+    <div id="billMsg" class="inline-msg"></div>
+
+    <table id="cartTable">
+      <thead>
+        <tr><th>Code</th><th>Item & Qty</th><th>MRP (₹)</th><th style="text-align:right;"></th></tr>
+      </thead>
+      <tbody id="cartBody"></tbody>
+    </table>
+
+    <!-- [ANCHOR:BILLING_NAKAD_START] -->
+    <!-- Hidden elements kept in DOM so original JS functions never crash -->
+    <input type="hidden" id="accInput" value="">
+    <div id="lossWarningBox" style="display:none;"></div>
+    <div id="quickDiscountRow" style="display:none;"></div>
+
+    <div class="row" style="margin-top:10px; align-items:flex-end;">
+      <div>
+        <label>Sticker Bill (₹)</label>
+        <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:900; color:#0f172a;">
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+          <label style="color:var(--green); margin:0;">Mila Cash/UPI (₹)</label>
+          <label style="display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; color:var(--maroon); background:var(--maroon-light); padding:2px 6px; border-radius:6px; border:1px solid var(--chip-border); cursor:pointer; margin:0; user-select:none;">
+            <input type="checkbox" id="unlockCashChk" onchange="togglePaidInputLock(this)" style="width:13px; height:13px; margin:0;"> 🔓 Edit
+          </label>
+        </div>
+        <input type="number" id="paidInput" placeholder="Abhi mile paise" readonly style="background:#f1f5f9; font-weight:800;" oninput="updateLiveSplit(); syncNakadDueBanner();">
+      </div>
+    </div>
+
+    <div id="baakiUdhaarBanner" style="display:none; margin-top:6px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; padding:7px 10px; align-items:center; justify-content:space-between;">
+      <span style="font-size:11.5px; font-weight:900; color:#dc2626;">⚠️ Baaki Udhaar (Due ₹):</span>
+      <input type="number" id="dueInput" readonly value="0" style="width:115px; margin:0; padding:4px 8px; background:#ffffff; color:#dc2626; font-weight:900; font-size:13px; text-align:right; border:1px solid #fca5a5; border-radius:6px;">
+    </div>
+    <!-- [ANCHOR:BILLING_NAKAD_END] -->
+
+    <div class="row">
+      <div class="suggest-wrap">
+        <label>Customer Name</label>
+        <input type="text" id="custName" placeholder="Ex: Sunita Devi" autocomplete="off" oninput="onCustNameInputType(this)" onfocus="onCustNameInputType(this)">
+        <div id="custNameSuggestBox" class="suggest-box"></div>
+      </div>
+      <div class="suggest-wrap">
+        <label>Gaon / City</label>
+        <input type="text" id="custVillage" placeholder="Ex: Niwari Kalan" autocomplete="off" oninput="onVillageInputType(this)" onfocus="onVillageInputType(this)">
+        <div id="villageSuggestBox" class="suggest-box"></div>
+      </div>
     </div>
 
     <div class="row">
+      <div class="suggest-wrap">
+        <label>Mobile Number (WhatsApp)</label>
+        <input type="tel" id="custMobile" placeholder="Ex: 9876543210" maxlength="10" autocomplete="off" oninput="onCustMobileInputType(this)" onfocus="onCustMobileInputType(this)">
+        <div id="custMobileSuggestBox" class="suggest-box"></div>
+      </div>
       <div>
-        <input type="text" id="scanInput" list="stockCodesList" placeholder="Ex: SC105, C60, S+450" onkeydown="if(event.key==='Enter') handleScanInput()" style="margin:0;">
-          <datalist id="stockCodesList"></datalist>
-      </div>
-      <div style="flex:0 0 auto; display:flex; gap:5px;">
-        <button onclick="handleScanInput()" style="margin:0; padding:9px 14px; font-size:12px;" class="gold">+ Add</button>
-        <button onclick="openCameraScanner()" style="margin:0; padding:9px 12px; font-size:12px;" class="dark">📷 Scan</button>
-      </div>
-    </div>
-
-    <!-- GORILLA FAST PRESETS -->
-    <div style="background:#fefce8; border:1.5px dashed #fde047; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:10.5px; color:#713f12;">
-      <b>⚡ Gorilla Fast Bill:</b> S+450 (Saree ₹450), F+850 (Fancy), C+50 (Cosmetic), P+120 (Petticoat)
-    </div>
-    <div id="quickPopularChips" style="display:flex; gap:5px; overflow-x:auto; margin-top:6px; padding-bottom:3px; scrollbar-width:none;"></div>
-    <!-- SMART POPULAR SUGGESTIONS BAR -->
-    <div id="smartSuggestionsBar" style="display:flex; gap:5px; overflow-x:auto; margin-top:6px; padding-bottom:2px; scrollbar-width:none;">
-      <span class="color-chip" style="font-size:10px; padding:3px 8px; flex-shrink:0; cursor:pointer;" onclick="quickSelectCode('SC105')">⚡ SC105</span>
-      <span class="color-chip" style="font-size:10px; padding:3px 8px; flex-shrink:0; cursor:pointer;" onclick="quickSelectCode('SC10Y')">⚡ SC10Y</span>
-      <span class="color-chip" style="font-size:10px; padding:3px 8px; flex-shrink:0; cursor:pointer;" onclick="quickSelectCode('SC10P')">⚡ SC10P</span>
-      <span class="color-chip" style="font-size:10px; padding:3px 8px; flex-shrink:0; cursor:pointer;" onclick="quickSelectCode('C60')">⚡ C60</span>
-      <span class="color-chip" style="font-size:10px; padding:3px 8px; flex-shrink:0; cursor:pointer;" onclick="quickSelectCode('P120')">⚡ P120</span>
-    </div>
-
-    <!-- BINA CODE / FUTTKAR ITEM -->
-    <div style="margin-top:10px; border-top:1.5px solid #e2e8f0; padding-top:8px;">
-      <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:5px;">Bina Code / Futtkar Item Jodein (Cosmetic, Chudi, Fall):</div>
-      <div class="row" style="gap:5px;">
-        <div style="flex:2;"><input type="text" id="fName" placeholder="Item (Ex: Chudi)" style="margin:0; font-size:11px;"></div>
-        <div style="flex:1;"><input type="number" id="fRate" placeholder="Rate ₹" style="margin:0; font-size:11px;"></div>
-        <div style="flex:1;"><input type="number" id="fCost" placeholder="Cost ₹" style="margin:0; font-size:11px;"></div>
-        <div style="flex:0 0 auto;"><button onclick="addCustomFuttkarItem()" class="gold small" style="margin:0; padding:9px 10px; font-size:11px;">+ Jodein</button></div>
+        <label>Payment Mode</label>
+        <select id="payMode" onchange="onPayModeChange()">
+          <option value="Cash">💵 Cash (Nagad)</option>
+          <option value="UPI">📱 PhonePe / UPI</option>
+          <option value="Split">💳 Cash + UPI (Split)</option>
+          <option value="AEPS Cash">🏦 Spice Money AEPS</option>
+        </select>
       </div>
     </div>
 
-    <!-- BILL ITEMS TABLE -->
-    <div style="margin-top:10px; max-height:150px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:8px;">
-      <table style="width:100%; border-collapse:collapse; font-size:11px;">
-        <thead>
-          <tr style="background:#f1f5f9; color:#334155; text-align:left;">
-            <th style="padding:6px; border-bottom:1px solid #cbd5e1;">Code</th>
-            <th style="padding:6px; border-bottom:1px solid #cbd5e1;">Item & Qty</th>
-            <th style="padding:6px; border-bottom:1px solid #cbd5e1; text-align:right;">MRP (₹)</th>
-            <th style="padding:6px; border-bottom:1px solid #cbd5e1; text-align:center;">Action</th>
-          </tr>
-        </thead>
-        <tbody id="billTableBody">
-          <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">Koi item nahi joda gaya</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ================= NAKAD-FIRST BILLING TOTAL & PAYMENT ================= -->
-    <div style="margin-top:12px; background:#f8fafc; padding:10px; border-radius:10px; border:1.5px solid #e2e8f0;">
-      
-      <!-- Kul Bill MRP -->
-      <div style="margin-bottom:8px;">
-        <label style="font-size:11px; font-weight:800; color:#475569;">Kul Bill MRP (₹)</label>
-        <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:900; font-size:14px; margin-top:2px; color:#1e293b;">
+    <div id="splitPayRow" class="row" style="display:none; background:#eff6ff; padding:8px; border-radius:8px; margin-top:6px; border:1px solid #bfdbfe;">
+      <div>
+        <label style="margin:0; color:var(--green);">💵 Cash Mila (₹)</label>
+        <input type="number" id="splitCashInput" placeholder="Cash ₹" oninput="onSplitCashChange()">
       </div>
-
-      <!-- Mila Cash & Payment Mode Row -->
-      <div class="row" style="margin-bottom:0;">
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-            <label style="color:var(--green); font-weight:800; margin:0; font-size:11px;">Mila Cash / UPI (Paid ₹)</label>
-            <label class="unlock-check-label" style="padding:3px 6px; font-size:9.5px;">
-              <input type="checkbox" id="unlockCashEdit" onchange="toggleCashEditLock(this)"> 🔓 Edit Unlock
-            </label>
-          </div>
-          <input type="number" id="paidInput" placeholder="Mile paise" readonly style="background:#f1f5f9; font-weight:900; font-size:13px; margin:0;" oninput="updateLiveSplit()">
-          <div id="dueAlertBox" class="due-alert-box">
-            ⚠️ Baaki Udhaar (Due): <span id="liveDueDisplay">₹0</span>
-          </div>
-        </div>
-        <div>
-          <label style="font-size:11px; font-weight:800; color:#475569;">Payment Mode</label>
-          <select id="payMode" onchange="onPayModeChange()" style="margin:0; font-size:12px;">
-            <option value="Cash">💵 Cash (Nagad)</option>
-            <option value="UPI">📱 PhonePe / UPI</option>
-            <option value="Split">💳 Cash + UPI (Split)</option>
-            <option value="AEPS Cash">🏦 Spice Money AEPS</option>
-          </select>
-        </div>
+      <div>
+        <label style="margin:0; color:var(--blue);">📱 UPI Mila (₹)</label>
+        <input type="number" id="splitUpiInput" placeholder="UPI ₹" oninput="onSplitUpiChange()">
       </div>
     </div>
 
-    <!-- ================= CUSTOMER & BILL ACTION SECTION ================= -->
-    <div style="margin-top:10px;">
-      <div class="row">
-        <div>
-          <label style="font-size:10.5px; color:#475569; font-weight:700;">Customer Name</label>
-          <input type="text" id="custName" list="custNameList" placeholder="Ex: Sunita Devi" style="margin:0; font-size:11.5px;" oninput="rememberCustomerData()">
-          <datalist id="custNameList"></datalist>
-        </div>
-        <div>
-          <label style="font-size:10.5px; color:#475569; font-weight:700;">Gaon / City</label>
-          <input type="text" id="custCity" list="custCityList" placeholder="Ex: Niwari Kalan" style="margin:0; font-size:11.5px;">
-          <datalist id="custCityList"></datalist>
-        </div>
-      </div>
+    <div id="custPrevUdhaarBanner" class="udhaar-alert-banner"></div>
 
-      <div class="row" style="margin-top:6px;">
-        <div>
-          <label style="font-size:10.5px; color:#475569; font-weight:700;">Mobile Number (WhatsApp)</label>
-          <input type="tel" id="custPhone" list="custPhoneList" placeholder="Ex: 9876543210" style="margin:0; font-size:11.5px;">
-          <datalist id="custPhoneList"></datalist>
-        </div>
-        <div style="display:flex; align-items:flex-end;">
-          <button type="button" class="dark" style="width:100%; margin:0; padding:10px; font-size:11.5px;" onclick="openUpiQrModal()">📱 UPI QR Code</button>
-        </div>
-      </div>
+    <div id="liveSplitBox" style="background:#fffbeb; padding:8px; border-radius:8px; margin-top:10px; font-size:12px; display:none;"></div>
 
-      <!-- FINAL BILL GENERATE BUTTON -->
-      <button onclick="generateAndPrintBill()" class="gold" style="width:100%; margin-top:10px; padding:12px; font-size:14px; font-weight:900; border-radius:10px; box-shadow:0 4px 12px rgba(212,175,55,0.35);">
-        ✅ Bill Banayein & Chhapein
-      </button>
+    <div class="row" style="margin-top:10px;">
+      <div style="flex:2;">
+        <button class="gold" style="margin:0;" onclick="finalizeBill()">✅ Bill Banayein & Chhapein</button>
+      </div>
+      <div style="flex:1;">
+        <button class="thermal" style="margin:0;" onclick="showLiveCounterUpiQr()">📱 UPI QR</button>
+      </div>
     </div>
+  </div>
 
+  <!-- PRINT & WHATSAPP RECEIPT CARD -->
+  <div id="printCard" class="card" style="display:none;">
+    <div id="printZone"></div>
+    <div class="row" style="margin-top:10px;">
+      <div><button class="thermal" style="margin:0;" onclick="printDirect80mm()">🖨️ Smart Printer Print</button></div>
+      <div><button style="margin:0;" onclick="window.print()">🌐 Browser / PDF Print</button></div>
+    </div>
+    <div class="row" style="margin-top:6px;">
+      <div style="flex:1.6;"><button class="whatsapp" style="margin:0;" onclick="sendWhatsAppLastBill('IMAGE')">📸 WhatsApp Par Asli Bill (Photo) Bhejein</button></div>
+      <div style="flex:1;"><button class="dark" style="margin:0;" onclick="sendWhatsAppLastBill('DIRECT')">📝 Text WA</button></div>
+    </div>
   </div>
 </div>
+<!-- [HTML-05: SECTION 1 - BILLING & CART END] -->
+
+<!-- =====================================================================
+     [HTML-06: SECTION 2 - STOCK MANAGEMENT START]
+     ===================================================================== -->
 <div id="stock" class="section">
   <div class="card">
     <h3>
@@ -3266,65 +3225,8 @@
   }
   // [ANCHOR:COLOR_JS_END]
 
-  // [ANCHOR:FIX_SCAN_JS]
-  function openCameraScanner() {
-    // Fallback if HTML5 QR scanner modal isn't loaded
-    const modal = document.getElementById('cameraScannerModal');
-    if (modal) {
-      modal.style.display = 'flex';
-      startScannerCamera();
-    } else {
-      // Direct prompt fallback for instant mobile code entry
-      const code = prompt('📷 Barcode / Saree Code Scan Karein:');
-      if (code) {
-        const inp = document.getElementById('scanInput');
-        if (inp) { inp.value = code; handleScanInput(); }
-      }
-    }
-  }
-
-  function populateAutosuggestionsLists() {
-    // Populate stock codes
-    const stockList = document.getElementById('stockCodesList');
-    if (stockList && typeof inventory !== 'undefined') {
-      stockList.innerHTML = inventory.map(i => `<option value="${i.code}">${i.cat} - ${i.color} (₹${i.mrp})</option>`).join('');
-    }
-    // Load saved customer history from localStorage
-    try {
-      const history = JSON.parse(localStorage.getItem('shakya_cust_history') || '[]');
-      const nameList = document.getElementById('custNameList');
-      const phoneList = document.getElementById('custPhoneList');
-      const cityList = document.getElementById('custCityList');
-      if (nameList) nameList.innerHTML = history.map(h => `<option value="${h.name}">`).join('');
-      if (phoneList) phoneList.innerHTML = history.map(h => `<option value="${h.phone}">`).join('');
-      if (cityList) cityList.innerHTML = history.map(h => `<option value="${h.city}">`).join('');
-    } catch(e) {}
-  }
-
-  function rememberCustomerData() {
-    const name = document.getElementById('custName')?.value?.trim();
-    const phone = document.getElementById('custPhone')?.value?.trim();
-    const city = document.getElementById('custCity')?.value?.trim();
-    if (!name) return;
-    try {
-      let history = JSON.parse(localStorage.getItem('shakya_cust_history') || '[]');
-      if (!history.some(h => h.name.toLowerCase() === name.toLowerCase())) {
-        history.unshift({ name, phone: phone || '', city: city || '' });
-        if (history.length > 25) history.pop();
-        localStorage.setItem('shakya_cust_history', JSON.stringify(history));
-        populateAutosuggestionsLists();
-      }
-    } catch(e) {}
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(populateAutosuggestionsLists, 500);
-  });
-  // [ANCHOR:FIX_SCAN_JS]
-
-
-  // [ANCHOR:PERM_NAKAD_JS_START]
-  function toggleCashEditLock(chk) {
+  // [ANCHOR:NAKAD_SAFE_JS_START]
+  function togglePaidInputLock(chk) {
     const paidInp = document.getElementById('paidInput');
     if (!paidInp) return;
     if (chk.checked) {
@@ -3337,43 +3239,110 @@
       paidInp.setAttribute('readonly', 'true');
       paidInp.style.background = '#f1f5f9';
       paidInp.style.borderColor = '#cbd5e1';
-      playPosBeep(700, 0.04);
     }
+    syncNakadDueBanner();
   }
 
-  // Override updateLiveSplit to show Due alert box when paid < total
-  const originalUpdateLiveSplit = window.updateLiveSplit;
-  window.updateLiveSplit = function() {
-    if (typeof originalUpdateLiveSplit === 'function') {
-      try { originalUpdateLiveSplit(); } catch(e) {}
-    }
+  function syncNakadDueBanner() {
     const total = parseFloat(document.getElementById('billTotalMrp')?.value) || 0;
-    const paid = parseFloat(document.getElementById('paidInput')?.value) || 0;
-    const dueBox = document.getElementById('dueAlertBox');
-    const dueSpan = document.getElementById('liveDueDisplay');
-    const due = Math.max(0, total - paid);
+    const paidEl = document.getElementById('paidInput');
+    const dueEl = document.getElementById('dueInput');
+    const banner = document.getElementById('baakiUdhaarBanner');
+    const chk = document.getElementById('unlockCashChk');
+    if (!paidEl || !dueEl || !banner) return;
 
-    if (dueBox && dueSpan) {
-      if (due > 0 && paid > 0) {
-        dueSpan.innerText = '₹' + due;
-        dueBox.classList.add('show');
-      } else {
-        dueBox.classList.remove('show');
+    const paidRaw = paidEl.value.trim();
+    const paidVal = parseFloat(paidRaw) || 0;
+
+    // When bill completes or resets to 0, hide Baaki Udhaar and re-lock Mila Cash
+    if (total <= 0) {
+      banner.style.display = 'none';
+      dueEl.value = 0;
+      if (chk && chk.checked && paidRaw === '') {
+        chk.checked = false;
+        paidEl.setAttribute('readonly', 'true');
+        paidEl.style.background = '#f1f5f9';
       }
+      return;
     }
-  };
-  // [ANCHOR:PERM_NAKAD_JS_END]
 
-
-  // [ANCHOR:NAKAD_JS_START]
-  function toggleNakadUdhaarMode() {
-    const drawer = document.getElementById('nakadUdhaarDrawer');
-    if (drawer) {
-      const isOpen = drawer.classList.toggle('open');
-      playPosBeep(isOpen ? 800 : 950, 0.05);
+    // Show Baaki Udhaar ONLY when user entered cash less than total bill
+    if (paidRaw !== '' && paidVal < total) {
+      const due = Math.max(0, total - paidVal);
+      dueEl.value = due;
+      banner.style.display = 'flex';
+    } else {
+      dueEl.value = 0;
+      banner.style.display = 'none';
     }
   }
-  // [ANCHOR:NAKAD_JS_END]
+
+  // Hook into bill changes so Due banner auto-hides the moment a bill is generated
+  setInterval(syncNakadDueBanner, 300);
+
+  // Non-destructive Auto-Suggestions for Stock Code, Customer Name, Gaon, Mobile
+  function refreshBillingDatalists() {
+    try {
+      const billingSec = document.getElementById('billing');
+      if (!billingSec) return;
+
+      const ensureDatalist = (id) => {
+        let dl = document.getElementById(id);
+        if (!dl) {
+          dl = document.createElement('datalist');
+          dl.id = id;
+          document.body.appendChild(dl);
+        }
+        return dl;
+      };
+
+      const dlCode = ensureDatalist('autoStockCodeList');
+      const dlName = ensureDatalist('autoCustNameList');
+      const dlCity = ensureDatalist('autoCustCityList');
+      const dlPhone = ensureDatalist('autoCustPhoneList');
+
+      if (typeof inventory !== 'undefined' && Array.isArray(inventory)) {
+        dlCode.innerHTML = inventory
+          .filter(i => (parseInt(i.qty) || 0) > 0)
+          .map(i => `<option value="${i.code}">${i.cat || 'Saree'} • ${i.color || ''} • ₹${i.mrp}</option>`)
+          .join('');
+      }
+
+      const names = new Set(), cities = new Set(), phones = new Set();
+      if (typeof khataList !== 'undefined' && Array.isArray(khataList)) {
+        khataList.forEach(k => {
+          if (k.name) names.add(k.name.trim());
+          if (k.city || k.gaon) cities.add((k.city || k.gaon).trim());
+          if (k.phone || k.mobile) phones.add((k.phone || k.mobile).trim());
+        });
+      }
+      if (typeof salesHistory !== 'undefined' && Array.isArray(salesHistory)) {
+        salesHistory.forEach(s => {
+          if (s.custName || s.customer) names.add((s.custName || s.customer).trim());
+          if (s.custCity || s.gaon) cities.add((s.custCity || s.gaon).trim());
+          if (s.custPhone || s.mobile) phones.add((s.custPhone || s.mobile).trim());
+        });
+      }
+
+      dlName.innerHTML = Array.from(names).filter(Boolean).map(v => `<option value="${v}">`).join('');
+      dlCity.innerHTML = Array.from(cities).filter(Boolean).map(v => `<option value="${v}">`).join('');
+      dlPhone.innerHTML = Array.from(phones).filter(Boolean).map(v => `<option value="${v}">`).join('');
+
+      billingSec.querySelectorAll('input').forEach(inp => {
+        if (inp.getAttribute('list')) return; // Keep existing datalist if already wired
+        const ph = (inp.placeholder || '').toLowerCase();
+        if (ph.includes('s+450') || ph.includes('code')) inp.setAttribute('list', 'autoStockCodeList');
+        else if (ph.includes('sunita')) inp.setAttribute('list', 'autoCustNameList');
+        else if (ph.includes('niwari')) inp.setAttribute('list', 'autoCustCityList');
+        else if (ph.includes('9876')) inp.setAttribute('list', 'autoCustPhoneList');
+      });
+    } catch (e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(refreshBillingDatalists, 400);
+  });
+  // [ANCHOR:NAKAD_SAFE_JS_END]
 
 
   // [ANCHOR:CUSTOM_SELECT_JS_START]
