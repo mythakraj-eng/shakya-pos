@@ -1114,200 +1114,132 @@
      [HTML-05: SECTION 1 - BILLING & CART START]
      ===================================================================== -->
 <div id="billing" class="section active">
+  <div class="card" style="padding:12px;">
+    <!-- QUICK STATS BANNER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:8px 10px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:10px;">
+      <div style="font-size:11.5px; font-weight:800; color:var(--maroon);" id="aajBikriSummary">🛒 Aaj Bikri: ₹0 (0 Bills)</div>
+      <div style="display:flex; gap:6px;">
+        <button class="gold small" style="margin:0; padding:4px 8px; font-size:10.5px;" onclick="openHoldBillsModal()">⏸️ Hold</button>
+        <button class="dark small" style="margin:0; padding:4px 8px; font-size:10.5px;" onclick="openQuickExpenseModal()">💸 Kharcha</button>
+      </div>
+    </div>
 
-  <div class="mini-galla-strip">
-    <span id="miniTodaySale">📅 Aaj Bikri: ₹0 (0 Bills)</span>
-    <span id="miniGallaCash" style="color:var(--green);">💵 Net Cash: ₹0</span>
-    <button id="holdBillBtn" class="small" style="background:var(--maroon); color:#fff; margin:0; padding:4px 9px;" onclick="toggleHoldCart()">⏸️ Hold Bill</button>
-  </div>
+    <!-- 1. SCAN / QUICK CODE INPUT -->
+    <div style="font-size:12px; font-weight:900; color:var(--maroon); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+      <span>1. Saree / Item Scan ya Code Likhein</span>
+      <button class="gold small" style="margin:0; padding:3px 8px; font-size:10.5px;" onclick="addFallPicoQuick()">+ Fall-Pico (₹50)</button>
+    </div>
 
-  <div class="card">
-    <h3>
-      <span>1. Scan / Code / Gorilla Short-Code</span>
-      <span class="color-chip" style="padding:2px 8px; font-size:10px; background:#ecfdf5; color:var(--green); border-color:var(--green);" onclick="quickAddFallPico()">🧵 + Fall-Pico (₹50)</span>
-    </h3>
     <div class="row">
-      <div style="flex:2.1" class="suggest-wrap">
-        <input type="text" id="scanInput" placeholder="Code ya S+450, C+60 likhein..." autocomplete="off" oninput="onScanInputType(this)" onfocus="onScanInputType(this)" onkeydown="if(event.key==='Enter') addItemToBill()">
-        <div id="scanSuggestBox" class="suggest-box"></div>
+      <div>
+        <input type="text" id="scanInput" placeholder="Ex: SC105, C60, S+450" onkeydown="if(event.key==='Enter') handleScanInput()" style="margin:0;">
       </div>
-      <div style="flex:0.9">
-        <button style="margin:0;" onclick="addItemToBill()">+ Add</button>
-      </div>
-      <div style="flex:0.9">
-        <button class="dark" style="margin:0;" onclick="startScanner('BILL')">📷 Scan</button>
+      <div style="flex:0 0 auto; display:flex; gap:5px;">
+        <button onclick="handleScanInput()" style="margin:0; padding:9px 14px; font-size:12px;" class="gold">+ Add</button>
+        <button onclick="openCameraScanner()" style="margin:0; padding:9px 12px; font-size:12px;" class="dark">📷 Scan</button>
       </div>
     </div>
 
-    <div class="gorilla-hint">
-      <span>🦍 <b>Gorilla Fast Bill:</b> <code>S+450</code> (Saree ₹450), <code>F+850</code> (Fancy), <code>C+50</code> (Cosmetic), <code>P+120</code> (Petticoat)</span>
+    <!-- GORILLA FAST PRESETS -->
+    <div style="background:#fefce8; border:1.5px dashed #fde047; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:10.5px; color:#713f12;">
+      <b>⚡ Gorilla Fast Bill:</b> S+450 (Saree ₹450), F+850 (Fancy), C+50 (Cosmetic), P+120 (Petticoat)
+    </div>
+    <div id="quickPopularChips" style="display:flex; gap:5px; overflow-x:auto; margin-top:6px; padding-bottom:3px; scrollbar-width:none;"></div>
+
+    <!-- BINA CODE / FUTTKAR ITEM -->
+    <div style="margin-top:10px; border-top:1.5px solid #e2e8f0; padding-top:8px;">
+      <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:5px;">Bina Code / Futtkar Item Jodein (Cosmetic, Chudi, Fall):</div>
+      <div class="row" style="gap:5px;">
+        <div style="flex:2;"><input type="text" id="fName" placeholder="Item (Ex: Chudi)" style="margin:0; font-size:11px;"></div>
+        <div style="flex:1;"><input type="number" id="fRate" placeholder="Rate ₹" style="margin:0; font-size:11px;"></div>
+        <div style="flex:1;"><input type="number" id="fCost" placeholder="Cost ₹" style="margin:0; font-size:11px;"></div>
+        <div style="flex:0 0 auto;"><button onclick="addCustomFuttkarItem()" class="gold small" style="margin:0; padding:9px 10px; font-size:11px;">+ Jodein</button></div>
+      </div>
     </div>
 
-    <div id="quickCatalogStrip" class="quick-catalog-strip"></div>
+    <!-- BILL ITEMS TABLE -->
+    <div style="margin-top:10px; max-height:150px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:8px;">
+      <table style="width:100%; border-collapse:collapse; font-size:11px;">
+        <thead>
+          <tr style="background:#f1f5f9; color:#334155; text-align:left;">
+            <th style="padding:6px; border-bottom:1px solid #cbd5e1;">Code</th>
+            <th style="padding:6px; border-bottom:1px solid #cbd5e1;">Item & Qty</th>
+            <th style="padding:6px; border-bottom:1px solid #cbd5e1; text-align:right;">MRP (₹)</th>
+            <th style="padding:6px; border-bottom:1px solid #cbd5e1; text-align:center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="billTableBody">
+          <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">Koi item nahi joda gaya</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="loose-box">
-      <div style="font-size:11px; font-weight:700; color:var(--maroon); margin-bottom:4px;">⚡ Bina Code / Futtkar Item Jodein (Cosmetic, Fall-Pico, Chudi):</div>
-      <div class="row">
-        <div style="flex:1.6;">
-          <input type="text" id="looseName" placeholder="Item (Ex: Chudi/Fall)" style="margin:0; padding:6px; font-size:12px;">
+    <!-- ================= NAKAD-FIRST BILLING TOTAL & PAYMENT ================= -->
+    <div style="margin-top:12px; background:#f8fafc; padding:10px; border-radius:10px; border:1.5px solid #e2e8f0;">
+      
+      <!-- Kul Bill MRP -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:11px; font-weight:800; color:#475569;">Kul Bill MRP (₹)</label>
+        <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:900; font-size:14px; margin-top:2px; color:#1e293b;">
+      </div>
+
+      <!-- Mila Cash & Payment Mode Row -->
+      <div class="row" style="margin-bottom:0;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+            <label style="color:var(--green); font-weight:800; margin:0; font-size:11px;">Mila Cash / UPI (Paid ₹)</label>
+            <label class="unlock-check-label" style="padding:3px 6px; font-size:9.5px;">
+              <input type="checkbox" id="unlockCashEdit" onchange="toggleCashEditLock(this)"> 🔓 Edit Unlock
+            </label>
+          </div>
+          <input type="number" id="paidInput" placeholder="Mile paise" readonly style="background:#f1f5f9; font-weight:900; font-size:13px; margin:0;" oninput="updateLiveSplit()">
+          <div id="dueAlertBox" class="due-alert-box">
+            ⚠️ Baaki Udhaar (Due): <span id="liveDueDisplay">₹0</span>
+          </div>
         </div>
-        <div style="flex:1;">
-          <input type="number" id="looseMrp" placeholder="Rate ₹" style="margin:0; padding:6px; font-size:12px;">
-        </div>
-        <div style="flex:0.9;">
-          <input type="number" id="looseCost" placeholder="Cost ₹" style="margin:0; padding:6px; font-size:12px;">
-        </div>
-        <div style="flex:0.8;">
-          <button class="gold" style="margin:0; padding:6px; font-size:11px;" onclick="addLooseItemToBill()">+ Jodein</button>
+        <div>
+          <label style="font-size:11px; font-weight:800; color:#475569;">Payment Mode</label>
+          <select id="payMode" onchange="onPayModeChange()" style="margin:0; font-size:12px;">
+            <option value="Cash">💵 Cash (Nagad)</option>
+            <option value="UPI">📱 PhonePe / UPI</option>
+            <option value="Split">💳 Cash + UPI (Split)</option>
+            <option value="AEPS Cash">🏦 Spice Money AEPS</option>
+          </select>
         </div>
       </div>
     </div>
 
-    <div id="exchangeCreditBanner" class="credit-banner">
-      <span id="exchangeCreditText">🔄 Exchange Credit Applied: ₹0</span>
-      <button class="small" style="background:#dc2626; color:#fff; margin:0; padding:3px 7px;" onclick="clearExchangeCredit()">✕ Hatayein</button>
-    </div>
-
-    <div id="billMsg" class="inline-msg"></div>
-
-    <table id="cartTable">
-      <thead>
-        <tr><th>Code</th><th>Item & Qty</th><th>MRP (₹)</th><th style="text-align:right;"></th></tr>
-      </thead>
-      <tbody id="cartBody"></tbody>
-    </table>
-
+    <!-- ================= CUSTOMER & BILL ACTION SECTION ================= -->
     <div style="margin-top:10px;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-        <label style="margin:0;">Kul Bill MRP (₹)</label>
-        <button type="button" class="nakad-toggle-btn" onclick="toggleNakadUdhaarMode()">🔓 Tay / Udhaar (Just in Case)</button>
-      </div>
-      <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:bold; margin-top:4px;">
-    </div>
-
-    <div class="row">
-      <div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-          <label style="color:var(--green); margin:0;">Mila Cash / UPI (Paid ₹)</label>
-          <label class="unlock-check-label">
-            <input type="checkbox" id="unlockCashEdit" onchange="toggleCashEditLock(this)"> 🔓 Edit Unlock
-          </label>
-        </div>
-        <div class="cash-input-row">
-          <input type="number" id="paidInput" placeholder="Mile paise" readonly style="background:#f1f5f9;" oninput="updateLiveSplit()">
-        </div>
-        <div id="dueAlertBox" class="due-alert-box">
-          ⚠️ Baaki Udhaar (Due): <span id="liveDueDisplay">₹0</span>
-        </div>
-      </div>
-      <div>
-        <label>Payment Mode</label>
-        <select id="payMode" onchange="onPayModeChange()">id="payMode" onchange="onPayModeChange()">
-          <option value="Cash">💵 Cash (Nagad)</option>
-          <option value="UPI">📱 PhonePe / UPI</option>
-          <option value="Split">💳 Cash + UPI (Split)</option>
-          <option value="AEPS Cash">🏦 Spice Money AEPS</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- COLLAPSIBLE UDHAAR & TAY RATE (HIDDEN FOR 100% NAKAD) -->
-    
       <div class="row">
         <div>
-          <label style="color:var(--maroon);">ACC (Tay Rate ₹)</label>
-          <input type="number" id="accInput" placeholder="Tay hisaab" oninput="onAccInputChange()">
+          <label style="font-size:10.5px; color:#475569; font-weight:700;">Customer Name</label>
+          <input type="text" id="custName" placeholder="Ex: Sunita Devi" style="margin:0; font-size:11.5px;">
         </div>
         <div>
-          <label style="color:var(--red);">Baaki Udhaar (Due ₹)</label>
-          <input type="number" id="dueInput" readonly value="0" style="background:#fef2f2; color:var(--red); font-weight:bold;">
+          <label style="font-size:10.5px; color:#475569; font-weight:700;">Gaon / City</label>
+          <input type="text" id="custCity" placeholder="Ex: Niwari Kalan" style="margin:0; font-size:11.5px;">
         </div>
       </div>
-      <div id="lossWarningBox" class="loss-warning-box">
-        🚨 सावधान! तय रेट (ACC) आपकी असली खरीद (Cost) से भी कम है! (घाटे की बिक्री)
+
+      <div class="row" style="margin-top:6px;">
+        <div>
+          <label style="font-size:10.5px; color:#475569; font-weight:700;">Mobile Number (WhatsApp)</label>
+          <input type="tel" id="custPhone" placeholder="Ex: 9876543210" style="margin:0; font-size:11.5px;">
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+          <button type="button" class="dark" style="width:100%; margin:0; padding:10px; font-size:11.5px;" onclick="openUpiQrModal()">📱 UPI QR Code</button>
+        </div>
       </div>
-      <div id="quickDiscountRow" style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap; align-items:center;">
-        <small style="font-size:10px; color:#475569; font-weight:bold;">⚡ Chhoot:</small>
-        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(20)">-₹20</span>
-        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(50)">-₹50</span>
-        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(100)">-₹100</span>
-        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickRound()">Round Figure</span>
-      </div>
+
+      <!-- FINAL BILL GENERATE BUTTON -->
+      <button onclick="generateAndPrintBill()" class="gold" style="width:100%; margin-top:10px; padding:12px; font-size:14px; font-weight:900; border-radius:10px; box-shadow:0 4px 12px rgba(212,175,55,0.35);">
+        ✅ Bill Banayein & Chhapein
+      </button>
     </div>
 
-    <div class="row">
-      <div class="suggest-wrap">
-        <label>Customer Name</label>
-        <input type="text" id="custName" placeholder="Ex: Sunita Devi" autocomplete="off" oninput="onCustNameInputType(this)" onfocus="onCustNameInputType(this)">
-        <div id="custNameSuggestBox" class="suggest-box"></div>
-      </div>
-      <div class="suggest-wrap">
-        <label>Gaon / City</label>
-        <input type="text" id="custVillage" placeholder="Ex: Niwari Kalan" autocomplete="off" oninput="onVillageInputType(this)" onfocus="onVillageInputType(this)">
-        <div id="villageSuggestBox" class="suggest-box"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="suggest-wrap">
-        <label>Mobile Number (WhatsApp)</label>
-        <input type="tel" id="custMobile" placeholder="Ex: 9876543210" maxlength="10" autocomplete="off" oninput="onCustMobileInputType(this)" onfocus="onCustMobileInputType(this)">
-        <div id="custMobileSuggestBox" class="suggest-box"></div>
-      </div>
-      <div>
-        <label>Payment Mode</label>
-        <select id="payMode" onchange="onPayModeChange()">
-          <option value="Cash">💵 Cash (Nagad)</option>
-          <option value="UPI">📱 PhonePe / UPI</option>
-          <option value="Split">💳 Cash + UPI (Split)</option>
-          <option value="AEPS Cash">🏦 Spice Money AEPS</option>
-        </select>
-      </div>
-    </div>
-
-    <div id="splitPayRow" class="row" style="display:none; background:#eff6ff; padding:8px; border-radius:8px; margin-top:6px; border:1px solid #bfdbfe;">
-      <div>
-        <label style="margin:0; color:var(--green);">💵 Cash Mila (₹)</label>
-        <input type="number" id="splitCashInput" placeholder="Cash ₹" oninput="onSplitCashChange()">
-      </div>
-      <div>
-        <label style="margin:0; color:var(--blue);">📱 UPI Mila (₹)</label>
-        <input type="number" id="splitUpiInput" placeholder="UPI ₹" oninput="onSplitUpiChange()">
-      </div>
-    </div>
-
-    <div id="custPrevUdhaarBanner" class="udhaar-alert-banner"></div>
-
-    <div id="liveSplitBox" style="background:#fffbeb; padding:8px; border-radius:8px; margin-top:10px; font-size:12px; display:none;"></div>
-
-    <div class="row" style="margin-top:10px;">
-      <div style="flex:2;">
-        <button class="gold" style="margin:0;" onclick="finalizeBill()">✅ Bill Banayein & Chhapein</button>
-      </div>
-      <div style="flex:1;">
-        <button class="thermal" style="margin:0;" onclick="showLiveCounterUpiQr()">📱 UPI QR</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PRINT & WHATSAPP RECEIPT CARD -->
-  <div id="printCard" class="card" style="display:none;">
-    <div id="printZone"></div>
-    <div class="row" style="margin-top:10px;">
-      <div><button class="thermal" style="margin:0;" onclick="printDirect80mm()">🖨️ Smart Printer Print</button></div>
-      <div><button style="margin:0;" onclick="window.print()">🌐 Browser / PDF Print</button></div>
-    </div>
-    <div class="row" style="margin-top:6px;">
-      <div style="flex:1.6;"><button class="whatsapp" style="margin:0;" onclick="sendWhatsAppLastBill('IMAGE')">📸 WhatsApp Par Asli Bill (Photo) Bhejein</button></div>
-      <div style="flex:1;"><button class="dark" style="margin:0;" onclick="sendWhatsAppLastBill('DIRECT')">📝 Text WA</button></div>
-    </div>
   </div>
 </div>
-<!-- [HTML-05: SECTION 1 - BILLING & CART END] -->
-
-<!-- =====================================================================
-     [HTML-06: SECTION 2 - STOCK MANAGEMENT START]
-     ===================================================================== -->
 <div id="stock" class="section">
   <div class="card">
     <h3>
