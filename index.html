@@ -558,6 +558,33 @@
     #camColorVideo { width: 100%; max-height: 170px; object-fit: cover; display: block; }
     .cam-crosshair { position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border: 2.5px solid #fde047; border-radius: 8px; box-shadow: 0 0 0 999px rgba(0,0,0,0.35); pointer-events: none; }
     /* [ANCHOR:COLOR_CSS_END] */
+    /* NAKAD-FIRST MODE STYLES */
+    .nakad-mode-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin: 6px 0 2px;
+    }
+    .nakad-toggle-btn {
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px dashed #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .nakad-collapsible {
+      display: none;
+      background: #fef2f2;
+      border: 1.5px dashed #fca5a5;
+      padding: 8px;
+      border-radius: 10px;
+      margin-top: 6px;
+      animation: fadeInSheet 0.15s ease;
+    }
+    .nakad-collapsible.open { display: block; }
+    /* [ANCHOR:NAKAD_CSS_END] */
     /* CUSTOM SELECT BOTTOM SHEET POPUP */
     #customSelectModal {
       display: none;
@@ -1110,37 +1137,52 @@
       <tbody id="cartBody"></tbody>
     </table>
 
-    <div class="row" style="margin-top:10px;">
-      <div>
-        <label>Sticker Bill (₹)</label>
-        <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:bold;">
+    <div style="margin-top:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <label style="margin:0;">Kul Bill MRP (₹)</label>
+        <button type="button" class="nakad-toggle-btn" onclick="toggleNakadUdhaarMode()">🔓 Tay / Udhaar (Just in Case)</button>
       </div>
-      <div>
-        <label style="color:var(--maroon);">ACC (Tay Rate ₹)</label>
-        <input type="number" id="accInput" placeholder="Tay hisaab" oninput="onAccInputChange()">
-      </div>
-    </div>
-
-    <div id="lossWarningBox" class="loss-warning-box">
-      🚨 सावधान! तय रेट (ACC) आपकी असली खरीद (Cost) से भी कम है! (घाटे की बिक्री)
-    </div>
-
-    <div id="quickDiscountRow" style="display:none; gap:5px; margin-top:6px; flex-wrap:wrap; align-items:center;">
-      <small style="font-size:10px; color:#475569; font-weight:bold;">⚡ Chhoot:</small>
-      <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(20)">-₹20</span>
-      <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(50)">-₹50</span>
-      <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(100)">-₹100</span>
-      <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickRound()">Round Figure</span>
+      <input type="number" id="billTotalMrp" readonly value="0" style="background:#e2e8f0; font-weight:bold; margin-top:4px;">
     </div>
 
     <div class="row">
       <div>
-        <label style="color:var(--green);">Abhi Mila Cash/UPI (Paid ₹)</label>
-        <input type="number" id="paidInput" placeholder="Abhi mile paise" oninput="updateLiveSplit()">
+        <label style="color:var(--green);">Mila Cash / UPI (Paid ₹)</label>
+        <input type="number" id="paidInput" placeholder="Mile paise" oninput="updateLiveSplit()">
       </div>
       <div>
-        <label style="color:var(--red);">Baaki Udhaar (Due ₹)</label>
-        <input type="number" id="dueInput" readonly value="0" style="background:#fef2f2; color:var(--red); font-weight:bold;">
+        <label>Payment Mode</label>
+        <select id="payMode" onchange="onPayModeChange()">
+          <option value="Cash">💵 Cash (Nagad)</option>
+          <option value="UPI">📱 PhonePe / UPI</option>
+          <option value="Split">💳 Cash + UPI (Split)</option>
+          <option value="AEPS Cash">🏦 Spice Money AEPS</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- COLLAPSIBLE UDHAAR & TAY RATE (HIDDEN FOR 100% NAKAD) -->
+    <div id="nakadUdhaarDrawer" class="nakad-collapsible">
+      <div style="font-size:11px; font-weight:800; color:#b91c1c; margin-bottom:6px;">⚠️ Udhaar / Custom Rate Mode (Just in Case):</div>
+      <div class="row">
+        <div>
+          <label style="color:var(--maroon);">ACC (Tay Rate ₹)</label>
+          <input type="number" id="accInput" placeholder="Tay hisaab" oninput="onAccInputChange()">
+        </div>
+        <div>
+          <label style="color:var(--red);">Baaki Udhaar (Due ₹)</label>
+          <input type="number" id="dueInput" readonly value="0" style="background:#fef2f2; color:var(--red); font-weight:bold;">
+        </div>
+      </div>
+      <div id="lossWarningBox" class="loss-warning-box">
+        🚨 सावधान! तय रेट (ACC) आपकी असली खरीद (Cost) से भी कम है! (घाटे की बिक्री)
+      </div>
+      <div id="quickDiscountRow" style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap; align-items:center;">
+        <small style="font-size:10px; color:#475569; font-weight:bold;">⚡ Chhoot:</small>
+        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(20)">-₹20</span>
+        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(50)">-₹50</span>
+        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickDiscount(100)">-₹100</span>
+        <span class="color-chip" style="padding:2px 7px; font-size:10px;" onclick="applyQuickRound()">Round Figure</span>
       </div>
     </div>
 
@@ -3230,6 +3272,17 @@
     });
   }
   // [ANCHOR:COLOR_JS_END]
+
+  // [ANCHOR:NAKAD_JS_START]
+  function toggleNakadUdhaarMode() {
+    const drawer = document.getElementById('nakadUdhaarDrawer');
+    if (drawer) {
+      const isOpen = drawer.classList.toggle('open');
+      playPosBeep(isOpen ? 800 : 950, 0.05);
+    }
+  }
+  // [ANCHOR:NAKAD_JS_END]
+
 
   // [ANCHOR:CUSTOM_SELECT_JS_START]
   let activeCustomSelectCallback = null;
