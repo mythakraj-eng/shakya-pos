@@ -1132,7 +1132,8 @@
 
     <div class="row">
       <div>
-        <input type="text" id="scanInput" placeholder="Ex: SC105, C60, S+450" onkeydown="if(event.key==='Enter') handleScanInput()" style="margin:0;">
+        <input type="text" id="scanInput" list="stockCodesList" placeholder="Ex: SC105, C60, S+450" onkeydown="if(event.key==='Enter') handleScanInput()" style="margin:0;">
+          <datalist id="stockCodesList"></datalist>
       </div>
       <div style="flex:0 0 auto; display:flex; gap:5px;">
         <button onclick="handleScanInput()" style="margin:0; padding:9px 14px; font-size:12px;" class="gold">+ Add</button>
@@ -1222,18 +1223,21 @@
       <div class="row">
         <div>
           <label style="font-size:10.5px; color:#475569; font-weight:700;">Customer Name</label>
-          <input type="text" id="custName" placeholder="Ex: Sunita Devi" style="margin:0; font-size:11.5px;">
+          <input type="text" id="custName" list="custNameList" placeholder="Ex: Sunita Devi" style="margin:0; font-size:11.5px;" oninput="rememberCustomerData()">
+          <datalist id="custNameList"></datalist>
         </div>
         <div>
           <label style="font-size:10.5px; color:#475569; font-weight:700;">Gaon / City</label>
-          <input type="text" id="custCity" placeholder="Ex: Niwari Kalan" style="margin:0; font-size:11.5px;">
+          <input type="text" id="custCity" list="custCityList" placeholder="Ex: Niwari Kalan" style="margin:0; font-size:11.5px;">
+          <datalist id="custCityList"></datalist>
         </div>
       </div>
 
       <div class="row" style="margin-top:6px;">
         <div>
           <label style="font-size:10.5px; color:#475569; font-weight:700;">Mobile Number (WhatsApp)</label>
-          <input type="tel" id="custPhone" placeholder="Ex: 9876543210" style="margin:0; font-size:11.5px;">
+          <input type="tel" id="custPhone" list="custPhoneList" placeholder="Ex: 9876543210" style="margin:0; font-size:11.5px;">
+          <datalist id="custPhoneList"></datalist>
         </div>
         <div style="display:flex; align-items:flex-end;">
           <button type="button" class="dark" style="width:100%; margin:0; padding:10px; font-size:11.5px;" onclick="openUpiQrModal()">📱 UPI QR Code</button>
@@ -3261,6 +3265,63 @@
     });
   }
   // [ANCHOR:COLOR_JS_END]
+
+  // [ANCHOR:FIX_SCAN_JS]
+  function openCameraScanner() {
+    // Fallback if HTML5 QR scanner modal isn't loaded
+    const modal = document.getElementById('cameraScannerModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      startScannerCamera();
+    } else {
+      // Direct prompt fallback for instant mobile code entry
+      const code = prompt('📷 Barcode / Saree Code Scan Karein:');
+      if (code) {
+        const inp = document.getElementById('scanInput');
+        if (inp) { inp.value = code; handleScanInput(); }
+      }
+    }
+  }
+
+  function populateAutosuggestionsLists() {
+    // Populate stock codes
+    const stockList = document.getElementById('stockCodesList');
+    if (stockList && typeof inventory !== 'undefined') {
+      stockList.innerHTML = inventory.map(i => `<option value="${i.code}">${i.cat} - ${i.color} (₹${i.mrp})</option>`).join('');
+    }
+    // Load saved customer history from localStorage
+    try {
+      const history = JSON.parse(localStorage.getItem('shakya_cust_history') || '[]');
+      const nameList = document.getElementById('custNameList');
+      const phoneList = document.getElementById('custPhoneList');
+      const cityList = document.getElementById('custCityList');
+      if (nameList) nameList.innerHTML = history.map(h => `<option value="${h.name}">`).join('');
+      if (phoneList) phoneList.innerHTML = history.map(h => `<option value="${h.phone}">`).join('');
+      if (cityList) cityList.innerHTML = history.map(h => `<option value="${h.city}">`).join('');
+    } catch(e) {}
+  }
+
+  function rememberCustomerData() {
+    const name = document.getElementById('custName')?.value?.trim();
+    const phone = document.getElementById('custPhone')?.value?.trim();
+    const city = document.getElementById('custCity')?.value?.trim();
+    if (!name) return;
+    try {
+      let history = JSON.parse(localStorage.getItem('shakya_cust_history') || '[]');
+      if (!history.some(h => h.name.toLowerCase() === name.toLowerCase())) {
+        history.unshift({ name, phone: phone || '', city: city || '' });
+        if (history.length > 25) history.pop();
+        localStorage.setItem('shakya_cust_history', JSON.stringify(history));
+        populateAutosuggestionsLists();
+      }
+    } catch(e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(populateAutosuggestionsLists, 500);
+  });
+  // [ANCHOR:FIX_SCAN_JS]
+
 
   // [ANCHOR:PERM_NAKAD_JS_START]
   function toggleCashEditLock(chk) {
