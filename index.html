@@ -1,6 +1,9 @@
 ```html
 <!DOCTYPE html>
 <html lang="hi">
+<!-- =====================================================================
+     [HTML-01: HEAD, PWA META & EXTERNAL LIBRARIES START]
+     ===================================================================== -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -32,8 +35,12 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- [HTML-01: HEAD, PWA META & EXTERNAL LIBRARIES END] -->
 
   <style>
+    /* ===================================================================
+       [CSS-01: CORE VARIABLES, BODY & HEADER STYLES START]
+       =================================================================== */
     :root {
       /* Default New Royal Indigo & Champagne Gold UI */
       --maroon: #2e1065;
@@ -129,7 +136,11 @@
       margin: 0;
       white-space: nowrap;
     }
+    /* [CSS-01: CORE VARIABLES, BODY & HEADER STYLES END] */
 
+    /* ===================================================================
+       [CSS-02: TABS, CARDS, INPUTS & BUTTONS START]
+       =================================================================== */
     .tabs {
       display: flex;
       background: #ffffff;
@@ -248,7 +259,11 @@
     button.thermal { background: linear-gradient(135deg, var(--blue), #0369a1); color: #fff; font-size: 13px; }
     button.callbtn { background: var(--green); color: #fff; font-size: 13px; }
     button.small { padding: 5px 9px; font-size: 11px; width: auto; margin: 2px; }
+    /* [CSS-02: TABS, CARDS, INPUTS & BUTTONS END] */
 
+    /* ===================================================================
+       [CSS-03: MODALS, TABLES, CHARTS & PRINT STYLES START]
+       =================================================================== */
     #shutdownModal, #waPromptModal, #udhaarModal, #pinModal, #editStockModal, #bulkStockModal, #upiQrModal, #startupLockModal {
       display: none;
       position: fixed;
@@ -477,7 +492,6 @@
     }
     .chk-row input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--maroon); }
 
-    /* THEME SWATCH BAR */
     .theme-swatch-row {
       display: flex;
       gap: 6px;
@@ -511,7 +525,7 @@
     .exchange-item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; background: var(--maroon-light); border-radius: 6px; margin-bottom: 4px; }
     .exchange-item-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0 8px 0 0; accent-color: var(--maroon); }
 
-    /* THERMAL / MULTI-SIZE RECEIPT CONTAINER (Always crisp black-on-white for real printing & WhatsApp Bill Photo) */
+    /* THERMAL / MULTI-SIZE RECEIPT CONTAINER */
     #printZone, #modalReceiptInner { border: 2px dashed #111; padding: 10px; background: #ffffff; text-align: center; margin-top: 8px; overflow: hidden; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; color: #000; }
     #printZone .receipt-didi, #modalReceiptInner .receipt-didi { font-size: 13px; font-weight: 900; color: #000; letter-spacing: 0.5px; margin: 0; }
     #printZone h2, #modalReceiptInner h2 { margin: 1px 0 0; font-size: 16px; font-weight: 900; color: #000; }
@@ -550,6 +564,7 @@
       }
       .single-tag { border: 1px solid #000; }
     }
+    /* [CSS-03: MODALS, TABLES, CHARTS & PRINT STYLES END] */
   </style>
   <style id="dynamicPrintPageStyle">
     @page { size: 80mm auto; margin: 0mm; }
@@ -557,18 +572,9 @@
 </head>
 <body>
 
-<!-- OPTIONAL STARTUP PIN LOCK MODAL -->
-<div id="startupLockModal">
-  <div class="dialog-box">
-    <div class="didi-badge" style="margin-bottom:6px;">✨ दीदी की दुकान ✨</div>
-    <h3 style="color:var(--maroon); margin-top:0;">🔒 Shakya POS Security Lock</h3>
-    <p style="font-size:12px; color:#555; margin:6px 0;">Dukaan ka App kholne ke liye apna 4-ank ka PIN daalein:</p>
-    <input type="password" id="startupPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:6px;" onkeydown="if(event.key==='Enter') verifyStartupPin()">
-    <div id="startupPinErr" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;">❌ Galat PIN! Dobara koshish karein.</div>
-    <button class="gold" style="margin-top:12px;" onclick="verifyStartupPin()">🔓 App Kholein</button>
-  </div>
-</div>
-
+<!-- =====================================================================
+     [HTML-02: TOP HEADER & GLOBAL CONTROLS START]
+     ===================================================================== -->
 <header>
   <div class="header-info">
     <div class="didi-badge">✨ दीदी की दुकान ✨</div>
@@ -584,6 +590,22 @@
     <button class="shutdown-btn" onclick="openShutdownModal()">🛑 Exit</button>
   </div>
 </header>
+<!-- [HTML-02: TOP HEADER & GLOBAL CONTROLS END] -->
+
+<!-- =====================================================================
+     [HTML-03: SYSTEM POPUP MODALS START]
+     ===================================================================== -->
+<!-- OPTIONAL STARTUP PIN LOCK MODAL -->
+<div id="startupLockModal">
+  <div class="dialog-box">
+    <div class="didi-badge" style="margin-bottom:6px;">✨ दीदी की दुकान ✨</div>
+    <h3 style="color:var(--maroon); margin-top:0;">🔒 Shakya POS Security Lock</h3>
+    <p style="font-size:12px; color:#555; margin:6px 0;">Dukaan ka App kholne ke liye apna 4-ank ka PIN daalein:</p>
+    <input type="password" id="startupPinInput" placeholder="****" maxlength="4" inputmode="numeric" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:6px;" onkeydown="if(event.key==='Enter') verifyStartupPin()">
+    <div id="startupPinErr" style="color:#b30000; font-size:11px; margin-top:6px; font-weight:bold; display:none;">❌ Galat PIN! Dobara koshish karein.</div>
+    <button class="gold" style="margin-top:12px;" onclick="verifyStartupPin()">🔓 App Kholein</button>
+  </div>
+</div>
 
 <!-- OWNER PIN MODAL -->
 <div id="pinModal">
@@ -746,15 +768,6 @@
   </div>
 </div>
 
-<!-- MAIN NAVIGATION TABS -->
-<div class="tabs">
-  <div class="tab active" id="tab-billing" onclick="switchTab('billing', this)">🧾 Billing <span id="cartCountBadge" class="tab-badge" style="display:none;">0</span></div>
-  <div class="tab" id="tab-stock" onclick="switchTab('stock', this)">📦 Stock <span id="lowStockBadge" class="tab-badge" style="display:none;">0</span></div>
-  <div class="tab" id="tab-stats" onclick="switchTab('stats', this)">📊 Insights</div>
-  <div class="tab" id="tab-cust" onclick="switchTab('cust', this)">👥 Khata/Cust</div>
-  <div class="tab" id="tab-backup" onclick="switchTab('backup', this)">🖨️ Printer/UI</div>
-</div>
-
 <!-- BARCODE CAMERA SCANNER MODAL -->
 <div id="scannerModal">
   <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
@@ -787,8 +800,23 @@
     <button class="dark" style="margin-top:6px; padding:8px;" onclick="closeBillModal()">❌ Band Karein (Close)</button>
   </div>
 </div>
+<!-- [HTML-03: SYSTEM POPUP MODALS END] -->
 
-<!-- ================= 1. BILLING SECTION ================= -->
+<!-- =====================================================================
+     [HTML-04: MAIN NAVIGATION TABS START]
+     ===================================================================== -->
+<div class="tabs">
+  <div class="tab active" id="tab-billing" onclick="switchTab('billing', this)">🧾 Billing <span id="cartCountBadge" class="tab-badge" style="display:none;">0</span></div>
+  <div class="tab" id="tab-stock" onclick="switchTab('stock', this)">📦 Stock <span id="lowStockBadge" class="tab-badge" style="display:none;">0</span></div>
+  <div class="tab" id="tab-stats" onclick="switchTab('stats', this)">📊 Insights</div>
+  <div class="tab" id="tab-cust" onclick="switchTab('cust', this)">👥 Khata/Cust</div>
+  <div class="tab" id="tab-backup" onclick="switchTab('backup', this)">🖨️ Printer/UI</div>
+</div>
+<!-- [HTML-04: MAIN NAVIGATION TABS END] -->
+
+<!-- =====================================================================
+     [HTML-05: SECTION 1 - BILLING & CART START]
+     ===================================================================== -->
 <div id="billing" class="section active">
 
   <div class="mini-galla-strip">
@@ -955,8 +983,11 @@
     </div>
   </div>
 </div>
+<!-- [HTML-05: SECTION 1 - BILLING & CART END] -->
 
-<!-- ================= 2. STOCK SECTION ================= -->
+<!-- =====================================================================
+     [HTML-06: SECTION 2 - STOCK MANAGEMENT START]
+     ===================================================================== -->
 <div id="stock" class="section">
   <div class="card">
     <h3>
@@ -1084,8 +1115,11 @@
     </table>
   </div>
 </div>
+<!-- [HTML-06: SECTION 2 - STOCK MANAGEMENT END] -->
 
-<!-- ================= 3. INSIGHTS SECTION ================= -->
+<!-- =====================================================================
+     [HTML-07: SECTION 3 - INSIGHTS, GALLA & EXPENSES START]
+     ===================================================================== -->
 <div id="stats" class="section">
   <div class="card">
     <h3>🔍 Verify / Exchange Bill (Bill No. ya Barcode Dalein)</h3>
@@ -1167,8 +1201,11 @@
     </table>
   </div>
 </div>
+<!-- [HTML-07: SECTION 3 - INSIGHTS, GALLA & EXPENSES END] -->
 
-<!-- ================= 4. CUSTOMER LEDGER & KHATA SECTION ================= -->
+<!-- =====================================================================
+     [HTML-08: SECTION 4 - CUSTOMER KHATA & DIRECTORY START]
+     ===================================================================== -->
 <div id="cust" class="section">
   <div class="card">
     <h3>📓 Customer Khata Book & Contact Directory</h3>
@@ -1198,8 +1235,11 @@
     </table>
   </div>
 </div>
+<!-- [HTML-08: SECTION 4 - CUSTOMER KHATA & DIRECTORY END] -->
 
-<!-- ================= 5. COLOUR UI, PRINTER HUB & BACKUP SECTION ================= -->
+<!-- =====================================================================
+     [HTML-09: SECTION 5 - COLOUR UI, PRINTER HUB & BACKUP START]
+     ===================================================================== -->
 <div id="backup" class="section">
 
   <!-- COLOUR UI THEME SELECTOR -->
@@ -1358,9 +1398,12 @@
     <input type="file" id="restoreFile" accept=".json" onchange="restoreBackupJSON(event)">
   </div>
 </div>
+<!-- [HTML-09: SECTION 5 - COLOUR UI, PRINTER HUB & BACKUP END] -->
 
 <script>
-  // --- 0. MULTI-THEME COLOUR UI ENGINE ---
+  // =====================================================================
+  // [JS-00: MULTI-THEME COLOUR UI ENGINE START]
+  // =====================================================================
   const UI_THEMES = {
     INDIGO: {
       label: 'Indigo',
@@ -1459,8 +1502,11 @@
     applyAppTheme(themeOrder[nextIdx]);
     playPosBeep(920, 0.05);
   }
+  // [JS-00: MULTI-THEME COLOUR UI ENGINE END]
 
-  // --- 1. FIREBASE REALTIME DATABASE & HYBRID LOCAL+CLOUD SETUP ---
+  // =====================================================================
+  // [JS-01: STATE, BEEP SOUND & FIREBASE HYBRID SYNC START]
+  // =====================================================================
   const firebaseConfig = {
     databaseURL: "https://shakyapos-default-rtdb.firebaseio.com/"
   };
@@ -1709,8 +1755,11 @@
     if (hasUnsyncedChanges) syncToCloud();
   });
   window.addEventListener('offline', () => updateSyncBadge('OFFLINE'));
+  // [JS-01: STATE, BEEP SOUND & FIREBASE HYBRID SYNC END]
 
-  // --- 2. UNIVERSAL MARKET PRINTER HUB ENGINE ---
+  // =====================================================================
+  // [JS-02: UNIVERSAL MARKET PRINTER HUB ENGINE START]
+  // =====================================================================
   let btDevice = null, btChar = null;
   let usbDevice = null, usbEndpoint = null;
   let serialPort = null, serialWriter = null;
@@ -2063,8 +2112,11 @@
       window.print();
     }
   }
+  // [JS-02: UNIVERSAL MARKET PRINTER HUB ENGINE END]
 
-  // --- 3. DYNAMIC UPI QR CODE GENERATOR ---
+  // =====================================================================
+  // [JS-03: DYNAMIC UPI QR CODE GENERATOR START]
+  // =====================================================================
   function saveMerchantUpiId() {
     const val = document.getElementById('merchantUpiInput').value.trim();
     if (!val || !val.includes('@')) {
@@ -2105,8 +2157,11 @@
   function closeUpiQrModal() {
     document.getElementById('upiQrModal').style.display = 'none';
   }
+  // [JS-03: DYNAMIC UPI QR CODE GENERATOR END]
 
-  // --- 4. OWNER PIN & COST/PROFIT LOCK ---
+  // =====================================================================
+  // [JS-04: OWNER PIN & COST/PROFIT LOCK START]
+  // =====================================================================
   function updateOwnerLockUI() {
     const btn = document.getElementById('ownerLockBtn');
     if (btn) {
@@ -2165,8 +2220,11 @@
     document.getElementById('newPinChange').value = '';
     showInlineMsg('pinChangeMsg', '✅ Naya Owner PIN safaltapoorvak save ho gaya!', 'success');
   }
+  // [JS-04: OWNER PIN & COST/PROFIT LOCK END]
 
-  // --- 5. BACK GUARD & SWIPE GESTURES ---
+  // =====================================================================
+  // [JS-05: BACK GUARD, SHUTDOWN & SWIPE NAVIGATION START]
+  // =====================================================================
   let isAppClosed = false;
   let backGuardArmed = false;
 
@@ -2302,8 +2360,11 @@
     'MAROON': 'M', 'ROYAL BLUE': 'RB', 'BLUE': 'BL', 'RAMA': 'RM', 'ORANGE': 'O',
     'PURPLE': 'PR', 'BLACK': 'BK', 'WHITE': 'W', 'GOLDEN': 'GD', 'MULTI': 'ML'
   };
+  // [JS-05: BACK GUARD, SHUTDOWN & SWIPE NAVIGATION END]
 
-  // --- 6. CUSTOMER DIRECTORY & AUTO-SUGGEST ---
+  // =====================================================================
+  // [JS-06: CUSTOMER DIRECTORY & AUTO-SUGGEST START]
+  // =====================================================================
   function getUniqueVillages() {
     let villages = new Set(['NIWARI KALAN', 'ETAWAH', 'MAHESH PURA', 'BAKKEVAR', 'BHARTHANA', 'TAKHA']);
     sales.forEach(s => {
@@ -2517,8 +2578,11 @@
     a.download = 'Shakya_Cust_' + mob + '.vcf';
     a.click();
   }
+  // [JS-06: CUSTOMER DIRECTORY & AUTO-SUGGEST END]
 
-  // --- 7. STOCK SEARCH, GORILLA SHORT-CODE & EXCEL BULK STOCK ENTRY ---
+  // =====================================================================
+  // [JS-07: STOCK SEARCH, GORILLA SHORT-CODE & BULK STOCK START]
+  // =====================================================================
   function renderQuickCatalogStrip() {
     const strip = document.getElementById('quickCatalogStrip');
     if (!strip) return;
@@ -2945,8 +3009,11 @@
       `;
     }).join('');
   }
+  // [JS-07: STOCK SEARCH, GORILLA SHORT-CODE & BULK STOCK END]
 
-  // --- 8. PRINTED TAGS WITH "दीदी की दुकान" & SECRET COST CIPHER ---
+  // =====================================================================
+  // [JS-08: PRINTED TAGS WITH SECRET COST CIPHER START]
+  // =====================================================================
   function printSareeTag(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
@@ -2998,8 +3065,11 @@
 
     window.print();
   }
+  // [JS-08: PRINTED TAGS WITH SECRET COST CIPHER END]
 
-  // --- 9. BILLING, GORILLA SHORT-CODE, HOLD CART, SPLIT PAY & LOSS ALERT ---
+  // =====================================================================
+  // [JS-09: BILLING, CART, HOLD BILL, SPLIT PAY & LOSS ALERT START]
+  // =====================================================================
   function updateHoldBtnUI() {
     const btn = document.getElementById('holdBillBtn');
     if (!btn) return;
@@ -3496,8 +3566,11 @@
       setTimeout(() => printDirect80mm(), 250);
     }
   }
+  // [JS-09: BILLING, CART, HOLD BILL, SPLIT PAY & LOSS ALERT END]
 
-  // --- 10. WHATSAPP ACTUAL PRINTED BILL IMAGE SHARE (WORKS FROM BOTH BILLING & MODAL) ---
+  // =====================================================================
+  // [JS-10: WHATSAPP PRINTED BILL IMAGE & TEXT SHARE START]
+  // =====================================================================
   function buildWhatsAppBillText(s) {
     const paidVal = s.paid !== undefined ? s.paid : s.acc;
     const dueVal = s.due || 0;
@@ -3586,8 +3659,6 @@
     window.open('https://wa.me/91' + mob + '?text=' + encodeURIComponent(msg), '_blank');
   }
 
-  // Captures whichever receipt container is currently visible (Modal Receipt or PrintZone)
-  // so it works even when viewing an older bill in Khata/Insights!
   function generateAndShareActualBillImage(mob) {
     const billModalEl = document.getElementById('billModal');
     const modalInnerEl = document.getElementById('modalReceiptInner');
@@ -3630,8 +3701,11 @@
       }, 'image/png');
     });
   }
+  // [JS-10: WHATSAPP PRINTED BILL IMAGE & TEXT SHARE END]
 
-  // --- 11. BILL MODAL & SINGLE-ITEM EXCHANGE ---
+  // =====================================================================
+  // [JS-11: BILL MODAL, BARCODE VERIFY & EXCHANGE ENGINE START]
+  // =====================================================================
   function openBillModal(invId) {
     const s = sales.find(x => x.invId.toUpperCase() === invId.toUpperCase());
     if (!s) return;
@@ -3838,8 +3912,11 @@
       res.innerHTML = `<span style="color:#888;">Bill <b>${targetInv}</b> nahi mila.</span>`;
     }
   }
+  // [JS-11: BILL MODAL, BARCODE VERIFY & EXCHANGE ENGINE END]
 
-  // --- 12. UDHAAR PASSBOOK, CALL & CONTACT DIRECTORY ---
+  // =====================================================================
+  // [JS-12: UDHAAR PASSBOOK, CALL & CUSTOMER KHATA START]
+  // =====================================================================
   function openUdhaarModal(mob, name, totalDue) {
     activeUdhaarMobile = mob;
     activeUdhaarName = name;
@@ -4030,8 +4107,11 @@
       </tr>
     `).join('');
   }
+  // [JS-12: UDHAAR PASSBOOK, CALL & CUSTOMER KHATA END]
 
-  // --- 13. ROZANA DUKAAN KHARCHA & INSIGHTS WITH 7-DAY CHART ---
+  // =====================================================================
+  // [JS-13: ROZANA DUKAAN KHARCHA & INSIGHTS 7-DAY CHART START]
+  // =====================================================================
   function addExpense() {
     const note = document.getElementById('expNote').value.trim();
     const amt = parseFloat(document.getElementById('expAmt').value) || 0;
@@ -4235,8 +4315,11 @@
       </tr>
     `).join('');
   }
+  // [JS-13: ROZANA DUKAAN KHARCHA & INSIGHTS 7-DAY CHART END]
 
-  // --- 14. EXCEL CSV & CLOUD/LOCAL JSON BACKUP ---
+  // =====================================================================
+  // [JS-14: EXCEL CSV & CLOUD/LOCAL JSON BACKUP START]
+  // =====================================================================
   function exportSalesCSV() {
     if (sales.length === 0) {
       showInlineMsg('backupMsg', '⚠️ Abhi koi sale record nahi hai!', 'error');
@@ -4303,6 +4386,7 @@
   renderStock();
   renderStats();
   renderCustomerSection();
+  // [JS-14: EXCEL CSV & CLOUD/LOCAL JSON BACKUP END]
 </script>
 </body>
 </html>
