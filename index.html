@@ -558,6 +558,87 @@
     #camColorVideo { width: 100%; max-height: 170px; object-fit: cover; display: block; }
     .cam-crosshair { position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border: 2.5px solid #fde047; border-radius: 8px; box-shadow: 0 0 0 999px rgba(0,0,0,0.35); pointer-events: none; }
     /* [ANCHOR:COLOR_CSS_END] */
+    /* CUSTOM SELECT BOTTOM SHEET POPUP */
+    #customSelectModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 2500;
+      align-items: flex-end;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+      animation: fadeInSheet 0.15s ease;
+    }
+    .custom-select-sheet {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 16px 24px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+      border-top: 5px solid var(--maroon);
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .custom-select-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--maroon);
+      margin-bottom: 12px;
+      text-align: center;
+      border-bottom: 1.5px solid var(--maroon-light);
+      padding-bottom: 8px;
+    }
+    .custom-select-option {
+      padding: 11px 14px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.12s;
+    }
+    .custom-select-option:active, .custom-select-option.selected {
+      background: var(--maroon-light);
+      border-color: var(--maroon);
+      color: var(--maroon-dark);
+    }
+    @keyframes fadeInSheet { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    /* [ANCHOR:CUSTOM_SELECT_CSS_END] */
+    .edit-color-row {
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+    }
+    .edit-color-row input {
+      flex: 1;
+      margin: 0;
+    }
+    .edit-color-row button {
+      width: auto;
+      margin: 0;
+      padding: 9px 10px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .edit-drawer {
+      display: none;
+      margin-top: 8px;
+      background: var(--maroon-light);
+      border: 1.5px dashed var(--maroon);
+      border-radius: 10px;
+      padding: 8px;
+      text-align: left;
+    }
+    .edit-drawer.open { display: block; }
+    /* [ANCHOR:EDIT_COLOR_CSS_END] */
 
     .filter-box { background: var(--maroon-light); border: 1px solid var(--chip-border); padding: 9px; border-radius: 10px; margin-top: 8px; }
     .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: var(--maroon-dark); background: var(--chip-bg); padding: 7px 10px; border-radius: 8px; margin-top: 8px; font-weight: 800; flex-wrap: wrap; gap: 4px; }
@@ -826,7 +907,14 @@
     <div class="row">
       <div>
         <label>Colour</label>
-        <input type="text" id="editColor">
+        <div class="edit-color-row">
+          <input type="text" id="editColor" placeholder="Red">
+          <button type="button" class="gold" onclick="toggleEditColorDrawer()">🎨 Palette</button>
+        </div>
+        <div id="editColorDrawer" class="edit-drawer">
+          <div style="font-size:10px; font-weight:800; color:var(--maroon); margin-bottom:4px;">Naya Saree Rang Chunein:</div>
+          <div class="multi-grid" id="editPaletteGrid" style="max-height:140px; overflow-y:auto;"></div>
+        </div>
       </div>
       <div>
         <label>Available Qty</label>
@@ -3143,6 +3231,61 @@
   }
   // [ANCHOR:COLOR_JS_END]
 
+  // [ANCHOR:CUSTOM_SELECT_JS_START]
+  let activeCustomSelectCallback = null;
+
+  function openCustomSelect(title, options, currentVal, callback) {
+    const modal = document.getElementById('customSelectModal');
+    const titleEl = document.getElementById('customSelectTitle');
+    const listEl = document.getElementById('customSelectOptionsList');
+    if (!modal || !listEl) return;
+
+    titleEl.innerText = title;
+    activeCustomSelectCallback = callback;
+
+    listEl.innerHTML = options.map(opt => `
+      <div class="custom-select-option ${opt.value === currentVal ? 'selected' : ''}" onclick="selectCustomOption('${opt.value}')">
+        <span>${opt.text}</span>
+        ${opt.value === currentVal ? '<span style="color:var(--maroon); font-weight:900;">✓</span>' : ''}
+      </div>
+    `).join('');
+
+    modal.style.display = 'flex';
+  }
+
+  function selectCustomOption(val) {
+    if (activeCustomSelectCallback) activeCustomSelectCallback(val);
+    closeCustomSelect();
+  }
+
+  function closeCustomSelect() {
+    const modal = document.getElementById('customSelectModal');
+    if (modal) modal.style.display = 'none';
+    activeCustomSelectCallback = null;
+  }
+
+  // Intercept native selects in Printer Hub to use clean bottom sheet
+  document.addEventListener('DOMContentLoaded', () => {
+    ['printerBrandProfile', 'printerConnMode', 'printerPaperSize', 'printerRenderMode', 'printerFeedLines', 'fCat', 'fStatus', 'payMode', 'udhaarPayMode', 'editCat', 'sCat'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel && !sel.dataset.intercepted) {
+        sel.dataset.intercepted = '1';
+        sel.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const opts = Array.from(sel.options).map(o => ({ value: o.value, text: o.text }));
+          const label = sel.previousElementSibling ? sel.previousElementSibling.innerText : 'Chunein';
+          openCustomSelect(label, opts, sel.value, (val) => {
+            sel.value = val;
+            sel.dispatchEvent(new Event('change'));
+          });
+        });
+        sel.addEventListener('click', (e) => { e.preventDefault(); });
+      }
+    });
+  });
+  // [ANCHOR:CUSTOM_SELECT_JS_END]
+
+
   function switchTab(id, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -3309,6 +3452,32 @@
     showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
+  function renderEditPaletteGrid() {
+    const grid = document.getElementById('editPaletteGrid');
+    if (!grid || grid.dataset.built) return;
+    grid.dataset.built = '1';
+    let html = '';
+    if (typeof SAREE_COLOR_DICT !== 'undefined') {
+      SAREE_COLOR_DICT.forEach(c => {
+        html += `<span class="color-chip" style="font-size:10px; padding:4px 6px;" onclick="selectEditColor('${c.name}')"><i class="swatch-dot" style="width:10px;height:10px;background:${c.hex};"></i>${c.name}</span>`;
+      });
+    }
+    grid.innerHTML = html;
+  }
+
+  function toggleEditColorDrawer() {
+    renderEditPaletteGrid();
+    const drawer = document.getElementById('editColorDrawer');
+    if (drawer) drawer.classList.toggle('open');
+  }
+
+  function selectEditColor(colName) {
+    document.getElementById('editColor').value = colName;
+    const drawer = document.getElementById('editColorDrawer');
+    if (drawer) drawer.classList.remove('open');
+    playPosBeep(920, 0.05);
+  }
+
   function openEditStockModal(code) {
     const item = inventory.find(i => i.code === code);
     if (!item) return;
@@ -3319,6 +3488,8 @@
     document.getElementById('editQty').value = item.qty;
     document.getElementById('editCost').value = item.cost;
     document.getElementById('editMrp').value = item.mrp;
+    const drawer = document.getElementById('editColorDrawer');
+    if (drawer) drawer.classList.remove('open');
     document.getElementById('editStockModal').style.display = 'flex';
   }
 
@@ -4860,5 +5031,15 @@
   renderCustomerSection();
   // [JS-14: EXCEL CSV & CLOUD/LOCAL JSON BACKUP END]
 </script>
+
+<!-- CUSTOM SELECT SHEET MODAL -->
+<div id="customSelectModal" onclick="if(event.target === this) closeCustomSelect()">
+  <div class="custom-select-sheet">
+    <div id="customSelectTitle" class="custom-select-title">Select Option</div>
+    <div id="customSelectOptionsList"></div>
+    <button class="dark" style="margin-top:12px; padding:9px;" onclick="closeCustomSelect()">Cancel</button>
+  </div>
+</div>
+
 </body>
 </html>
