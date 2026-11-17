@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <!-- =====================================================================
@@ -419,9 +418,146 @@
     .credit-banner { display: none; background: #ecfdf5; border: 1.5px solid var(--green); color: var(--green); padding: 8px 10px; border-radius: 8px; margin-top: 8px; font-size: 12px; font-weight: 700; justify-content: space-between; align-items: center; }
     .udhaar-alert-banner { display: none; background: #fef2f2; border: 1.5px solid var(--red); color: var(--red); padding: 8px 10px; border-radius: 8px; margin-top: 8px; font-size: 12px; font-weight: 700; }
 
-    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .color-chip { background: var(--chip-bg); color: var(--maroon-dark); border: 1px solid var(--chip-border); padding: 4.5px 10px; border-radius: 16px; font-size: 11px; font-weight: 700; cursor: pointer; user-select: none; transition: all 0.12s; }
-    .color-chip:active { background: var(--maroon); color: #fff; transform: scale(0.95); }
+    /* [ANCHOR:COLOR_CSS_START] */
+    html, body {
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      overscroll-behavior-x: none;
+      position: relative;
+    }
+    .tabs, .section, .card {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    .tab {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--maroon-dark) 0%, var(--maroon) 55%, var(--maroon-mid) 100%);
+      color: #fff;
+      padding: 9px 10px 10px;
+      border-bottom: 3.5px solid var(--gold);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.22);
+    }
+    .banner-board {
+      border: 1.5px solid rgba(253, 230, 138, 0.45);
+      background: rgba(0, 0, 0, 0.16);
+      border-radius: 12px;
+      padding: 7px 10px;
+      text-align: center;
+      position: relative;
+    }
+    .banner-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 3px;
+    }
+    .banner-corner-ornament {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--gold-light);
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(253, 230, 138, 0.3);
+    }
+    .didi-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+      color: #111827;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 2px 11px;
+      border-radius: 12px;
+      letter-spacing: 0.4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      margin: 0;
+    }
+    .banner-title {
+      margin: 2px 0 1px !important;
+      font-size: 18px !important;
+      font-weight: 900;
+      color: #ffffff !important;
+      letter-spacing: 1px;
+      justify-content: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+    }
+    .banner-hindi {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gold-light);
+      letter-spacing: 0.3px;
+    }
+    .banner-address {
+      font-size: 10px;
+      color: #e2e8f0;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      width: 100%;
+    }
+    .slide-lock-btn, .shutdown-btn {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 6px 4px !important;
+      font-size: 10.5px !important;
+      border-radius: 8px !important;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .palette-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 6px; font-size: 11px; color: #475569; font-weight: 700; }
+    .palette-actions { display: flex; gap: 6px; }
+    .preset-link { background: var(--maroon-light); color: var(--maroon); border: 1px solid var(--chip-border); padding: 3px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+    .clear-link { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; border-radius: 6px; font-size: 10.5px; font-weight: 800; cursor: pointer; padding: 3px 8px; white-space: nowrap; }
+    .chip-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .color-chip { display: flex; align-items: center; gap: 5px; background: #ffffff; color: #1e293b; border: 1.5px solid #cbd5e1; padding: 6px 7px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all 0.14s ease; }
+    .color-chip .swatch-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.2); }
+    .color-chip.selected { background: var(--maroon); color: #ffffff; border-color: var(--maroon-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .color-chip.selected .swatch-dot { border-color: #ffffff; box-shadow: 0 0 0 1.5px var(--gold); }
+
+    .multi-drawer { display: none; margin-top: 8px; background: var(--maroon-light); border: 1.5px dashed var(--maroon); border-radius: 12px; padding: 10px; }
+    .multi-drawer.open { display: block; }
+    .multi-drawer-head { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 800; color: var(--maroon-dark); margin-bottom: 8px; }
+    .wheel-matcher-box { background: #ffffff; border: 1.5px solid var(--chip-border); border-radius: 10px; padding: 9px; margin-bottom: 9px; text-align: center; }
+    .wheel-canvas-wrap { position: relative; width: 100%; height: 130px; border-radius: 8px; overflow: hidden; cursor: crosshair; border: 1.5px solid #cbd5e1; touch-action: none; }
+    #sareeSpectrumCanvas { width: 100%; height: 100%; display: block; }
+    #spectrumPointer { position: absolute; width: 18px; height: 18px; border: 2.5px solid #fff; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.8); pointer-events: none; transform: translate(-50%, -50%); top: 50%; left: 80%; }
+
+    .top3-matches-wrap { margin-top: 8px; background: #f8fafc; padding: 7px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left; }
+    .top3-title { font-size: 10px; color: #475569; font-weight: 800; margin-bottom: 5px; display: flex; justify-content: space-between; }
+    .top3-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .match-pill { flex: 1; min-width: 90px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 8px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; border: 1.5px solid #cbd5e1; background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .match-pill.best { border-color: var(--maroon); background: var(--maroon-light); color: var(--maroon-dark); }
+    .match-pill:active { transform: scale(0.96); }
+
+    .multi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-height: 210px; overflow-y: auto; padding: 2px; }
+    #camColorWrap { display: none; margin-top: 8px; background: #0f172a; padding: 8px; border-radius: 8px; color: #fff; }
+    .cam-stage { position: relative; width: 100%; max-height: 170px; overflow: hidden; border-radius: 6px; }
+    #camColorVideo { width: 100%; max-height: 170px; object-fit: cover; display: block; }
+    .cam-crosshair { position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border: 2.5px solid #fde047; border-radius: 8px; box-shadow: 0 0 0 999px rgba(0,0,0,0.35); pointer-events: none; }
+    /* [ANCHOR:COLOR_CSS_END] */
 
     .filter-box { background: var(--maroon-light); border: 1px solid var(--chip-border); padding: 9px; border-radius: 10px; margin-top: 8px; }
     .filter-summary { display: flex; justify-content: space-between; font-size: 11px; color: var(--maroon-dark); background: var(--chip-bg); padding: 7px 10px; border-radius: 8px; margin-top: 8px; font-weight: 800; flex-wrap: wrap; gap: 4px; }
@@ -576,10 +712,15 @@
      [HTML-02: TOP HEADER & GLOBAL CONTROLS START]
      ===================================================================== -->
 <header>
-  <div class="header-info">
-    <div class="didi-badge">✨ दीदी की दुकान ✨</div>
-    <h1>SHAKYA COSMETIC <span id="syncStatusBadge" class="sync-badge">🔄 Connecting...</span></h1>
-    <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन | निवाड़ी कलां | Mob: 8780234760</p>
+  <div class="banner-board">
+    <div class="banner-top-row">
+      <span class="banner-corner-ornament"> शुभ लाभ </span>
+      <div class="didi-badge">✨ दीदी की दुकान ✨</div>
+      <span id="syncStatusBadge" class="sync-badge">🔄 Connecting...</span>
+    </div>
+    <h1 class="banner-title">SHAKYA COSMETIC</h1>
+    <div class="banner-hindi">शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</div>
+    <div class="banner-address">📍 निवाड़ी कलां (इटावा) &nbsp;•&nbsp; 📞 8780234760</div>
   </div>
   <div class="header-actions">
     <button id="themeCycleBtn" class="slide-lock-btn" onclick="cycleAppTheme()" title="Change App Colour UI">🎨 UI: Indigo</button>
@@ -1011,35 +1152,86 @@
       </div>
     </div>
 
+    <!-- [ANCHOR:COLOR_HTML_START] -->
     <div class="row">
-      <div style="flex:2">
+      <div style="flex:2.2">
         <label>Colours (Ek ya Poore Set ke Colours)</label>
-        <input type="text" id="sColor" placeholder="Ex: Red, Yellow, Green">
+        <input type="text" id="sColor" placeholder="Ex: Red, Yellow, Green" oninput="syncColorChipsUI()">
       </div>
-      <div style="flex:1">
+      <div style="flex:0.8">
         <label>Qty (Each)</label>
         <input type="number" id="sQty" value="1">
       </div>
     </div>
 
-    <div style="margin-top:6px;">
-      <small style="color:#475569; font-size:11px;">👇 Tap karke Colours jodein (Clear: <b style="color:var(--red);cursor:pointer;" onclick="document.getElementById('sColor').value=''">✕ Saaf karein</b>):</small>
-      <div class="chip-wrap">
-        <span class="color-chip" onclick="addColorChip('Red')">🔴 Red</span>
-        <span class="color-chip" onclick="addColorChip('Rani Pink')">🩷 Rani Pink</span>
-        <span class="color-chip" onclick="addColorChip('Yellow')">🟡 Yellow</span>
-        <span class="color-chip" onclick="addColorChip('Green')">🟢 Green</span>
-        <span class="color-chip" onclick="addColorChip('Maroon')">🍷 Maroon</span>
-        <span class="color-chip" onclick="addColorChip('Royal Blue')">🔵 Royal Blue</span>
-        <span class="color-chip" onclick="addColorChip('Rama')">🩵 Rama</span>
-        <span class="color-chip" onclick="addColorChip('Orange')">🟠 Orange</span>
-        <span class="color-chip" onclick="addColorChip('Purple')">🟣 Purple</span>
-        <span class="color-chip" onclick="addColorChip('Black')">⚫ Black</span>
-        <span class="color-chip" onclick="addColorChip('White')">⚪ White</span>
-        <span class="color-chip" onclick="addColorChip('Golden')">✨ Golden</span>
-        <span class="color-chip" onclick="addColorChip('Multi')">🌈 Multi</span>
+    <div>
+      <div class="palette-header">
+        <span>🎨 Colours Chunein (Tap = Add/Remove):</span>
+        <div class="palette-actions">
+          <span class="preset-link" onclick="applyPresetSet()">+ 6-Set</span>
+          <span class="clear-link" onclick="clearColorChips()">✕ Clear</span>
+        </div>
+      </div>
+      <div class="chip-wrap" id="colorPaletteGrid">
+        <span class="color-chip" data-col="Red" onclick="toggleColorChip('Red')"><i class="swatch-dot" style="background:#dc2626;"></i>Red</span>
+        <span class="color-chip" data-col="Rani Pink" onclick="toggleColorChip('Rani Pink')"><i class="swatch-dot" style="background:#ec4899;"></i>Rani Pink</span>
+        <span class="color-chip" data-col="Yellow" onclick="toggleColorChip('Yellow')"><i class="swatch-dot" style="background:#eab308;"></i>Yellow</span>
+        <span class="color-chip" data-col="Green" onclick="toggleColorChip('Green')"><i class="swatch-dot" style="background:#16a34a;"></i>Green</span>
+        <span class="color-chip" data-col="Maroon" onclick="toggleColorChip('Maroon')"><i class="swatch-dot" style="background:#7f1d1d;"></i>Maroon</span>
+        <span class="color-chip" data-col="Royal Blue" onclick="toggleColorChip('Royal Blue')"><i class="swatch-dot" style="background:#1d4ed8;"></i>Royal Blue</span>
+        <span class="color-chip" data-col="Rama" onclick="toggleColorChip('Rama')"><i class="swatch-dot" style="background:#06b6d4;"></i>Rama</span>
+        <span class="color-chip" data-col="Orange" onclick="toggleColorChip('Orange')"><i class="swatch-dot" style="background:#f97316;"></i>Orange</span>
+        <span class="color-chip" data-col="Purple" onclick="toggleColorChip('Purple')"><i class="swatch-dot" style="background:#7e22ce;"></i>Purple</span>
+        <span class="color-chip" data-col="Black" onclick="toggleColorChip('Black')"><i class="swatch-dot" style="background:#0f172a;"></i>Black</span>
+        <span class="color-chip" data-col="White" onclick="toggleColorChip('White')"><i class="swatch-dot" style="background:#ffffff;"></i>White</span>
+        <span class="color-chip" data-col="Golden" onclick="toggleColorChip('Golden')"><i class="swatch-dot" style="background:linear-gradient(135deg,#fde047,#ca8a04);"></i>Golden</span>
+        <span class="color-chip" id="multiTriggerChip" onclick="toggleMultiDrawer()"><i class="swatch-dot" style="background:conic-gradient(#ef4444,#eab308,#22c55e,#3b82f6,#a855f7,#ef4444);"></i>Colour Finder 🎨</span>
+      </div>
+
+      <!-- ACCURATE LAB/HSL SAREE COLOUR MATCHER -->
+      <div id="multiColorDrawer" class="multi-drawer">
+        <div class="multi-drawer-head">
+          <span>🎯 Accurate Saree Shade Matcher (36 Shades):</span>
+          <span class="clear-link" onclick="toggleMultiDrawer()">✕ Close</span>
+        </div>
+
+        <div class="wheel-matcher-box">
+          <div style="font-size:10.5px; color:#475569; margin-bottom:5px; font-weight:700;">
+            👇 Rang par ungli ghumayein — Neeche Top 3 Milte-Julte Saree Rang aayenge (Tap = Add):
+          </div>
+          <div class="wheel-canvas-wrap">
+            <canvas id="sareeSpectrumCanvas" width="340" height="130"></canvas>
+            <div id="spectrumPointer"></div>
+          </div>
+
+          <div class="top3-matches-wrap">
+            <div class="top3-title">
+              <span>✨ Top 3 Matching Saree Shades (Tap to Add):</span>
+              <span id="liveRgbBadge" style="font-weight:900; color:var(--maroon);">● Picked</span>
+            </div>
+            <div id="top3MatchesRow" class="top3-row"></div>
+          </div>
+
+          <button type="button" class="dark small" style="width:100%; margin-top:7px; padding:6px;" onclick="startCameraColorMatch()">📷 Camera + Torch se Saree Match Karein</button>
+          <div id="camColorWrap">
+            <div style="font-size:10px; color:#fde047; margin-bottom:4px;"> पीले चौकोर डिब्बे [ ] को साड़ी के प्लेन हिस्से पर रखें (जरी से दूर):</div>
+            <div class="cam-stage">
+              <video id="camColorVideo" autoplay playsinline></video>
+              <div class="cam-crosshair"></div>
+            </div>
+            <div class="row" style="margin-top:6px;">
+              <div style="flex:1.5;"><button type="button" class="gold small" style="width:100%; margin:0;" onclick="captureCameraSareeColor()">🎯 Scan Shade</button></div>
+              <div style="flex:1;"><button type="button" class="small" style="width:100%; margin:0; background:#334155;" onclick="toggleCameraTorch()">🔦 Torch</button></div>
+              <div style="flex:0.8;"><button type="button" class="small" style="width:100%; margin:0; background:#dc2626;" onclick="stopCameraColorMatch()">✕ Band</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:10.5px; font-weight:800; color:var(--maroon-dark); margin-bottom:5px;">📋 All 24 Extra Saree Shades (Seedhe Tap Karein):</div>
+        <div class="multi-grid" id="extendedPaletteGrid"></div>
       </div>
     </div>
+    <!-- [ANCHOR:COLOR_HTML_END] -->
 
     <div class="row" style="margin-top:6px;">
       <div>
@@ -2320,7 +2512,7 @@
   function handleSwipeGesture() {
     const diffX = touchEndX - touchStartX;
     const diffY = Math.abs(touchEndY - touchStartY);
-    if (Math.abs(diffX) < 135 || diffY > 35) return;
+    if (Math.abs(diffX) < 85 || diffY > 55) return;
     const activeSec = document.querySelector('.section.active');
     if (!activeSec) return;
     let idx = tabOrder.indexOf(activeSec.id);
@@ -2666,12 +2858,290 @@
     }
   });
 
-  function addColorChip(colName) {
+  // [ANCHOR:COLOR_JS_START]
+  const SAREE_COLOR_DICT = [
+    { name: 'Red', hex: '#dc2626', code: 'R' },
+    { name: 'Blood Red', hex: '#991b1b', code: 'BR' },
+    { name: 'Maroon', hex: '#6e1423', code: 'M' },
+    { name: 'Wine', hex: '#581c5c', code: 'WN' },
+    { name: 'Rani Pink', hex: '#ec4899', code: 'RP' },
+    { name: 'Magenta', hex: '#be185d', code: 'MG' },
+    { name: 'Gajri', hex: '#f43f5e', code: 'GJ' },
+    { name: 'Baby Pink', hex: '#f9a8d4', code: 'BP' },
+    { name: 'Onion Pink', hex: '#c08497', code: 'OP' },
+    { name: 'Peach', hex: '#fdba8c', code: 'PC' },
+    { name: 'Orange', hex: '#f97316', code: 'O' },
+    { name: 'Rust', hex: '#b45309', code: 'RS' },
+    { name: 'Yellow', hex: '#facc15', code: 'Y' },
+    { name: 'Haldi Yellow', hex: '#eab308', code: 'HL' },
+    { name: 'Mustard', hex: '#ca8a04', code: 'MS' },
+    { name: 'Golden', hex: '#d4af37', code: 'GD' },
+    { name: 'Cream', hex: '#fef3c7', code: 'CR' },
+    { name: 'Chiku', hex: '#d6bfa7', code: 'CK' },
+    { name: 'Pista', hex: '#bef264', code: 'PS' },
+    { name: 'Parrot', hex: '#84cc16', code: 'PT' },
+    { name: 'Mehndi', hex: '#4d7c0f', code: 'MH' },
+    { name: 'Green', hex: '#16a34a', code: 'G' },
+    { name: 'Bottle Green', hex: '#064e3b', code: 'BG' },
+    { name: 'Rama', hex: '#0891b2', code: 'RM' },
+    { name: 'Firozi', hex: '#14b8a6', code: 'FZ' },
+    { name: 'Sky Blue', hex: '#38bdf8', code: 'SB' },
+    { name: 'Royal Blue', hex: '#1d4ed8', code: 'RB' },
+    { name: 'Navy Blue', hex: '#1e3a8a', code: 'NB' },
+    { name: 'Lavender', hex: '#c084fc', code: 'LV' },
+    { name: 'Purple', hex: '#7e22ce', code: 'PR' },
+    { name: 'Brown', hex: '#78350f', code: 'BN' },
+    { name: 'Coffee', hex: '#451a03', code: 'CF' },
+    { name: 'Silver', hex: '#cbd5e1', code: 'SL' },
+    { name: 'Grey', hex: '#64748b', code: 'GY' },
+    { name: 'Black', hex: '#0f172a', code: 'BK' },
+    { name: 'White', hex: '#f8fafc', code: 'W' }
+  ];
+
+  // Register all saree codes into colorCodeMap for automatic SKU generation
+  if (typeof colorCodeMap === 'object') {
+    SAREE_COLOR_DICT.forEach(c => { colorCodeMap[c.name.toUpperCase()] = c.code; });
+    colorCodeMap['MULTI'] = 'ML';
+  }
+
+  function hexToRgbArr(hex) {
+    const n = parseInt(hex.replace('#', ''), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  // Perceptual RGB -> CIELAB conversion for accurate human-eye matching
+  function rgbToLab(r, g, b) {
+    let R = r / 255, G = g / 255, B = b / 255;
+    R = R > 0.04045 ? Math.pow((R + 0.055) / 1.055, 2.4) : R / 12.92;
+    G = G > 0.04045 ? Math.pow((G + 0.055) / 1.055, 2.4) : G / 12.92;
+    B = B > 0.04045 ? Math.pow((B + 0.055) / 1.055, 2.4) : B / 12.92;
+    let X = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047;
+    let Y = (R * 0.2126 + G * 0.7152 + B * 0.0722) / 1.00000;
+    let Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+    X = X > 0.008856 ? Math.cbrt(X) : (7.787 * X) + 16 / 116;
+    Y = Y > 0.008856 ? Math.cbrt(Y) : (7.787 * Y) + 16 / 116;
+    Z = Z > 0.008856 ? Math.cbrt(Z) : (7.787 * Z) + 16 / 116;
+    return [(116 * Y) - 16, 500 * (X - Y), 200 * (Y - Z)];
+  }
+
+  SAREE_COLOR_DICT.forEach(c => {
+    c.rgb = hexToRgbArr(c.hex);
+    c.lab = rgbToLab(c.rgb[0], c.rgb[1], c.rgb[2]);
+  });
+
+  function getTop3SareeMatches(r, g, b) {
+    const targetLab = rgbToLab(r, g, b);
+    const scored = SAREE_COLOR_DICT.map(c => {
+      const dL = (targetLab[0] - c.lab[0]) * 0.85; // slightly forgiving on shop lighting brightness
+      const da = (targetLab[1] - c.lab[1]) * 1.15; // strict on red/green hue
+      const db = (targetLab[2] - c.lab[2]) * 1.15; // strict on yellow/blue hue
+      return { ...c, dist: Math.sqrt(dL * dL + da * da + db * db) };
+    });
+    scored.sort((a, b) => a.dist - b.dist);
+    return scored.slice(0, 3);
+  }
+
+  let camColorStream = null;
+  let torchOn = false;
+
+  function renderExtendedSareeGrid() {
+    const grid = document.getElementById('extendedPaletteGrid');
+    if (!grid || grid.dataset.built) return;
+    grid.dataset.built = '1';
+    const mainSet = new Set(['Red','Rani Pink','Yellow','Green','Maroon','Royal Blue','Rama','Orange','Purple','Black','White','Golden']);
+    const extraShades = SAREE_COLOR_DICT.filter(c => !mainSet.has(c.name));
+    let html = `<span class="color-chip" data-col="Multi" onclick="toggleColorChip('Multi')"><i class="swatch-dot" style="background:conic-gradient(#ef4444,#eab308,#22c55e,#3b82f6,#a855f7,#ef4444);"></i>Multi Print</span>`;
+    extraShades.forEach(c => {
+      html += `<span class="color-chip" data-col="${c.name}" onclick="toggleColorChip('${c.name}')"><i class="swatch-dot" style="background:${c.hex};"></i>${c.name}</span>`;
+    });
+    grid.innerHTML = html;
+  }
+
+  function updateDetectedColorPreview(r, g, b) {
+    const top3 = getTop3SareeMatches(r, g, b);
+    const badge = document.getElementById('liveRgbBadge');
+    if (badge) {
+      badge.style.color = `rgb(${r},${g},${b})`;
+      badge.innerText = `● ${top3[0].name}`;
+    }
+    const row = document.getElementById('top3MatchesRow');
+    if (!row) return;
+    row.innerHTML = top3.map((m, idx) => `
+      <div class="match-pill ${idx === 0 ? 'best' : ''}" onclick="toggleColorChip('${m.name}')">
+        <i class="swatch-dot" style="width:13px;height:13px;border-radius:50%;background:${m.hex};border:1px solid #333;display:inline-block;"></i>
+        <span>${idx === 0 ? '🎯 ' : '+ '}${m.name}</span>
+      </div>
+    `).join('');
+  }
+
+  function initSareeSpectrumCanvas() {
+    renderExtendedSareeGrid();
+    const canvas = document.getElementById('sareeSpectrumCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!canvas.dataset.ready) {
+      canvas.dataset.ready = '1';
+      // Draw rich 36-tile Saree Swatch Matrix on top 65% + smooth rainbow on bottom 35%
+      const cols = 9;
+      const rows = 4;
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+      SAREE_COLOR_DICT.slice(0, 36).forEach((c, idx) => {
+        const colIdx = idx % cols;
+        const rowIdx = Math.floor(idx / cols);
+        ctx.fillStyle = c.hex;
+        ctx.fillRect(colIdx * cellW, rowIdx * cellH, cellW + 0.8, cellH + 0.8);
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.strokeRect(colIdx * cellW, rowIdx * cellH, cellW, cellH);
+      });
+
+      function pickAtEvent(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const relX = Math.max(0, Math.min(rect.width - 1, clientX - rect.left));
+        const relY = Math.max(0, Math.min(rect.height - 1, clientY - rect.top));
+        const x = Math.round((relX / rect.width) * (canvas.width - 1));
+        const y = Math.round((relY / rect.height) * (canvas.height - 1));
+        const ptr = document.getElementById('spectrumPointer');
+        if (ptr) {
+          ptr.style.left = `${(relX / rect.width) * 100}%`;
+          ptr.style.top = `${(relY / rect.height) * 100}%`;
+        }
+        const px = ctx.getImageData(x, y, 1, 1).data;
+        updateDetectedColorPreview(px[0], px[1], px[2]);
+      }
+
+      canvas.addEventListener('pointerdown', pickAtEvent);
+      canvas.addEventListener('pointermove', (e) => { if (e.buttons > 0) pickAtEvent(e); });
+      canvas.addEventListener('touchstart', pickAtEvent, { passive: true });
+      canvas.addEventListener('touchmove', pickAtEvent, { passive: true });
+      updateDetectedColorPreview(236, 72, 153);
+    }
+  }
+
+  async function startCameraColorMatch() {
+    const wrap = document.getElementById('camColorWrap');
+    const vid = document.getElementById('camColorVideo');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('⚠️ Camera ke liye localhost:8080 par kholein.');
+      return;
+    }
+    try {
+      camColorStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      vid.srcObject = camColorStream;
+      wrap.style.display = 'block';
+    } catch (err) {
+      alert('⚠️ Camera permission allow karein.');
+    }
+  }
+
+  async function toggleCameraTorch() {
+    if (!camColorStream) return;
+    const track = camColorStream.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      torchOn = !torchOn;
+      await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+    } catch (e) {
+      alert('ℹ️ Is phone camera par direct torch support nahi hai.');
+    }
+  }
+
+  function captureCameraSareeColor() {
+    const vid = document.getElementById('camColorVideo');
+    if (!vid || !vid.videoWidth) return;
+    const sampleSize = 36;
+    const c = document.createElement('canvas');
+    c.width = sampleSize;
+    c.height = sampleSize;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(
+      vid,
+      (vid.videoWidth - sampleSize) / 2,
+      (vid.videoHeight - sampleSize) / 2,
+      sampleSize,
+      sampleSize,
+      0, 0, sampleSize, sampleSize
+    );
+    const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+    let rSum = 0, gSum = 0, bSum = 0, count = 0;
+    // Ignore extreme specular glare (zari reflection) and deep fold shadows
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (lum > 18 && lum < 245) {
+        rSum += r; gSum += g; bSum += b; count++;
+      }
+    }
+    if (count === 0) {
+      rSum = data[0]; gSum = data[1]; bSum = data[2]; count = 1;
+    }
+    const avgR = Math.round(rSum / count);
+    const avgG = Math.round(gSum / count);
+    const avgB = Math.round(bSum / count);
+    updateDetectedColorPreview(avgR, avgG, avgB);
+    const best = getTop3SareeMatches(avgR, avgG, avgB)[0];
+    if (best) toggleColorChip(best.name);
+    stopCameraColorMatch();
+  }
+
+  function stopCameraColorMatch() {
+    torchOn = false;
+    if (camColorStream) {
+      camColorStream.getTracks().forEach(t => t.stop());
+      camColorStream = null;
+    }
+    const wrap = document.getElementById('camColorWrap');
+    if (wrap) wrap.style.display = 'none';
+  }
+
+  function toggleMultiDrawer() {
+    const drawer = document.getElementById('multiColorDrawer');
+    if (!drawer) return;
+    const isOpen = drawer.classList.toggle('open');
+    if (isOpen) {
+      initSareeSpectrumCanvas();
+      syncColorChipsUI();
+    } else {
+      stopCameraColorMatch();
+    }
+    playPosBeep(920, 0.04);
+  }
+
+  function toggleColorChip(colName) {
     const inp = document.getElementById('sColor');
     let current = inp.value.split(',').map(s => s.trim()).filter(Boolean);
-    if (!current.includes(colName)) { current.push(colName); }
+    const idx = current.findIndex(c => c.toLowerCase() === colName.toLowerCase());
+    if (idx > -1) { current.splice(idx, 1); } else { current.push(colName); }
     inp.value = current.join(', ');
+    syncColorChipsUI();
+    playPosBeep(900, 0.04);
   }
+
+  function applyPresetSet() {
+    document.getElementById('sColor').value = 'Red, Rani Pink, Yellow, Green, Maroon, Royal Blue';
+    syncColorChipsUI();
+    playPosBeep(960, 0.06);
+  }
+
+  function clearColorChips() {
+    document.getElementById('sColor').value = '';
+    syncColorChipsUI();
+  }
+
+  function syncColorChipsUI() {
+    const val = document.getElementById('sColor')?.value || '';
+    const activeList = val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    document.querySelectorAll('#colorPaletteGrid .color-chip[data-col], #extendedPaletteGrid .color-chip[data-col]').forEach(chip => {
+      const col = (chip.getAttribute('data-col') || '').toLowerCase();
+      chip.classList.toggle('selected', activeList.includes(col));
+    });
+  }
+  // [ANCHOR:COLOR_JS_END]
 
   function switchTab(id, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -2834,6 +3304,8 @@
     renderStock();
     document.getElementById('sCode').value = '';
     document.getElementById('sColor').value = '';
+    if (typeof syncColorChipsUI === 'function') syncColorChipsUI();
+    if (typeof syncColorChipsUI === 'function') syncColorChipsUI();
     showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
@@ -4390,4 +4862,3 @@
 </script>
 </body>
 </html>
-```
