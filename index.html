@@ -558,6 +558,46 @@
     #camColorVideo { width: 100%; max-height: 170px; object-fit: cover; display: block; }
     .cam-crosshair { position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; transform: translate(-50%, -50%); border: 2.5px solid #fde047; border-radius: 8px; box-shadow: 0 0 0 999px rgba(0,0,0,0.35); pointer-events: none; }
     /* [ANCHOR:COLOR_CSS_END] */
+    /* PERMANENT NAKAD BILLING STYLES */
+    .cash-input-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .cash-input-row input {
+      flex: 1;
+      margin: 0;
+    }
+    .unlock-check-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--maroon);
+      background: var(--maroon-light);
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--chip-border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .due-alert-box {
+      display: none;
+      margin-top: 6px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--red);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-align: center;
+      animation: fadeInSheet 0.15s ease;
+    }
+    .due-alert-box.show { display: block; }
+    /* [ANCHOR:PERM_NAKAD_CSS_END] */
     /* NAKAD-FIRST MODE STYLES */
     .nakad-mode-toggle {
       display: flex;
@@ -1147,12 +1187,22 @@
 
     <div class="row">
       <div>
-        <label style="color:var(--green);">Mila Cash / UPI (Paid ₹)</label>
-        <input type="number" id="paidInput" placeholder="Mile paise" oninput="updateLiveSplit()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+          <label style="color:var(--green); margin:0;">Mila Cash / UPI (Paid ₹)</label>
+          <label class="unlock-check-label">
+            <input type="checkbox" id="unlockCashEdit" onchange="toggleCashEditLock(this)"> 🔓 Edit Unlock
+          </label>
+        </div>
+        <div class="cash-input-row">
+          <input type="number" id="paidInput" placeholder="Mile paise" readonly style="background:#f1f5f9;" oninput="updateLiveSplit()">
+        </div>
+        <div id="dueAlertBox" class="due-alert-box">
+          ⚠️ Baaki Udhaar (Due): <span id="liveDueDisplay">₹0</span>
+        </div>
       </div>
       <div>
         <label>Payment Mode</label>
-        <select id="payMode" onchange="onPayModeChange()">
+        <select id="payMode" onchange="onPayModeChange()">id="payMode" onchange="onPayModeChange()">
           <option value="Cash">💵 Cash (Nagad)</option>
           <option value="UPI">📱 PhonePe / UPI</option>
           <option value="Split">💳 Cash + UPI (Split)</option>
@@ -1162,8 +1212,7 @@
     </div>
 
     <!-- COLLAPSIBLE UDHAAR & TAY RATE (HIDDEN FOR 100% NAKAD) -->
-    <div id="nakadUdhaarDrawer" class="nakad-collapsible">
-      <div style="font-size:11px; font-weight:800; color:#b91c1c; margin-bottom:6px;">⚠️ Udhaar / Custom Rate Mode (Just in Case):</div>
+    
       <div class="row">
         <div>
           <label style="color:var(--maroon);">ACC (Tay Rate ₹)</label>
@@ -3272,6 +3321,48 @@
     });
   }
   // [ANCHOR:COLOR_JS_END]
+
+  // [ANCHOR:PERM_NAKAD_JS_START]
+  function toggleCashEditLock(chk) {
+    const paidInp = document.getElementById('paidInput');
+    if (!paidInp) return;
+    if (chk.checked) {
+      paidInp.removeAttribute('readonly');
+      paidInp.style.background = '#ffffff';
+      paidInp.style.borderColor = 'var(--maroon)';
+      paidInp.focus();
+      playPosBeep(920, 0.04);
+    } else {
+      paidInp.setAttribute('readonly', 'true');
+      paidInp.style.background = '#f1f5f9';
+      paidInp.style.borderColor = '#cbd5e1';
+      playPosBeep(700, 0.04);
+    }
+  }
+
+  // Override updateLiveSplit to show Due alert box when paid < total
+  const originalUpdateLiveSplit = window.updateLiveSplit;
+  window.updateLiveSplit = function() {
+    if (typeof originalUpdateLiveSplit === 'function') {
+      try { originalUpdateLiveSplit(); } catch(e) {}
+    }
+    const total = parseFloat(document.getElementById('billTotalMrp')?.value) || 0;
+    const paid = parseFloat(document.getElementById('paidInput')?.value) || 0;
+    const dueBox = document.getElementById('dueAlertBox');
+    const dueSpan = document.getElementById('liveDueDisplay');
+    const due = Math.max(0, total - paid);
+
+    if (dueBox && dueSpan) {
+      if (due > 0 && paid > 0) {
+        dueSpan.innerText = '₹' + due;
+        dueBox.classList.add('show');
+      } else {
+        dueBox.classList.remove('show');
+      }
+    }
+  };
+  // [ANCHOR:PERM_NAKAD_JS_END]
+
 
   // [ANCHOR:NAKAD_JS_START]
   function toggleNakadUdhaarMode() {
