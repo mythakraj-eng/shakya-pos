@@ -5908,484 +5908,456 @@
 
 
 
-<!-- === SHAKYA COSMETIC: TAB-WISE EXCEL CUSTOMIZER === -->
-<style>
-  /* 1. Force Utility Class to Hide Any Element Reliably */
-  .sh-force-hide {
-    display: none !important;
-  }
 
-  /* 2. Compact Single-Row Header Ribbon */
+
+<!-- === SHAKYA COSMETIC: ORGANIZED FLUENT MOBILE UI === -->
+<style>
+  /* 1. Universal Clean Hide Class */
+  .sh-force-hide { display: none !important; }
+
+  /* 2. Compact, Organized Header */
   header .header-actions {
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    gap: 5px !important;
+    gap: 6px !important;
     padding-bottom: 2px !important;
     scrollbar-width: none !important;
     align-items: center !important;
   }
   header .header-actions::-webkit-scrollbar { display: none !important; }
-  header .header-actions button {
-    flex: 0 0 auto !important;
+  
+  .sh-header-btn {
+    background: rgba(255,255,255,0.15) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    margin: 0 !important;
     width: auto !important;
-    padding: 5px 9px !important;
-    font-size: 10.5px !important;
+  }
+  #fluentSettingsBtn {
+    background: #f59e0b !important;
+    color: #1e1b4b !important;
+    border-color: #fcd34d !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
   }
 
-  #excelTabSettingsBtn {
-    background: linear-gradient(135deg, var(--gold), #fbbf24) !important;
-    color: #111827 !important;
-    font-weight: 900 !important;
-    border: none !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
-  }
-
-  /* Active Tab Excel Dropdown Arrow */
-  .tab.active::after {
-    content: " ▾";
-    font-size: 11px;
-    font-weight: 900;
-    color: var(--maroon);
-  }
-
-  /* 3. True Excel Sub-Ribbon Bar (Drops down right below .tabs without blocking screen) */
-  #shakyaExcelRibbon {
+  /* 3. Modern Settings Bottom Sheet (Highly Organized) */
+  #fluentSettingsModal {
     display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    z-index: 999999;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .fluent-sheet {
+    background: #f8fafc;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px 20px 0 0;
+    max-height: 85dvh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .fluent-sheet-header {
     background: #ffffff;
-    border-bottom: 2.5px solid var(--maroon);
-    padding: 8px 10px 10px;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
-    position: sticky;
-    top: 39px;
-    z-index: 29;
-    animation: slideExcelRibbon 0.15s ease-out;
-  }
-  #shakyaExcelRibbon.open {
-    display: block !important;
-  }
-  @keyframes slideExcelRibbon {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .sh-ribbon-top {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 7px;
-    gap: 6px;
   }
-  .sh-ribbon-title {
-    font-size: 12px;
+  .fluent-sheet-title {
+    font-size: 16px;
     font-weight: 900;
-    color: var(--maroon-dark);
+    color: #1e1b4b;
   }
-  .sh-ribbon-actions {
+  .fluent-sheet-subtitle {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  
+  /* Horizontal Category Tabs for Organization */
+  .fluent-cat-tabs {
     display: flex;
-    gap: 5px;
-    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .sh-rib-mini-btn {
-    width: auto !important;
-    margin: 0 !important;
-    padding: 4px 8px !important;
-    font-size: 10px !important;
-    border-radius: 6px !important;
-    font-weight: 800 !important;
+  .fluent-cat-tabs::-webkit-scrollbar { display: none; }
+  .f-cat-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .f-cat-btn.active {
+    background: #1e1b4b;
+    color: #ffffff;
+    border-color: #1e1b4b;
   }
 
-  .sh-ribbon-chips {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    max-height: 42vh;
+  /* Smooth Scrolling Settings List */
+  .fluent-settings-body {
+    flex: 1;
     overflow-y: auto;
+    padding: 12px 16px 24px;
   }
-  .sh-rib-chip {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 7px 8px !important;
-    margin: 0 !important;
-    border-radius: 8px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    background: #f8fafc !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    color: #334155 !important;
-    cursor: pointer !important;
-    user-select: none !important;
+  .fluent-group-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px 4px;
   }
-  .sh-rib-chip.checked {
-    background: var(--maroon-light) !important;
-    border-color: var(--maroon) !important;
-    color: var(--maroon-dark) !important;
+  .fluent-group-title:first-child { margin-top: 4px; }
+  
+  .fluent-setting-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
   }
-  .sh-rib-chip input[type="checkbox"] {
-    width: 14px !important;
-    height: 14px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    accent-color: var(--maroon) !important;
-    flex-shrink: 0 !important;
-    pointer-events: none !important;
+  .fluent-setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
   }
+  .fluent-setting-row:last-child { border-bottom: none; }
+  .f-set-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .f-set-icon { font-size: 16px; }
+
+  /* Modern iOS/Fluent Toggle Switches */
+  .f-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  .f-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .f-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 24px;
+  }
+  .f-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  input:checked + .f-slider { background-color: #10B981; }
+  input:checked + .f-slider:before { transform: translateX(20px); }
 </style>
 
 <script>
 (function() {
-  const BUILD_STAMP = "1795000583";
-  if (localStorage.getItem("sc_build_stamp") !== BUILD_STAMP) {
-    localStorage.setItem("sc_build_stamp", BUILD_STAMP);
-    if ("caches" in window) {
-      caches.keys().then(names => names.forEach(n => caches.delete(n)));
-    }
+  const BUILD = "1795036039";
+  if (localStorage.getItem("sc_build_stamp") !== BUILD) {
+    localStorage.setItem("sc_build_stamp", BUILD);
+    if ("caches" in window) caches.keys().then(names => names.forEach(n => caches.delete(n)));
   }
 
-  const DEFAULT_LAYOUT = {
-    // Billing Tab Options
-    bill_manual_code: true,
-    bill_scan_title: false,
-    bill_galla_strip: true,
-    bill_fallpico: false,
-    bill_gorilla: false,
-    bill_quick_strip: false,
-    bill_loose_box: false,
-    bill_cust_row: true,
-    bill_mob_mode_row: true,
-    bill_upi_btn: true,
-
-    // Stock Tab Options
-    stk_add_card: true,
-    stk_bulk_btn: true,
-    stk_palette: true,
-    stk_mandi_tags_btns: true,
-    stk_filter_box: true,
-    stk_summary_bar: true,
-
-    // Insights Tab Options
-    ins_verify_card: true,
-    ins_galla_card: true,
-    ins_7day_chart: true,
-    ins_expense_card: true,
-    ins_history_card: true,
-
-    // Khata/Cust Tab Options
-    cust_search_card: true,
-    cust_list_card: true,
-
-    // Printer/UI & Header Options
-    hdr_banner: true,
-    hdr_cost: true,
-    hdr_printer: true,
-    hdr_theme: false,
-    hdr_sound: false,
-    hdr_swipe: false,
-    hdr_exit: true,
-    set_theme_card: true,
-    set_printer_card: true,
-    set_upi_card: true,
-    set_pin_card: true,
-    set_backup_card: true
+  // Clean grouped configurations
+  const SETTINGS_MAP = {
+    "BILLING": [
+      {
+        group: "Scanner & Input",
+        items: [
+          { key: "bill_manual_code", icon: "⌨️", label: "Manual Code Box" },
+          { key: "bill_scan_title", icon: "📝", label: "Scanner Heading" }
+        ]
+      },
+      {
+        group: "Fast Billing Buttons",
+        items: [
+          { key: "bill_galla_strip", icon: "💵", label: "Mini Galla & Hold" },
+          { key: "bill_loose_box", icon: "🛍️", label: "Futtkar Item Box" },
+          { key: "bill_quick_strip", icon: "⚡", label: "Quick Catalog Pills" },
+          { key: "bill_fallpico", icon: "🧵", label: "Fall-Pico (₹50) Btn" }
+        ]
+      },
+      {
+        group: "Customer Details",
+        items: [
+          { key: "bill_cust_row", icon: "👤", label: "Name & Gaon Input" },
+          { key: "bill_mob_mode_row", icon: "📱", label: "Mobile & Pay Mode" },
+          { key: "bill_upi_btn", icon: "📲", label: "UPI QR Button" }
+        ]
+      }
+    ],
+    "STOCK": [
+      {
+        group: "Stock Entry Tools",
+        items: [
+          { key: "stk_add_card", icon: "➕", label: "Add New Stock Form" },
+          { key: "stk_bulk_btn", icon: "📊", label: "Excel Bulk Button" },
+          { key: "stk_palette", icon: "🎨", label: "Colour Palette" }
+        ]
+      },
+      {
+        group: "Inventory Tools",
+        items: [
+          { key: "stk_filter_box", icon: "🔍", label: "Search & Filter Box" },
+          { key: "stk_mandi_tags_btns", icon: "🏷️", label: "Mandi & Tag Print Btns" },
+          { key: "stk_summary_bar", icon: "📋", label: "Total Pcs / Value Bar" }
+        ]
+      }
+    ],
+    "INSIGHTS": [
+      {
+        group: "Analytics",
+        items: [
+          { key: "ins_galla_card", icon: "📊", label: "Galla & Profit Stats" },
+          { key: "ins_verify_card", icon: "🔍", label: "Verify/Return Bill Box" },
+          { key: "ins_7day_chart", icon: "📈", label: "7-Day Trend Chart" },
+          { key: "ins_expense_card", icon: "☕", label: "Shop Kharcha Entry" }
+        ]
+      }
+    ],
+    "SYSTEM": [
+      {
+        group: "Header & App Frame",
+        items: [
+          { key: "hdr_banner", icon: "🏪", label: "Top Shop Address Banner" },
+          { key: "hdr_cost", icon: "🔒", label: "Cost Lock Button" },
+          { key: "hdr_printer", icon: "🖨️", label: "Printer Status Button" }
+        ]
+      },
+      {
+        group: "Printer & Config Tab",
+        items: [
+          { key: "set_printer_card", icon: "🖨️", label: "Printer Connection Hub" },
+          { key: "set_upi_card", icon: "📱", label: "UPI QR Setup" },
+          { key: "set_theme_card", icon: "🎨", label: "Theme Accent Switcher" },
+          { key: "set_backup_card", icon: "💾", label: "Cloud & CSV Backup" }
+        ]
+      }
+    ]
   };
 
-  let savedOld = JSON.parse(localStorage.getItem("sc_ui_customizer_v2") || "{}");
-  let savedTab = JSON.parse(localStorage.getItem("sc_tab_customizer") || "{}");
-  let layoutPrefs = Object.assign({}, DEFAULT_LAYOUT, savedOld, savedTab);
+  const DEFAULT_PREFS = {};
+  Object.values(SETTINGS_MAP).forEach(cats => cats.forEach(g => g.items.forEach(i => DEFAULT_PREFS[i.key] = true)));
+  
+  // Set some clutter off by default
+  DEFAULT_PREFS.bill_scan_title = false;
+  DEFAULT_PREFS.bill_quick_strip = false;
+  DEFAULT_PREFS.bill_loose_box = false;
+  DEFAULT_PREFS.bill_fallpico = false;
 
-  // Uses CSS class .sh-force-hide with !important so flex/grid/inline-block never break!
-  function setVisible(el, show) {
+  let savedPrefs = JSON.parse(localStorage.getItem("sc_org_prefs") || "{}");
+  let prefs = Object.assign({}, DEFAULT_PREFS, savedPrefs);
+
+  function toggleDisplay(el, isVisible) {
     if (!el) return;
     el.style.removeProperty("display");
-    el.classList.toggle("sh-force-hide", !show);
+    el.classList.toggle("sh-force-hide", !isVisible);
   }
 
-  function applyLayout() {
-    localStorage.setItem("sc_tab_customizer", JSON.stringify(layoutPrefs));
+  function applyUI() {
+    localStorage.setItem("sc_org_prefs", JSON.stringify(prefs));
 
-    // 1. BILLING TAB (Scanner always stays visible!)
-    const billingCard = document.querySelector("#billing .card");
-    if (billingCard) {
-      setVisible(document.querySelector("#billing .mini-galla-strip"), layoutPrefs.bill_galla_strip);
+    // 1. HEADER
+    toggleDisplay(document.querySelector("header .banner-board"), prefs.hdr_banner);
+    toggleDisplay(document.getElementById("ownerLockBtn"), prefs.hdr_cost);
+    toggleDisplay(document.getElementById("printerHeaderBtn"), prefs.hdr_printer);
 
-      const h3 = billingCard.querySelector("h3");
-      const titleSpan = h3 ? h3.querySelector("span:first-child") : null;
-      const fallPicoChip = billingCard.querySelector("[onclick*='quickAddFallPico']");
-      setVisible(titleSpan, layoutPrefs.bill_scan_title);
-      setVisible(fallPicoChip, layoutPrefs.bill_fallpico);
-      setVisible(h3, !!(layoutPrefs.bill_scan_title || layoutPrefs.bill_fallpico));
-
+    // 2. BILLING
+    const billCard = document.querySelector("#billing .card");
+    if (billCard) {
+      toggleDisplay(document.querySelector("#billing .mini-galla-strip"), prefs.bill_galla_strip);
+      toggleDisplay(billCard.querySelector("h3 > span:first-child"), prefs.bill_scan_title);
+      toggleDisplay(billCard.querySelector("[onclick*='quickAddFallPico']"), prefs.bill_fallpico);
+      
       const scanInput = document.getElementById("scanInput");
-      if (scanInput) {
-        const scanRow = scanInput.closest(".row");
-        if (scanRow && scanRow.children.length >= 3) {
-          setVisible(scanRow.children[0], layoutPrefs.bill_manual_code);
-          setVisible(scanRow.children[1], layoutPrefs.bill_manual_code);
-          scanRow.children[2].style.flex = layoutPrefs.bill_manual_code ? "0.9" : "1";
+      if (scanInput && scanInput.closest(".row")) {
+        const rowChildren = scanInput.closest(".row").children;
+        if (rowChildren.length >= 3) {
+          toggleDisplay(rowChildren[0], prefs.bill_manual_code);
+          toggleDisplay(rowChildren[1], prefs.bill_manual_code);
+          rowChildren[2].style.flex = prefs.bill_manual_code ? "0.9" : "1";
         }
       }
-
-      setVisible(billingCard.querySelector(".gorilla-hint"), layoutPrefs.bill_gorilla);
-      setVisible(document.getElementById("quickCatalogStrip"), layoutPrefs.bill_quick_strip);
-      setVisible(billingCard.querySelector(".loose-box"), layoutPrefs.bill_loose_box);
-      setVisible(document.getElementById("custName")?.closest(".row"), layoutPrefs.bill_cust_row);
-      setVisible(document.getElementById("custMobile")?.closest(".row"), layoutPrefs.bill_mob_mode_row);
-
-      const upiBtn = billingCard.querySelector("button[onclick*='showLiveCounterUpiQr']");
-      if (upiBtn && upiBtn.parentElement) {
-        setVisible(upiBtn.parentElement, layoutPrefs.bill_upi_btn);
-      }
+      toggleDisplay(document.getElementById("quickCatalogStrip"), prefs.bill_quick_strip);
+      toggleDisplay(billCard.querySelector(".loose-box"), prefs.bill_loose_box);
+      toggleDisplay(document.getElementById("custName")?.closest(".row"), prefs.bill_cust_row);
+      toggleDisplay(document.getElementById("custMobile")?.closest(".row"), prefs.bill_mob_mode_row);
+      const upiBtn = billCard.querySelector("button[onclick*='showLiveCounterUpiQr']");
+      if (upiBtn) toggleDisplay(upiBtn.parentElement, prefs.bill_upi_btn);
     }
 
-    // 2. STOCK TAB
-    const stockCards = document.querySelectorAll("#stock > .card");
-    if (stockCards.length >= 2) {
-      setVisible(stockCards[0], layoutPrefs.stk_add_card);
-      setVisible(stockCards[0].querySelector("button[onclick*='openBulkStockModal']"), layoutPrefs.stk_bulk_btn);
-      setVisible(document.getElementById("colorPaletteGrid")?.parentElement, layoutPrefs.stk_palette);
-      setVisible(stockCards[1].querySelector("button[onclick*='shareLowStockMandiList']")?.parentElement, layoutPrefs.stk_mandi_tags_btns);
-      setVisible(stockCards[1].querySelector(".filter-box"), layoutPrefs.stk_filter_box);
-      setVisible(document.getElementById("stockSummaryBar"), layoutPrefs.stk_summary_bar);
+    // 3. STOCK
+    const stkCards = document.querySelectorAll("#stock > .card");
+    if (stkCards.length >= 2) {
+      toggleDisplay(stkCards[0], prefs.stk_add_card);
+      toggleDisplay(stkCards[0].querySelector("button[onclick*='openBulkStockModal']"), prefs.stk_bulk_btn);
+      toggleDisplay(document.getElementById("colorPaletteGrid")?.parentElement, prefs.stk_palette);
+      toggleDisplay(stkCards[1].querySelector("button[onclick*='shareLowStockMandiList']")?.parentElement, prefs.stk_mandi_tags_btns);
+      toggleDisplay(stkCards[1].querySelector(".filter-box"), prefs.stk_filter_box);
+      toggleDisplay(document.getElementById("stockSummaryBar"), prefs.stk_summary_bar);
     }
 
-    // 3. INSIGHTS TAB
-    const statsCards = document.querySelectorAll("#stats > .card");
-    if (statsCards.length >= 4) {
-      setVisible(statsCards[0], layoutPrefs.ins_verify_card);
-      setVisible(statsCards[1], layoutPrefs.ins_galla_card);
-      setVisible(document.getElementById("sevenDayChart")?.parentElement, layoutPrefs.ins_7day_chart);
-      setVisible(statsCards[2], layoutPrefs.ins_expense_card);
-      setVisible(statsCards[3], layoutPrefs.ins_history_card);
+    // 4. INSIGHTS
+    const insCards = document.querySelectorAll("#stats > .card");
+    if (insCards.length >= 4) {
+      toggleDisplay(insCards[0], prefs.ins_verify_card);
+      toggleDisplay(insCards[1], prefs.ins_galla_card);
+      toggleDisplay(document.getElementById("sevenDayChart")?.parentElement, prefs.ins_7day_chart);
+      toggleDisplay(insCards[2], prefs.ins_expense_card);
     }
 
-    // 4. KHATA TAB
-    const custCards = document.querySelectorAll("#cust > .card");
-    if (custCards.length >= 2) {
-      setVisible(custCards[0], layoutPrefs.cust_search_card);
-      setVisible(custCards[1], layoutPrefs.cust_list_card);
-    }
-
-    // 5. PRINTER/UI & HEADER
-    setVisible(document.querySelector("header .banner-board"), layoutPrefs.hdr_banner);
-    setVisible(document.getElementById("ownerLockBtn"), layoutPrefs.hdr_cost);
-    setVisible(document.getElementById("printerHeaderBtn"), layoutPrefs.hdr_printer);
-    setVisible(document.getElementById("themeCycleBtn"), layoutPrefs.hdr_theme);
-    setVisible(document.getElementById("soundToggleBtn"), layoutPrefs.hdr_sound);
-    setVisible(document.getElementById("swipeLockBtn"), layoutPrefs.hdr_swipe);
-    setVisible(document.querySelector("header .shutdown-btn"), layoutPrefs.hdr_exit);
-
-    const backupCards = document.querySelectorAll("#backup > .card");
-    if (backupCards.length >= 5) {
-      setVisible(backupCards[0], layoutPrefs.set_theme_card);
-      setVisible(backupCards[1], layoutPrefs.set_printer_card);
-      setVisible(backupCards[2], layoutPrefs.set_upi_card);
-      setVisible(backupCards[3], layoutPrefs.set_pin_card);
-      setVisible(backupCards[4], layoutPrefs.set_backup_card);
+    // 5. SYSTEM/BACKUP
+    const sysCards = document.querySelectorAll("#backup > .card");
+    if (sysCards.length >= 5) {
+      toggleDisplay(sysCards[0], prefs.set_theme_card);
+      toggleDisplay(sysCards[1], prefs.set_printer_card);
+      toggleDisplay(sysCards[2], prefs.set_upi_card);
+      toggleDisplay(sysCards[4], prefs.set_backup_card);
     }
   }
 
-  const TAB_SETTINGS_MAP = {
-    billing: {
-      btnLabel: "⚙️ Billing Options ▾",
-      title: "🧾 Billing Tab Excel Ribbon",
-      items: [
-        { key: "bill_manual_code", label: "⌨️ Code Box & +Add" },
-        { key: "bill_scan_title", label: "📝 '1. Scan/Code' Title" },
-        { key: "bill_galla_strip", label: "💵 Mini Galla & Hold" },
-        { key: "bill_fallpico", label: "🧵 + Fall-Pico Chip" },
-        { key: "bill_gorilla", label: "🦍 Gorilla Hint Box" },
-        { key: "bill_quick_strip", label: "⚡ Quick Saree Strip" },
-        { key: "bill_loose_box", label: "🛍️ Futtkar Item Box" },
-        { key: "bill_cust_row", label: "👤 Customer & Gaon" },
-        { key: "bill_mob_mode_row", label: "📱 Mobile & Pay Mode" },
-        { key: "bill_upi_btn", label: "📲 UPI QR Button" }
-      ]
-    },
-    stock: {
-      btnLabel: "⚙️ Stock Options ▾",
-      title: "📦 Stock Tab Excel Ribbon",
-      items: [
-        { key: "stk_add_card", label: "➕ Add New Stock Card" },
-        { key: "stk_bulk_btn", label: "📊 Excel Bulk Button" },
-        { key: "stk_palette", label: "🎨 Colour Chips Palette" },
-        { key: "stk_mandi_tags_btns", label: "📝 Mandi & Tags Btns" },
-        { key: "stk_filter_box", label: "🔍 Search & Filter Box" },
-        { key: "stk_summary_bar", label: "📋 Stock Summary Bar" }
-      ]
-    },
-    stats: {
-      btnLabel: "⚙️ Insights Options ▾",
-      title: "📊 Insights Tab Excel Ribbon",
-      items: [
-        { key: "ins_verify_card", label: "🔍 Verify/Exchange Bill" },
-        { key: "ins_galla_card", label: "📊 Galla & Profit Stats" },
-        { key: "ins_7day_chart", label: "📈 7-Day Sales Chart" },
-        { key: "ins_expense_card", label: "☕ Rozana Kharcha Card" },
-        { key: "ins_history_card", label: "🧾 Bill History Table" }
-      ]
-    },
-    cust: {
-      btnLabel: "⚙️ Khata Options ▾",
-      title: "👥 Khata Tab Excel Ribbon",
-      items: [
-        { key: "cust_search_card", label: "🔍 Khata Search Box" },
-        { key: "cust_list_card", label: "📋 All Customers List" }
-      ]
-    },
-    backup: {
-      btnLabel: "⚙️ Printer/UI Options ▾",
-      title: "🖨️ Printer & Header Excel Ribbon",
-      items: [
-        { key: "hdr_banner", label: "🏪 Top Shop Banner" },
-        { key: "hdr_cost", label: "🔒 Cost Button" },
-        { key: "hdr_printer", label: "🖨️ Printer Status" },
-        { key: "hdr_theme", label: "🎨 Theme Button" },
-        { key: "hdr_sound", label: "🔊 Beep Button" },
-        { key: "hdr_swipe", label: "👆 Slide Button" },
-        { key: "hdr_exit", label: "🛑 Exit Button" },
-        { key: "set_theme_card", label: "🎨 Colour Theme Card" },
-        { key: "set_printer_card", label: "🖨️ Printer Hub Card" },
-        { key: "set_upi_card", label: "📱 UPI Setup Card" },
-        { key: "set_pin_card", label: "🔐 Security PIN Card" },
-        { key: "set_backup_card", label: "💾 Cloud & CSV Backup" }
-      ]
-    }
-  };
-
-  function getActiveTabId() {
-    const sec = document.querySelector(".section.active");
-    return sec ? sec.id : "billing";
-  }
-
-  function ensureRibbonDOM() {
-    let rib = document.getElementById("shakyaExcelRibbon");
-    if (!rib) {
-      rib = document.createElement("div");
-      rib.id = "shakyaExcelRibbon";
-      const tabsBar = document.querySelector(".tabs");
-      if (tabsBar && tabsBar.nextSibling) {
-        tabsBar.parentNode.insertBefore(rib, tabsBar.nextSibling);
-      } else {
-        document.body.appendChild(rib);
-      }
-    }
-    return rib;
-  }
-
-  function renderRibbonForTab(tabKey) {
-    const conf = TAB_SETTINGS_MAP[tabKey] || TAB_SETTINGS_MAP.billing;
-    const btn = document.getElementById("excelTabSettingsBtn");
-    if (btn) btn.innerHTML = conf.btnLabel;
-
-    const rib = ensureRibbonDOM();
-    rib.innerHTML = `
-      <div class="sh-ribbon-top">
-        <span class="sh-ribbon-title">${conf.title}</span>
-        <div class="sh-ribbon-actions">
-          <button type="button" class="dark sh-rib-mini-btn" id="shRibMinBtn">✨ Minimal</button>
-          <button type="button" class="gold sh-rib-mini-btn" id="shRibAllBtn">✅ Show All</button>
-          <button type="button" class="sh-rib-mini-btn" style="background:#e2e8f0;color:#0f172a;" id="shRibCloseBtn">▲ Hide</button>
-        </div>
-      </div>
-      <div class="sh-ribbon-chips">
-        ${conf.items.map(item => `
-          <div class="sh-rib-chip ${layoutPrefs[item.key] ? 'checked' : ''}" data-key="${item.key}">
-            <input type="checkbox" ${layoutPrefs[item.key] ? 'checked' : ''}>
-            <span>${item.label}</span>
-          </div>
-        `).join("")}
-      </div>
-    `;
-
-    rib.querySelectorAll(".sh-rib-chip").forEach(chip => {
-      chip.onclick = (e) => {
-        e.stopPropagation();
-        const k = chip.getAttribute("data-key");
-        layoutPrefs[k] = !layoutPrefs[k];
-        const chk = chip.querySelector("input");
-        if (chk) chk.checked = layoutPrefs[k];
-        chip.classList.toggle("checked", layoutPrefs[k]);
-        applyLayout();
-      };
-    });
-
-    rib.querySelector("#shRibMinBtn").onclick = () => {
-      conf.items.forEach(it => layoutPrefs[it.key] = false);
-      applyLayout();
-      renderRibbonForTab(tabKey);
-    };
-
-    rib.querySelector("#shRibAllBtn").onclick = () => {
-      conf.items.forEach(it => layoutPrefs[it.key] = true);
-      applyLayout();
-      renderRibbonForTab(tabKey);
-    };
-
-    rib.querySelector("#shRibCloseBtn").onclick = () => {
-      rib.classList.remove("open");
-    };
-  }
-
-  function toggleRibbonForTab(tabKey) {
-    const rib = ensureRibbonDOM();
-    const isAlreadyOpen = rib.classList.contains("open") && rib.dataset.activeTab === tabKey;
-    if (isAlreadyOpen) {
-      rib.classList.remove("open");
-    } else {
-      rib.dataset.activeTab = tabKey;
-      renderRibbonForTab(tabKey);
-      rib.classList.add("open");
-    }
-  }
-
-  function setupExcelRibbon() {
+  function buildSettingsUI() {
+    // 1. Add sleek organized button to header
     const headerActions = document.querySelector("header .header-actions");
-    if (headerActions && !document.getElementById("excelTabSettingsBtn")) {
+    document.querySelectorAll("#excelTabSettingsBtn, #excelCustomizeBtn").forEach(e => e.remove()); // wipe old
+
+    if (headerActions && !document.getElementById("fluentSettingsBtn")) {
       const btn = document.createElement("button");
-      btn.id = "excelTabSettingsBtn";
-      btn.className = "slide-lock-btn";
-      btn.innerHTML = "⚙️ Billing Options ▾";
-      btn.onclick = () => toggleRibbonForTab(getActiveTabId());
+      btn.id = "fluentSettingsBtn";
+      btn.className = "sh-header-btn";
+      btn.innerHTML = "<span>⚙️</span> Layout Settings";
+      btn.onclick = () => { document.getElementById("fluentSettingsModal").style.display = "flex"; };
       headerActions.insertBefore(btn, headerActions.firstChild);
     }
 
-    // Wrap the native switchTab() function so:
-    // - Tapping a DIFFERENT tab switches to that tab (and updates the open ribbon if visible)
-    // - Tapping the ALREADY-ACTIVE tab toggles its Excel Sub-Ribbon bar!
-    if (typeof window.switchTab === "function" && !window.switchTab._excelWrapped) {
-      const origSwitchTab = window.switchTab;
-      const wrapped = function(id, el) {
-        const currentActiveId = getActiveTabId();
-        origSwitchTab(id, el);
-        applyLayout();
-        const btn = document.getElementById("excelTabSettingsBtn");
-        const conf = TAB_SETTINGS_MAP[id];
-        if (btn && conf) btn.innerHTML = conf.btnLabel;
+    // 2. Build the Organized Modal
+    if (document.getElementById("fluentSettingsModal")) return;
 
-        const rib = ensureRibbonDOM();
-        if (currentActiveId === id) {
-          toggleRibbonForTab(id);
-        } else if (rib.classList.contains("open")) {
-          rib.dataset.activeTab = id;
-          renderRibbonForTab(id);
-        }
+    const modal = document.createElement("div");
+    modal.id = "fluentSettingsModal";
+    modal.onclick = (e) => { if(e.target === modal) modal.style.display = "none"; };
+    
+    let activeCat = "BILLING";
+
+    const renderBody = () => {
+      const groups = SETTINGS_MAP[activeCat];
+      return groups.map(g => `
+        <div class="fluent-group-title">${g.group}</div>
+        <div class="fluent-setting-card">
+          ${g.items.map(it => `
+            <div class="fluent-setting-row">
+              <div class="f-set-label">
+                <span class="f-set-icon">${it.icon}</span>
+                <span>${it.label}</span>
+              </div>
+              <label class="f-switch">
+                <input type="checkbox" data-key="${it.key}" ${prefs[it.key] ? 'checked' : ''}>
+                <span class="f-slider"></span>
+              </label>
+            </div>
+          `).join("")}
+        </div>
+      `).join("");
+    };
+
+    modal.innerHTML = `
+      <div class="fluent-sheet">
+        <div class="fluent-sheet-header">
+          <div>
+            <div class="fluent-sheet-title">Layout Settings</div>
+            <div class="fluent-sheet-subtitle">Organize app layout and hide what you don't need.</div>
+          </div>
+          <button type="button" style="background:#f1f5f9;border:none;border-radius:20px;padding:6px 12px;font-weight:bold;color:#475569;" onclick="document.getElementById('fluentSettingsModal').style.display='none'">Done</button>
+        </div>
+        <div class="fluent-cat-tabs">
+          ${Object.keys(SETTINGS_MAP).map(k => `
+            <button class="f-cat-btn ${k === activeCat ? 'active' : ''}" data-cat="${k}">${k.charAt(0) + k.slice(1).toLowerCase()}</button>
+          `).join("")}
+        </div>
+        <div class="fluent-settings-body" id="fSettingsBody">
+          ${renderBody()}
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const bindSwitches = () => {
+      modal.querySelectorAll("input[type='checkbox']").forEach(chk => {
+        chk.onchange = () => {
+          prefs[chk.getAttribute("data-key")] = chk.checked;
+          applyUI();
+        };
+      });
+    };
+    bindSwitches();
+
+    modal.querySelectorAll(".f-cat-btn").forEach(btn => {
+      btn.onclick = () => {
+        modal.querySelectorAll(".f-cat-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeCat = btn.getAttribute("data-cat");
+        document.getElementById("fSettingsBody").innerHTML = renderBody();
+        bindSwitches();
       };
-      wrapped._excelWrapped = true;
-      window.switchTab = wrapped;
-    }
+    });
   }
 
   window.addEventListener("DOMContentLoaded", () => {
-    setupExcelRibbon();
-    applyLayout();
+    buildSettingsUI();
+    applyUI();
   });
   setTimeout(() => {
-    setupExcelRibbon();
-    applyLayout();
-  }, 100);
+    buildSettingsUI();
+    applyUI();
+  }, 150);
 })();
 </script>
-<!-- === END TAB-WISE CUSTOMIZER === -->
+<!-- === END ORGANIZED FLUENT MOBILE UI === -->
 </body>
 </html>
