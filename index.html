@@ -1007,8 +1007,18 @@
 
 <!-- BARCODE CAMERA SCANNER MODAL -->
 <div id="scannerModal">
-  <h3 style="color:var(--gold); margin-top:10px;">📷 Barcode Par Camera Rakhein</h3>
-  <div id="reader"></div>
+  <h3 style="color:var(--gold); margin:6px 0;">⚡ Ultra-Fast Laser Scanner</h3>
+  <p style="color:#cbd5e1; font-size:11px; margin:0 0 8px 0;">Tag ko lal laser line ke beech rakhein (Auto-Scan):</p>
+  <div style="position:relative; width:100%; max-width:400px; margin:0 auto;">
+    <div id="reader" style="width:100%; background:#000; border-radius:12px; overflow:hidden; border:2px solid var(--gold);"></div>
+    <div style="position:absolute; left:8%; right:8%; top:50%; height:2px; background:#ef4444; box-shadow:0 0 10px 2px #ef4444; pointer-events:none; z-index:10;"></div>
+  </div>
+  <div class="row" style="max-width:400px; margin:10px auto 0; gap:8px;">
+    <div><button type="button" id="scanTorchBtn" class="dark" style="margin:0;" onclick="toggleScannerTorch()">🔦 Torch: OFF</button></div>
+    <div><button type="button" id="scanZoomBtn" class="dark" style="margin:0;" onclick="toggleScannerZoom()">🔍 Zoom: 1x</button></div>
+    <div><button type="button" class="gold" style="margin:0;" onclick="stopScanner()">❌ Band</button></div>
+  </div>
+</div>
   <button class="gold" style="max-width:250px;" onclick="stopScanner()">❌ Band Karein (Close)</button>
 </div>
 
@@ -3416,14 +3426,65 @@
     renderStock(); renderStats(); renderCustomerSection();
   }
 
+  let scanTorchState = false;
+  let scanZoomLevel = 1;
+  let scanLocked = false;
+
   function startScanner(mode) {
-    document.getElementById('scannerModal').style.display = 'block';
-    html5QrCode = new Html5Qrcode("reader");
+    const modal = document.getElementById('scannerModal');
+    modal.style.display = 'block';
+    scanTorchState = false;
+    scanZoomLevel = 1;
+    scanLocked = false;
+    const tBtn = document.getElementById('scanTorchBtn');
+    const zBtn = document.getElementById('scanZoomBtn');
+    if (tBtn) tBtn.innerText = '🔦 Torch: OFF';
+    if (zBtn) zBtn.innerText = '🔍 Zoom: 1x';
+
+    if (html5QrCode) {
+      try { html5QrCode.clear(); } catch (e) {}
+    }
+
+    // Lock strictly to CODE_128 (your saree/bill tags) + QR_CODE + EAN_13 (cosmetics) + Hardware BarDetector
+    const formats = (typeof Html5QrcodeSupportedFormats !== 'undefined')
+      ? [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.CODE_39
+        ]
+      : undefined;
+
+    html5QrCode = new Html5Qrcode("reader", {
+      formatsToSupport: formats,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+
+    const scanConfig = {
+      fps: 30, // 3x faster frame sampling (every 33ms)
+      qrbox: (viewW, viewH) => ({
+        width: Math.floor(viewW * 0.86),
+        height: Math.floor(Math.min(viewH * 0.42, 135))
+      }),
+      aspectRatio: 1.333,
+      disableFlip: true, // Saves 50% CPU per frame
+      videoConstraints: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        advanced: [{ focusMode: "continuous" }]
+      }
+    };
+
     html5QrCode.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 120 } },
+      scanConfig,
       (decodedText) => {
-        playPosBeep(1050, 0.09);
+        if (scanLocked) return;
+        scanLocked = true;
+        playPosBeep(1150, 0.06);
+        if (navigator.vibrate) navigator.vibrate(40);
         stopScanner();
         if (mode === 'BILL') {
           document.getElementById('scanInput').value = cleanCode(decodedText);
@@ -3434,24 +3495,95 @@
         }
       },
       () => {}
-    ).catch(() => {
+    ).then(() => {
+      // Auto-apply slight 1.4x zoom if supported so phone focuses faster on small barcode stickers
+      try {
+        const caps = html5QrCode.getRunningTrackCameraCapabilities();
+        if (caps && caps.zoomFeature && caps.zoomFeature().isSupported()) {
+          const z = caps.zoomFeature();
+          const defaultZoom = Math.min(z.max(), Math.max(z.min(), 1.4));
+          z.apply(defaultZoom);
+        }
+      } catch (e) {}
+    }).catch(() => {
       stopScanner();
       showInlineMsg('billMsg', '📷 Camera permission allow karein.', 'error');
     });
   }
 
+  function toggleScannerTorch() {
+    if (!html5QrCode) return;
+    try {
+      const caps = html5QrCode.getRunningTrackCameraCapabilities();
+      if (caps && caps.torchFeature && caps.torchFeature().isSupported()) {
+        scanTorchState = !scanTorchState;
+        caps.torchFeature().apply(scanTorchState);
+        document.getElementById('scanTorchBtn').innerText = scanTorchState ? '🔦 Torch: ON' : '🔦 Torch: OFF';
+      } else {
+        alert('ℹ️ Is phone camera par Torch support nahi hai.');
+      }
+    } catch (e) {}
+  }
+
+  function toggleScannerZoom() {
+    if (!html5QrCode) return;
+    try {
+      const caps = html5QrCode.getRunningTrackCameraCapabilities();
+      if (caps && caps.zoomFeature && caps.zoomFeature().isSupported()) {
+        const z = caps.zoomFeature();
+        scanZoomLevel = scanZoomLevel === 1 ? Math.min(z.max(), 2.2) : 1;
+        z.apply(scanZoomLevel);
+        document.getElementById('scanZoomBtn').innerText = scanZoomLevel > 1 ? '🔍 Zoom: 2x' : '🔍 Zoom: 1x';
+      } else {
+        alert('ℹ️ Is phone par camera zoom support nahi hai.');
+      }
+    } catch (e) {}
+  }
+
   function stopScanner() {
+    const modal = document.getElementById('scannerModal');
     if (html5QrCode) {
-      html5QrCode.stop().then(() => {
-        html5QrCode.clear();
-        document.getElementById('scannerModal').style.display = 'none';
+      const instance = html5QrCode;
+      html5QrCode = null;
+      instance.stop().then(() => {
+        instance.clear();
+        modal.style.display = 'none';
       }).catch(() => {
-        document.getElementById('scannerModal').style.display = 'none';
+        modal.style.display = 'none';
       });
     } else {
-      document.getElementById('scannerModal').style.display = 'none';
+      modal.style.display = 'none';
     }
   }
+
+  // BONUS: Instant Hardware USB / Bluetooth Laser Barcode Gun Listener (0.001s Speed)
+  (function() {
+    let gunBuf = '';
+    let lastKeyTime = 0;
+    document.addEventListener('keydown', (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName : '';
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
+      const now = performance.now();
+      if (now - lastKeyTime > 65) gunBuf = '';
+      lastKeyTime = now;
+      if (e.key === 'Enter' && gunBuf.length >= 3) {
+        e.preventDefault();
+        const code = cleanCode(gunBuf);
+        gunBuf = '';
+        playPosBeep(1200, 0.05);
+        const activeSec = document.querySelector('.section.active')?.id;
+        if (activeSec === 'stats') {
+          document.getElementById('decodeInput').value = code;
+          decodeAcc(code, true);
+        } else {
+          document.getElementById('scanInput').value = code;
+          addItemToBill();
+        }
+      } else if (e.key.length === 1) {
+        gunBuf += e.key;
+      }
+    });
+  })();
 
   function openBulkStockModal() {
     const tbody = document.getElementById('bulkStockRows');
