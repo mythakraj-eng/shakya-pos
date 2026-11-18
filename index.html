@@ -786,6 +786,14 @@
   <style id="dynamicPrintPageStyle">
     @page { size: 80mm auto; margin: 0mm; }
   </style>
+
+    <!-- Link to the Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- Tell Android/iOS to use your specific image as the App Icon -->
+    <link rel="apple-touch-icon" href="/1000126066.png">
+    <meta name="theme-color" content="#800000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
@@ -5154,6 +5162,294 @@
     <button class="dark" style="margin-top:12px; padding:9px;" onclick="closeCustomSelect()">Cancel</button>
   </div>
 </div>
+
+
+<!-- === SHAKYA COSMETIC: EXCEL WINDOW, COLOR PALETTE & SCROLL LOCK FIX === -->
+<style>
+  /* 1. Pure App me Popup khulne par Background Scroll Lock */
+  body.popup-scroll-locked {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    touch-action: none !important;
+  }
+
+  /* Sabhi popups ke andar smooth isolated scrolling */
+  [class*="modal"], [class*="popup"], [id*="modal"], [id*="popup"], .excel-fullscreen-card {
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* 2. Bulk Stock ko Popup ki jagah Full-Screen Excel Window banana */
+  .excel-fullscreen-overlay {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+
+  .excel-fullscreen-card {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 12px 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+  }
+
+  /* Excel Grid Table Styling */
+  .excel-fullscreen-card table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .excel-fullscreen-card th {
+    position: sticky !important;
+    top: 0 !important;
+    background: #e0e7ff !important;
+    z-index: 10 !important;
+    border: 1px solid #94a3b8 !important;
+    padding: 8px 4px !important;
+    font-size: 13px !important;
+  }
+
+  .excel-fullscreen-card td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 0 !important;
+  }
+
+  .excel-fullscreen-card input,
+  .excel-fullscreen-card select {
+    border-radius: 0 !important;
+    border: 1px solid #cbd5e1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    height: 36px !important;
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+  }
+
+  .excel-fullscreen-card input:focus,
+  .excel-fullscreen-card select:focus {
+    outline: 2px solid #2563eb !important;
+    background: #eff6ff !important;
+  }
+
+  /* 3. Floating Colour Palette Window */
+  #shakya-color-palette {
+    position: fixed;
+    z-index: 999999;
+    background: #ffffff;
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    display: none;
+    width: 280px;
+    max-width: 92vw;
+  }
+
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .color-swatch-btn {
+    display: flex;
+     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .color-swatch-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+    border: 1px solid rgba(0,0,0,0.25);
+  }
+</style>
+
+<script>
+(function() {
+  let savedScrollY = 0;
+  let activeColorInput = null;
+
+  // Common Saree / Suit / Cosmetic Colours
+  const SHAKYA_COLORS = [
+    { name: "Red", hex: "#ef4444" },
+    { name: "Maroon", hex: "#7f1d1d" },
+    { name: "Rani Pink", hex: "#db2777" },
+    { name: "Baby Pink", hex: "#f472b6" },
+    { name: "Yellow", hex: "#eab308" },
+    { name: "Orange", hex: "#f97316" },
+    { name: "Green", hex: "#16a34a" },
+    { name: "Mehendi", hex: "#4d7c0f" },
+    { name: "Rama", hex: "#0d9488" },
+    { name: "Sky Blue", hex: "#38bdf8" },
+    { name: "Navy Blue", hex: "#1e3a8a" },
+    { name: "Purple", hex: "#9333ea" },
+    { name: "Wine", hex: "#581c87" },
+    { name: "Black", hex: "#0f172a" },
+    { name: "White", hex: "#ffffff" },
+    { name: "Golden", hex: "#d97706" }
+  ];
+
+  // Create Floating Color Palette DOM
+  function createColorPalette() {
+    if (document.getElementById("shakya-color-palette")) return;
+    const palette = document.createElement("div");
+    palette.id = "shakya-color-palette";
+    palette.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;font-size:14px;color:#1e293b;">
+        <span>🎨 Select Colour</span>
+        <button type="button" id="close-palette-btn" style="border:none;background:#ef4444;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+      </div>
+      <div class="palette-grid">
+        ${SHAKYA_COLORS.map(c => `
+          <button type="button" class="color-swatch-btn" data-color="${c.name}" data-hex="${c.hex}">
+            <span class="color-swatch-circle" style="background:${c.hex}"></span>
+            <span>${c.name}</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+    document.body.appendChild(palette);
+
+    palette.addEventListener("click", function(e) {
+      const btn = e.target.closest(".color-swatch-btn");
+      if (btn && activeColorInput) {
+        activeColorInput.value = btn.getAttribute("data-color");
+        activeColorInput.style.borderLeft = "8px solid " + btn.getAttribute("data-hex");
+        activeColorInput.dispatchEvent(new Event("input", { bubbles: true }));
+        activeColorInput.dispatchEvent(new Event("change", { bubbles: true }));
+        palette.style.display = "none";
+      }
+      if (e.target.id === "close-palette-btn") {
+        palette.style.display = "none";
+      }
+    });
+  }
+
+  // Detect if an input is a Bulk Stock "Colour" field
+  function isBulkColorInput(el) {
+    if (!el || el.tagName !== "INPUT") return false;
+    const card = el.closest(".excel-fullscreen-card");
+    if (!card) return false;
+    const placeholder = (el.getAttribute("placeholder") || "").toLowerCase();
+    const val = (el.value || "").toLowerCase();
+    if (placeholder.includes("red") || placeholder.includes("col") || val === "red") return true;
+
+    // Also check if it's the 3rd input in its row (Code, Category, Colour)
+    const row = el.closest("tr, div");
+    if (row) {
+      const fields = Array.from(row.querySelectorAll("input, select"));
+      if (fields.indexOf(el) === 1 || fields.filter(f => f.tagName === "INPUT").indexOf(el) === 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Upgrade Bulk Stock Popup to Fullscreen Excel & Check Global Scroll Lock
+  function syncPopupsAndExcel() {
+    createColorPalette();
+
+    // 1. Find "Excel-Style Bulk Stock Entry" heading and convert card to Fullscreen Excel Window
+    const allHeadings = document.querySelectorAll("h1, h2, h3, h4, div, span");
+    allHeadings.forEach(el => {
+      if (el.textContent && el.textContent.includes("Excel-Style Bulk Stock Entry") && el.children.length <= 2) {
+        const card = el.closest("div[style*='background'], div[class*='modal'], div[class*='popup'], div");
+        if (card && !card.classList.contains("excel-fullscreen-card")) {
+          // Climb up to the white card box
+          let targetCard = el.parentElement;
+          while (targetCard && targetCard !== document.body) {
+            const bg = window.getComputedStyle(targetCard).backgroundColor;
+            if (bg === "rgb(255, 255, 255)" || targetCard.clientWidth > 250) {
+              break;
+            }
+            targetCard = targetCard.parentElement;
+          }
+          if (targetCard && targetCard !== document.body) {
+            targetCard.classList.add("excel-fullscreen-card");
+            if (targetCard.parentElement && targetCard.parentElement !== document.body) {
+              targetCard.parentElement.classList.add("excel-fullscreen-overlay");
+            }
+          }
+        }
+      }
+    });
+
+    // 2. Check if any fixed modal/popup is open on screen -> Lock background scroll
+    let anyPopupVisible = false;
+    const allDivs = document.querySelectorAll("div");
+    for (let i = 0; i < allDivs.length; i++) {
+      const d = allDivs[i];
+      if (d.id === "shakya-color-palette") continue;
+      const style = window.getComputedStyle(d);
+      if (style.position === "fixed" && style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0") {
+        if (d.clientWidth >= window.innerWidth * 0.7 && d.clientHeight >= window.innerHeight * 0.4) {
+          anyPopupVisible = true;
+          break;
+        }
+      }
+    }
+
+    if (anyPopupVisible && !document.body.classList.contains("popup-scroll-locked")) {
+      savedScrollY = window.scrollY;
+      document.body.style.top = `-${savedScrollY}px`;
+      document.body.classList.add("popup-scroll-locked");
+    } else if (!anyPopupVisible && document.body.classList.contains("popup-scroll-locked")) {
+      document.body.classList.remove("popup-scroll-locked");
+      document.body.style.top = "";
+      window.scrollTo(0, savedScrollY);
+      const palette = document.getElementById("shakya-color-palette");
+      if (palette) palette.style.display = "none";
+    }
+  }
+
+  // Open Color Palette on tapping Colour field in Bulk Stock
+  document.addEventListener("click", function(e) {
+    const palette = document.getElementById("shakya-color-palette");
+    if (isBulkColorInput(e.target)) {
+      activeColorInput = e.target;
+      const rect = e.target.getBoundingClientRect();
+      palette.style.display = "block";
+      let topPos = rect.bottom + 6;
+      if (topPos + 240 > window.innerHeight) {
+        topPos = Math.max(10, rect.top - 240);
+      }
+      palette.style.top = topPos + "px";
+      palette.style.left = Math.min(window.innerWidth - 290, Math.max(10, rect.left - 40)) + "px";
+    } else if (palette && !palette.contains(e.target)) {
+      palette.style.display = "none";
+    }
+  });
+
+  // Observe DOM changes to catch popups opening/closing & new rows added
+  window.addEventListener("DOMContentLoaded", () => {
+    syncPopupsAndExcel();
+    const observer = new MutationObserver(syncPopupsAndExcel);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
+  });
+})();
+</script>
+<!-- === END SHAKYA COSMETIC FIX === -->
 
 </body>
 </html>
