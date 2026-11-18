@@ -787,12 +787,8 @@
     @page { size: 80mm auto; margin: 0mm; }
   </style>
 
-    <!-- Link to the Web App Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- Tell Android/iOS to use your specific image as the App Icon -->
+    <!-- Custom App Icon & iOS Status Bar -->
     <link rel="apple-touch-icon" href="/1000126066.png">
-    <meta name="theme-color" content="#800000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
@@ -1806,6 +1802,29 @@
   const dbRef = firebase.database().ref('shakya_pos_data');
   const connectedRef = firebase.database().ref('.info/connected');
 
+  function getLocalIsoDate(d = new Date()) {
+    const dt = d instanceof Date ? d : new Date(d);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function csvSafe(val) {
+    let s = String(val == null ? '' : val).replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return `"${s}"`;
+  }
+
   function normalizeArray(val) {
     if (!val) return [];
     if (Array.isArray(val)) return val.filter(Boolean);
@@ -1889,7 +1908,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     applyAppTheme(currentThemeKey);
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = getLocalIsoDate();
     const dInp = document.getElementById('statsDateInput');
     const mInp = document.getElementById('statsMonthInput');
     const upiInp = document.getElementById('merchantUpiInput');
@@ -1956,6 +1975,9 @@
   });
 
   dbRef.on('value', (snapshot) => {
+    if (hasUnsyncedChanges) {
+      return;
+    }
     const cloudData = snapshot.val();
     if (cloudData) {
       if (cloudData.inventory !== undefined) {
@@ -2006,6 +2028,7 @@
       renderStock();
       renderStats();
       renderCustomerSection();
+      if (typeof refreshBillingDatalists === 'function') refreshBillingDatalists();
     } else if (inventory.length > 0 || sales.length > 0) {
       syncToCloud();
     }
@@ -2329,7 +2352,11 @@
       return true;
     }
     if (printerPrefs.mode === 'NETWORK' && printerPrefs.netIp) {
-      const url = `http://${printerPrefs.netIp}:${printerPrefs.netPort || 9100}/`;
+      const port = Number(printerPrefs.netPort) || 9100;
+      if (port === 9100) {
+        throw new Error('Port 9100 requires RawBT or TCP print bridge');
+      }
+      const url = `http://${printerPrefs.netIp}:${port}/`;
       await fetch(url, { method: 'POST', mode: 'no-cors', body: bytes });
       return true;
     }
@@ -3000,6 +3027,7 @@
   if (typeof colorCodeMap === 'object') {
     SAREE_COLOR_DICT.forEach(c => { colorCodeMap[c.name.toUpperCase()] = c.code; });
     colorCodeMap['MULTI'] = 'ML';
+    colorCodeMap['MEHENDI'] = 'MH';
   }
 
   function hexToRgbArr(hex) {
@@ -3261,6 +3289,10 @@
 
   function syncNakadDueBanner() {
     const total = parseFloat(document.getElementById('billTotalMrp')?.value) || 0;
+    const accEl = document.getElementById('accInput');
+    const acc = accEl && accEl.value !== '' ? (parseFloat(accEl.value) || 0) : total;
+    const exCredit = (typeof activeExchangeCredit !== 'undefined') ? (parseFloat(activeExchangeCredit) || 0) : 0;
+    const netTarget = Math.max(0, acc - exCredit);
     const paidEl = document.getElementById('paidInput');
     const dueEl = document.getElementById('dueInput');
     const banner = document.getElementById('baakiUdhaarBanner');
@@ -3270,21 +3302,20 @@
     const paidRaw = paidEl.value.trim();
     const paidVal = parseFloat(paidRaw) || 0;
 
-    // When bill completes or resets to 0, hide Baaki Udhaar and re-lock Mila Cash
     if (total <= 0) {
       banner.style.display = 'none';
       dueEl.value = 0;
-      if (chk && chk.checked && paidRaw === '') {
+      if (chk && chk.checked && (paidRaw === '' || paidVal === 0)) {
         chk.checked = false;
         paidEl.setAttribute('readonly', 'true');
         paidEl.style.background = '#f1f5f9';
+        paidEl.style.borderColor = '#cbd5e1';
       }
       return;
     }
 
-    // Show Baaki Udhaar ONLY when user entered cash less than total bill
-    if (paidRaw !== '' && paidVal < total) {
-      const due = Math.max(0, total - paidVal);
+    if (paidRaw !== '' && paidVal < netTarget) {
+      const due = Math.max(0, netTarget - paidVal);
       dueEl.value = due;
       banner.style.display = 'flex';
     } else {
@@ -3292,9 +3323,6 @@
       banner.style.display = 'none';
     }
   }
-
-  // Hook into bill changes so Due banner auto-hides the moment a bill is generated
-  setInterval(syncNakadDueBanner, 300);
 
   // Non-destructive Auto-Suggestions for Stock Code, Customer Name, Gaon, Mobile
   function refreshBillingDatalists() {
@@ -3325,18 +3353,18 @@
       }
 
       const names = new Set(), cities = new Set(), phones = new Set();
-      if (typeof khataList !== 'undefined' && Array.isArray(khataList)) {
-        khataList.forEach(k => {
-          if (k.name) names.add(k.name.trim());
-          if (k.city || k.gaon) cities.add((k.city || k.gaon).trim());
-          if (k.phone || k.mobile) phones.add((k.phone || k.mobile).trim());
+      if (typeof getCustomerDirectory === 'function') {
+        getCustomerDirectory().forEach(c => {
+          if (c.name && c.name.toUpperCase() !== 'WALK-IN CUSTOMER') names.add(c.name.trim());
+          if (c.village) cities.add(c.village.trim());
+          if (c.mobile) phones.add(c.mobile.trim());
         });
       }
-      if (typeof salesHistory !== 'undefined' && Array.isArray(salesHistory)) {
-        salesHistory.forEach(s => {
-          if (s.custName || s.customer) names.add((s.custName || s.customer).trim());
-          if (s.custCity || s.gaon) cities.add((s.custCity || s.gaon).trim());
-          if (s.custPhone || s.mobile) phones.add((s.custPhone || s.mobile).trim());
+      if (typeof sales !== 'undefined' && Array.isArray(sales)) {
+        sales.forEach(s => {
+          if (s.cust && s.cust.toUpperCase() !== 'WALK-IN CUSTOMER') names.add(s.cust.trim());
+          if (s.village) cities.add(s.village.trim());
+          if (s.mobile) phones.add(s.mobile.trim());
         });
       }
 
@@ -3700,7 +3728,7 @@
     document.getElementById('sCode').value = '';
     document.getElementById('sColor').value = '';
     if (typeof syncColorChipsUI === 'function') syncColorChipsUI();
-    if (typeof syncColorChipsUI === 'function') syncColorChipsUI();
+    if (typeof refreshBillingDatalists === 'function') refreshBillingDatalists();
     showInlineMsg('stockMsg', `✅ Stock jud gaya & Cloud par sync ho gaya: ` + addedCodes.join(', '), 'success');
   }
 
@@ -3888,7 +3916,7 @@
       return `
         <tr>
           <td class="code-cell">${item.code} ${isUnsold ? '<span title="Unsold / Slow Moving">🐢</span>' : ''}</td>
-          <td>${item.cat}<br><small style="color:var(--maroon);font-weight:700;">${item.color}</small></td>
+          <td>${escapeHtml(item.cat)}<br><small style="color:var(--maroon);font-weight:700;">${escapeHtml(item.color)}</small></td>
           <td>${ownerUnlocked ? '₹' + item.cost : '🔒 ' + encodeSecretCost(item.cost)}</td>
           <td><b>₹${item.mrp}</b></td>
           <td style="color:${item.qty <= 2 ? 'var(--red)' : '#0f172a'}; font-weight:bold;">${item.qty}</td>
@@ -4266,6 +4294,7 @@
     const netTarget = Math.max(0, acc - activeExchangeCredit);
     const due = Math.max(0, netTarget - paid);
     document.getElementById('dueInput').value = due;
+    if (typeof syncNakadDueBanner === 'function') syncNakadDueBanner();
 
     if (document.getElementById('payMode').value === 'Split') {
       const cVal = parseFloat(document.getElementById('splitCashInput').value) || 0;
@@ -4318,11 +4347,11 @@
       <p>शाक्या कॉस्मेटिक एवं साड़ी कलेक्शन</p>
       <p>Ram Dara Road, Niwari Kalan, Etawah | Mob: 8780234760</p>
       <hr style="border-top:1px dashed #000;">
-      <p style="text-align:left; margin:4px 0;"><b>Bill No:</b> ${saleRecord.invId} ${saleRecord.exchanged ? '(EXCHANGED)' : ''} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${saleRecord.cust} (${saleRecord.village || 'Niwari Kalan'})<br><b>Mobile:</b> ${saleRecord.mobile || 'N/A'} | <b>Mode:</b> ${saleRecord.mode}</p>
+      <p style="text-align:left; margin:4px 0;"><b>Bill No:</b> ${saleRecord.invId} ${saleRecord.exchanged ? '(EXCHANGED)' : ''} | <b>Date:</b> ${saleRecord.date}<br><b>Customer:</b> ${escapeHtml(saleRecord.cust)} (${escapeHtml(saleRecord.village || 'Niwari Kalan')})<br><b>Mobile:</b> ${saleRecord.mobile || 'N/A'} | <b>Mode:</b> ${saleRecord.mode}</p>
       <table>
         <thead><tr><th>Code</th><th>Item & Qty</th><th style="text-align:right;">Rate (₹)</th></tr></thead>
         <tbody>
-          ${saleRecord.items.map(i => `<tr style="${i.returned ? 'text-decoration:line-through; opacity:0.6;' : ''}"><td class="code-cell">${i.code}</td><td>${i.cat} (${i.color}) ${i.returned ? '[RETURNED]' : ''}<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
+          ${saleRecord.items.map(i => `<tr style="${i.returned ? 'text-decoration:line-through; opacity:0.6;' : ''}"><td class="code-cell">${i.code}</td><td>${escapeHtml(i.cat)} (${escapeHtml(i.color)}) ${i.returned ? '[RETURNED]' : ''}<br><small>Qty: ${i.qty} pcs</small></td><td style="text-align:right;">₹${i.mrp * i.qty}</td></tr>`).join('')}
         </tbody>
       </table>
       <div class="receipt-total">TOTAL: ₹${saleRecord.totalMrp} | TAY: ₹${saleRecord.acc}</div>
@@ -4409,7 +4438,7 @@
     const invId = generateNextInvId();
     const now = new Date();
     const dateStr = now.toLocaleDateString('hi-IN');
-    const isoDate = now.toISOString().slice(0, 10);
+    const isoDate = getLocalIsoDate(now);
 
     const itemsSold = cart.map(i => {
       if (!i.isLoose) {
@@ -4455,6 +4484,7 @@
     document.getElementById('custMobile').value = '';
     document.getElementById('custPrevUdhaarBanner').style.display = 'none';
 
+    if (typeof refreshBillingDatalists === 'function') refreshBillingDatalists();
     showInlineMsg('billMsg', `🎉 Bill ${invId} ban gaya aur Cloud par sync ho gaya!`, 'success');
 
     if (printerPrefs.autoPrint) {
@@ -4705,22 +4735,31 @@
       lastSavedSale.acc = Math.max(0, lastSavedSale.acc - (soldItem.realSale || 0));
     });
 
+    let creditToApply = refundRealSale;
+    const prevDue = lastSavedSale.due || 0;
+    const dueReduce = Math.min(prevDue, refundRealSale);
+    if (prevDue > 0) {
+      lastSavedSale.due = prevDue - dueReduce;
+      creditToApply = Math.max(0, refundRealSale - dueReduce);
+    }
+
     const remainingActive = lastSavedSale.items.filter(i => !i.returned);
     if (remainingActive.length === 0) {
       lastSavedSale.exchanged = true;
       lastSavedSale.acc = 0;
-      lastSavedSale.paid = 0;
       lastSavedSale.due = 0;
       lastSavedSale.profit = 0;
+      if (!sendToNewBill) {
+        lastSavedSale.paid = 0;
+      }
     } else {
       lastSavedSale.profit = lastSavedSale.acc - lastSavedSale.totalCost;
-      if (lastSavedSale.due > 0) {
-        const dueReduce = Math.min(lastSavedSale.due, refundRealSale);
-        lastSavedSale.due -= dueReduce;
-        const remRefund = refundRealSale - dueReduce;
-        lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - remRefund);
-      } else {
-        lastSavedSale.paid = lastSavedSale.acc;
+      if (!sendToNewBill) {
+        if (prevDue > 0) {
+          lastSavedSale.paid = Math.max(0, (lastSavedSale.paid || 0) - creditToApply);
+        } else {
+          lastSavedSale.paid = Math.min(lastSavedSale.paid !== undefined ? lastSavedSale.paid : lastSavedSale.acc, lastSavedSale.acc);
+        }
       }
     }
 
@@ -4730,7 +4769,7 @@
     renderCustomerSection();
 
     if (sendToNewBill) {
-      activeExchangeCredit += refundRealSale;
+      activeExchangeCredit += creditToApply;
       activeExchangeRefInv = lastSavedSale.invId;
       document.getElementById('custName').value = lastSavedSale.cust !== 'Walk-in Customer' ? lastSavedSale.cust : '';
       document.getElementById('custVillage').value = lastSavedSale.village || '';
@@ -4739,7 +4778,7 @@
       const tabEl = document.getElementById('tab-billing');
       if (tabEl) switchTab('billing', tabEl);
       renderCart();
-      showInlineMsg('billMsg', `🔄 ₹${refundRealSale} ka Exchange Credit (${lastSavedSale.invId}) naye bill mein jud gaya! Ab nayi saree scan karein.`, 'success');
+      showInlineMsg('billMsg', `🔄 ₹${creditToApply} ka Exchange Credit (${lastSavedSale.invId}) naye bill mein jud gaya! Ab nayi saree scan karein.`, 'success');
     } else {
       openBillModal(lastSavedSale.invId);
       alert(`✅ Chune hue item Stock mein wapas jud gaye! Customer ke ₹${refundRealSale} adjust ho gaye hain.`);
@@ -4875,7 +4914,7 @@
     udhaarLogs.unshift({
       id: 'UDH' + Date.now().toString().slice(-5),
       date: now.toLocaleDateString('hi-IN'),
-      isoDate: now.toISOString().slice(0, 10),
+      isoDate: getLocalIsoDate(now),
       mobile: activeUdhaarMobile,
       cust: activeUdhaarName,
       amount: actuallySettled,
@@ -4932,7 +4971,7 @@
 
     res.innerHTML = `
       <div style="background:var(--maroon-light); border:1.5px solid var(--maroon); padding:10px; border-radius:10px;">
-        👤 <b>Name:</b> ${custName} | 📍 <b>Gaon:</b> ${village} | 📱 <b>Mob:</b> ${mob || 'N/A'}<br>
+        👤 <b>Name:</b> ${escapeHtml(custName)} | 📍 <b>Gaon:</b> ${escapeHtml(village)} | 📱 <b>Mob:</b> ${escapeHtml(mob || 'N/A')}<br>
         📦 <b>Kul Bills:</b> ${matchedBills.length} | 💰 <b>Kul Kharid:</b> ₹${totalSpend} | <b style="color:var(--red);">Baaki Udhaar: ₹${totalDue}</b>
         ${mob ? `
           <div class="row" style="margin-top:8px;">
@@ -4983,7 +5022,7 @@
     tbody.innerHTML = customerTableCache.map((c, idx) => `
       <tr>
         <td onclick="selectCustomerSearchByIdx(${idx})" style="cursor:pointer;">
-          <b style="color:var(--maroon-dark);">${c.name}</b><br>
+          <b style="color:var(--maroon-dark);">${escapeHtml(c.name)}</b><br>
           <small style="color:#475569;">${c.mobile || 'No Mob'}</small>
         </td>
         <td>${c.village}</td>
@@ -5016,7 +5055,7 @@
     expenses.unshift({
       id: 'EXP' + Date.now().toString().slice(-5),
       date: now.toLocaleDateString('hi-IN'),
-      isoDate: now.toISOString().slice(0, 10),
+      isoDate: getLocalIsoDate(now),
       note,
       amount: amt
     });
@@ -5075,7 +5114,7 @@
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const iso = d.toISOString().slice(0, 10);
+      const iso = getLocalIsoDate(d);
       const hiStr = d.toLocaleDateString('hi-IN');
       const label = i === 0 ? 'Aaj' : d.toLocaleDateString('en-IN', { weekday: 'short' });
       days.push({ iso, hiStr, label, total: 0 });
@@ -5101,7 +5140,7 @@
 
   function renderStats() {
     const todayStr = new Date().toLocaleDateString('hi-IN');
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = getLocalIsoDate();
     const selDate = document.getElementById('statsDateInput')?.value || todayIso;
     const selMonth = document.getElementById('statsMonthInput')?.value || todayIso.slice(0, 7);
 
@@ -5191,7 +5230,7 @@
         ? `<span style="color:#64748b;">Is avadhi mein koi dukaan kharcha nahi likha gaya.</span>`
         : filteredExpenses.map(e => `
             <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #e2e8f0;">
-              <span>• <b>${e.note}</b> <small style="color:#64748b;">(${e.date})</small></span>
+              <span>• <b>${escapeHtml(e.note)}</b> <small style="color:#64748b;">(${escapeHtml(e.date)})</small></span>
               <span><b style="color:var(--red);">₹${e.amount}</b> <button class="btn-action btn-del" style="margin-left:6px;" onclick="deleteExpense('${e.id}')">✕</button></span>
             </div>
           `).join('');
@@ -5224,12 +5263,12 @@
     sales.forEach(s => {
       const itemsStr = s.items.map(i => `${String(i.code||'').replace(/[=+@\\-]/g,'')}(${i.qty}pcs,Rs.${i.realSale}${i.returned ? ',RETURNED' : ''})`).join(' | ');
       const paidVal = s.paid !== undefined ? s.paid : s.acc;
-      csv += `${s.invId},${s.date},"${s.cust}","${s.village || ''}",${s.mobile || ''},${s.mode},${s.totalMrp},${s.acc},${s.exchangeCredit || 0},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},"${itemsStr}"\n`;
+      csv += `${csvSafe(s.invId)},${csvSafe(s.date)},${csvSafe(s.cust)},${csvSafe(s.village || '')},${csvSafe(s.mobile || '')},${csvSafe(s.mode)},${s.totalMrp},${s.acc},${s.exchangeCredit || 0},${paidVal},${s.due || 0},${s.totalCost},${s.profit},${s.exchanged ? 'EXCHANGED' : 'SOLD'},${csvSafe(itemsStr)}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Shakya_Sales_${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `Shakya_Sales_${getLocalIsoDate()}.csv`;
     a.click();
     showInlineMsg('backupMsg', '✅ Sales Excel (.CSV) download ho gayi!', 'success');
   }
@@ -5239,7 +5278,7 @@
     const blob = new Blob([data], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Shakya_POS_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `Shakya_POS_Backup_${getLocalIsoDate()}.json`;
     a.click();
     showInlineMsg('backupMsg', '✅ Full Backup (.JSON) download ho gaya!', 'success');
   }
@@ -5580,7 +5619,7 @@
     { name: "Mustard", hex: "#ca8a04" },
     { name: "Orange", hex: "#f97316" },
     { name: "Green", hex: "#16a34a" },
-    { name: "Mehendi", hex: "#4d7c0f" },
+    { name: "Mehndi", hex: "#4d7c0f" },
     { name: "Rama", hex: "#0d9488" },
     { name: "Sky Blue", hex: "#38bdf8" },
     { name: "Navy Blue", hex: "#1e3a8a" },
@@ -5809,9 +5848,9 @@
     if (!f) return;
 
     picked = {};
-    const curC = (f.col.value || "Red").trim();
+    const curC = (f.col.value || "").trim();
     const curQ = Math.max(1, parseInt(f.qty.value) || 1);
-    picked[curC] = curQ;
+    if (curC) picked[curC] = curQ;
 
     document.getElementById("sh-m-val").value = curQ;
     document.getElementById("sh-sheet-sub").textContent =
@@ -6098,7 +6137,7 @@
   const BUILD = "1795036658";
   if (localStorage.getItem("sc_build_stamp") !== BUILD) {
     localStorage.setItem("sc_build_stamp", BUILD);
-    if ("caches" in window) caches.keys().then(names => names.forEach(n => caches.delete(n)));
+    if (navigator.onLine && "caches" in window) caches.keys().then(names => names.forEach(n => caches.delete(n)));
   }
 
   const SETTINGS_MAP = {
