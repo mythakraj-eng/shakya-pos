@@ -5910,12 +5910,11 @@
 
 
 
-<!-- === SHAKYA COSMETIC: ORGANIZED FLUENT MOBILE UI === -->
+
+<!-- === SHAKYA COSMETIC: STABLE NON-SLIDING FLUENT UI === -->
 <style>
-  /* 1. Universal Clean Hide Class */
   .sh-force-hide { display: none !important; }
 
-  /* 2. Compact, Organized Header */
   header .header-actions {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -5949,7 +5948,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
   }
 
-  /* 3. Modern Settings Bottom Sheet (Highly Organized) */
+  /* Stable Non-Sliding Bottom Sheet */
   #fluentSettingsModal {
     display: none;
     position: fixed;
@@ -5964,8 +5963,9 @@
     background: #f8fafc;
     width: 100%;
     max-width: 500px;
+    height: 75vh; /* Fixed height so modal never slips up or down! */
+    max-height: 75vh;
     border-radius: 20px 20px 0 0;
-    max-height: 85dvh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
@@ -5973,24 +5973,24 @@
   }
   .fluent-sheet-header {
     background: #ffffff;
-    padding: 16px 16px 12px;
+    padding: 14px 16px 10px;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
   }
   .fluent-sheet-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     color: #1e1b4b;
   }
   .fluent-sheet-subtitle {
     font-size: 11px;
     color: #64748b;
-    margin-top: 2px;
+    margin-top: 1px;
   }
   
-  /* Horizontal Category Tabs for Organization */
   .fluent-cat-tabs {
     display: flex;
     gap: 8px;
@@ -5999,6 +5999,7 @@
     border-bottom: 1px solid #e2e8f0;
     overflow-x: auto;
     scrollbar-width: none;
+    flex-shrink: 0;
   }
   .fluent-cat-tabs::-webkit-scrollbar { display: none; }
   .f-cat-btn {
@@ -6011,6 +6012,7 @@
     font-weight: 800;
     white-space: nowrap;
     cursor: pointer;
+    flex-shrink: 0;
   }
   .f-cat-btn.active {
     background: #1e1b4b;
@@ -6018,11 +6020,11 @@
     border-color: #1e1b4b;
   }
 
-  /* Smooth Scrolling Settings List */
   .fluent-settings-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px 24px;
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    padding: 12px 16px 30px;
+    -webkit-overflow-scrolling: touch;
   }
   .fluent-group-title {
     font-size: 11px;
@@ -6030,7 +6032,7 @@
     color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin: 16px 0 8px 4px;
+    margin: 14px 0 8px 4px;
   }
   .fluent-group-title:first-child { margin-top: 4px; }
   
@@ -6039,13 +6041,13 @@
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .fluent-setting-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 16px;
+    padding: 13px 16px;
     border-bottom: 1px solid #f1f5f9;
   }
   .fluent-setting-row:last-child { border-bottom: none; }
@@ -6059,18 +6061,14 @@
   }
   .f-set-icon { font-size: 16px; }
 
-  /* Modern iOS/Fluent Toggle Switches */
   .f-switch {
     position: relative;
     display: inline-block;
     width: 44px;
     height: 24px;
+    flex-shrink: 0;
   }
-  .f-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
+  .f-switch input { opacity: 0; width: 0; height: 0; }
   .f-slider {
     position: absolute;
     cursor: pointer;
@@ -6097,13 +6095,12 @@
 
 <script>
 (function() {
-  const BUILD = "1795036039";
+  const BUILD = "1795036658";
   if (localStorage.getItem("sc_build_stamp") !== BUILD) {
     localStorage.setItem("sc_build_stamp", BUILD);
     if ("caches" in window) caches.keys().then(names => names.forEach(n => caches.delete(n)));
   }
 
-  // Clean grouped configurations
   const SETTINGS_MAP = {
     "BILLING": [
       {
@@ -6184,7 +6181,6 @@
   const DEFAULT_PREFS = {};
   Object.values(SETTINGS_MAP).forEach(cats => cats.forEach(g => g.items.forEach(i => DEFAULT_PREFS[i.key] = true)));
   
-  // Set some clutter off by default
   DEFAULT_PREFS.bill_scan_title = false;
   DEFAULT_PREFS.bill_quick_strip = false;
   DEFAULT_PREFS.bill_loose_box = false;
@@ -6202,12 +6198,10 @@
   function applyUI() {
     localStorage.setItem("sc_org_prefs", JSON.stringify(prefs));
 
-    // 1. HEADER
     toggleDisplay(document.querySelector("header .banner-board"), prefs.hdr_banner);
     toggleDisplay(document.getElementById("ownerLockBtn"), prefs.hdr_cost);
     toggleDisplay(document.getElementById("printerHeaderBtn"), prefs.hdr_printer);
 
-    // 2. BILLING
     const billCard = document.querySelector("#billing .card");
     if (billCard) {
       toggleDisplay(document.querySelector("#billing .mini-galla-strip"), prefs.bill_galla_strip);
@@ -6231,7 +6225,6 @@
       if (upiBtn) toggleDisplay(upiBtn.parentElement, prefs.bill_upi_btn);
     }
 
-    // 3. STOCK
     const stkCards = document.querySelectorAll("#stock > .card");
     if (stkCards.length >= 2) {
       toggleDisplay(stkCards[0], prefs.stk_add_card);
@@ -6242,7 +6235,6 @@
       toggleDisplay(document.getElementById("stockSummaryBar"), prefs.stk_summary_bar);
     }
 
-    // 4. INSIGHTS
     const insCards = document.querySelectorAll("#stats > .card");
     if (insCards.length >= 4) {
       toggleDisplay(insCards[0], prefs.ins_verify_card);
@@ -6251,7 +6243,6 @@
       toggleDisplay(insCards[2], prefs.ins_expense_card);
     }
 
-    // 5. SYSTEM/BACKUP
     const sysCards = document.querySelectorAll("#backup > .card");
     if (sysCards.length >= 5) {
       toggleDisplay(sysCards[0], prefs.set_theme_card);
@@ -6262,9 +6253,8 @@
   }
 
   function buildSettingsUI() {
-    // 1. Add sleek organized button to header
     const headerActions = document.querySelector("header .header-actions");
-    document.querySelectorAll("#excelTabSettingsBtn, #excelCustomizeBtn").forEach(e => e.remove()); // wipe old
+    document.querySelectorAll("#excelTabSettingsBtn, #excelCustomizeBtn").forEach(e => e.remove());
 
     if (headerActions && !document.getElementById("fluentSettingsBtn")) {
       const btn = document.createElement("button");
@@ -6275,7 +6265,6 @@
       headerActions.insertBefore(btn, headerActions.firstChild);
     }
 
-    // 2. Build the Organized Modal
     if (document.getElementById("fluentSettingsModal")) return;
 
     const modal = document.createElement("div");
@@ -6310,7 +6299,7 @@
         <div class="fluent-sheet-header">
           <div>
             <div class="fluent-sheet-title">Layout Settings</div>
-            <div class="fluent-sheet-subtitle">Organize app layout and hide what you don't need.</div>
+            <div class="fluent-sheet-subtitle">Organize app layout smoothly.</div>
           </div>
           <button type="button" style="background:#f1f5f9;border:none;border-radius:20px;padding:6px 12px;font-weight:bold;color:#475569;" onclick="document.getElementById('fluentSettingsModal').style.display='none'">Done</button>
         </div>
@@ -6333,7 +6322,7 @@
           prefs[chk.getAttribute("data-key")] = chk.checked;
           applyUI();
         };
-      });
+      };
     };
     bindSwitches();
 
@@ -6345,7 +6334,7 @@
         document.getElementById("fSettingsBody").innerHTML = renderBody();
         bindSwitches();
       };
-    });
+    };
   }
 
   window.addEventListener("DOMContentLoaded", () => {
@@ -6358,6 +6347,6 @@
   }, 150);
 })();
 </script>
-<!-- === END ORGANIZED FLUENT MOBILE UI === -->
+<!-- === END STABLE NON-SLIDING FLUENT UI === -->
 </body>
 </html>
