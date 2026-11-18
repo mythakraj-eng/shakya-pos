@@ -5166,7 +5166,7 @@
 
 <!-- === SHAKYA COSMETIC: EXCEL WINDOW, COLOR PALETTE & SCROLL LOCK FIX === -->
 <style>
-  /* 1. Pure App me Popup khulne par Background Scroll Lock */
+  /* 1. Global Background Scroll Lock when any popup is open */
   body.popup-scroll-locked {
     overflow: hidden !important;
     position: fixed !important;
@@ -5174,17 +5174,18 @@
     touch-action: none !important;
   }
 
-  /* Sabhi popups ke andar smooth isolated scrolling */
   [class*="modal"], [class*="popup"], [id*="modal"], [id*="popup"], .excel-fullscreen-card {
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  /* 2. Bulk Stock ko Popup ki jagah Full-Screen Excel Window banana */
+  /* 2. Full-Screen Enterprise Excel Window */
   .excel-fullscreen-overlay {
     padding: 0 !important;
+    margin: 0 !important;
     align-items: stretch !important;
     justify-content: stretch !important;
+    background: #f1f5f9 !important;
   }
 
   .excel-fullscreen-card {
@@ -5194,109 +5195,346 @@
     max-height: 100dvh !important;
     border-radius: 0 !important;
     margin: 0 !important;
-    padding: 12px 8px !important;
+    padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     box-sizing: border-box !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
+    background: #f8fafc !important;
+    overflow: hidden !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
   }
 
-  /* Excel Grid Table Styling */
+  /* Professional Top Header & Live Summary Ribbon */
+  #shakya-excel-topbar {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    color: #ffffff;
+    padding: 12px 14px 10px 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+
+  .shakya-topbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .shakya-topbar-badge {
+    font-size: 11px;
+    background: rgba(255,255,255,0.18);
+    padding: 3px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+
+  .shakya-summary-ribbon {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .shakya-stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .shakya-stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #cbd5e1;
+    letter-spacing: 0.4px;
+  }
+
+  .shakya-stat-val {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fbbf24;
+    margin-top: 2px;
+  }
+
+  /* Scrollable Spreadsheet Area */
+  .shakya-table-scroll-wrap {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    background: #ffffff !important;
+    padding-bottom: 120px !important;
+  }
+
   .excel-fullscreen-card table {
     width: 100% !important;
     border-collapse: collapse !important;
+    table-layout: fixed !important;
   }
 
   .excel-fullscreen-card th {
     position: sticky !important;
     top: 0 !important;
-    background: #e0e7ff !important;
-    z-index: 10 !important;
-    border: 1px solid #94a3b8 !important;
-    padding: 8px 4px !important;
-    font-size: 13px !important;
+    background: #1e293b !important;
+    color: #ffffff !important;
+    z-index: 20 !important;
+    border: 1px solid #334155 !important;
+    padding: 9px 4px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .excel-fullscreen-card tr:nth-child(even) td {
+    background: #f8fafc !important;
   }
 
   .excel-fullscreen-card td {
     border: 1px solid #cbd5e1 !important;
     padding: 0 !important;
+    height: 40px !important;
+    vertical-align: middle !important;
   }
 
   .excel-fullscreen-card input,
   .excel-fullscreen-card select {
     border-radius: 0 !important;
-    border: 1px solid #cbd5e1 !important;
+    border: none !important;
+    background: transparent !important;
     width: 100% !important;
+    height: 40px !important;
     box-sizing: border-box !important;
-    height: 36px !important;
     padding: 4px 6px !important;
     font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
   }
 
   .excel-fullscreen-card input:focus,
   .excel-fullscreen-card select:focus {
-    outline: 2px solid #2563eb !important;
-    background: #eff6ff !important;
+    outline: 2px solid #4f46e5 !important;
+    outline-offset: -2px !important;
+    background: #eef2ff !important;
   }
 
-  /* 3. Floating Colour Palette Window */
+  /* Colour Cell Pro Look */
+  .shakya-color-input-cell {
+    cursor: pointer !important;
+    background-image: radial-gradient(circle, #ef4444 45%, transparent 48%), linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%) !important;
+    background-position: 7px center, calc(100% - 11px) 17px, calc(100% - 7px) 17px !important;
+    background-size: 10px 10px, 4px 4px, 4px 4px !important;
+    background-repeat: no-repeat !important;
+    padding-left: 20px !important;
+    padding-right: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Sticky Bottom Action Bar */
+  .shakya-sticky-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    border-top: 1px solid #cbd5e1 !important;
+    padding: 10px 12px !important;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.08) !important;
+    z-index: 50 !important;
+  }
+
+  /* 3. Pro Bottom-Sheet Colour & Quantity Studio */
+  #shakya-color-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 999998;
+    display: none;
+  }
+
   #shakya-color-palette {
     position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 999999;
     background: #ffffff;
-    border: 2px solid #1e293b;
-    border-radius: 12px;
-    padding: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    border-radius: 20px 20px 0 0;
+    padding: 16px 14px 18px 14px;
+    box-shadow: 0 -10px 35px rgba(0,0,0,0.3);
     display: none;
-    width: 280px;
-    max-width: 92vw;
+    max-height: 85dvh;
+    overflow-y: auto;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .studio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .studio-mode-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    margin: 12px 0;
+  }
+
+  .studio-tab-btn {
+    border: none;
+    padding: 8px 6px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .studio-tab-btn.active {
+    background: #ffffff;
+    color: #1e1b4b;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  #same-qty-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
   }
 
   .palette-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-top: 8px;
+    margin-bottom: 14px;
   }
 
-  .color-swatch-btn {
-    display: flex;
-     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 4px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+  .color-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 6px;
     background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    color: #1e293b;
+    transition: all 0.15s ease;
+    position: relative;
   }
 
-  .color-swatch-circle {
+  .color-card.selected {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
+  }
+
+  .color-card-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.2);
+    flex-shrink: 0;
+  }
+
+  .color-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .per-color-qty-box {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    margin-top: 7px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .color-card.selected.diff-mode .per-color-qty-box {
+    display: flex;
+  }
+
+  .qty-step-btn {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
-    margin-bottom: 4px;
-    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-weight: 800;
+    font-size: 14px;
+    color: #1e293b;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .qty-mini-input {
+    width: 36px !important;
+    height: 24px !important;
+    text-align: center !important;
+    border: 1px solid #94a3b8 !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .studio-apply-btn {
+    width: 100%;
+    border: none;
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3);
   }
 </style>
 
 <script>
 (function() {
   let savedScrollY = 0;
-  let activeColorInput = null;
+  let activeRow = null;
+  let qtyMode = "same"; // "same" or "diff"
+  let selectedColours = {}; // { "Red": 2, "Maroon": 4 }
 
-  // Common Saree / Suit / Cosmetic Colours
   const SHAKYA_COLORS = [
     { name: "Red", hex: "#ef4444" },
     { name: "Maroon", hex: "#7f1d1d" },
     { name: "Rani Pink", hex: "#db2777" },
     { name: "Baby Pink", hex: "#f472b6" },
     { name: "Yellow", hex: "#eab308" },
+    { name: "Mustard", hex: "#ca8a04" },
     { name: "Orange", hex: "#f97316" },
     { name: "Green", hex: "#16a34a" },
     { name: "Mehendi", hex: "#4d7c0f" },
@@ -5306,101 +5544,390 @@
     { name: "Purple", hex: "#9333ea" },
     { name: "Wine", hex: "#581c87" },
     { name: "Black", hex: "#0f172a" },
-    { name: "White", hex: "#ffffff" },
+    { name: "White", hex: "#f8fafc" },
+    { name: "Grey", hex: "#64748b" },
     { name: "Golden", hex: "#d97706" }
   ];
 
-  // Create Floating Color Palette DOM
-  function createColorPalette() {
+  function getHexForName(name) {
+    const found = SHAKYA_COLORS.find(c => c.name.toLowerCase() === (name || "").trim().toLowerCase());
+    return found ? found.hex : "#ef4444";
+  }
+
+  function styleColorInputIndicator(input) {
+    if (!input) return;
+    input.classList.add("shakya-color-input-cell");
+    input.setAttribute("readonly", "readonly");
+    const hex = getHexForName(input.value);
+    input.style.backgroundImage = `radial-gradient(circle, ${hex} 45%, transparent 48%), linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%)`;
+  }
+
+  function getRowFields(tr) {
+    if (!tr) return null;
+    const inputs = Array.from(tr.querySelectorAll("input"));
+    const select = tr.querySelector("select");
+    if (inputs.length < 4) return null;
+    return {
+      code: inputs[0],
+      category: select,
+      colour: inputs[1],
+      qty: inputs[2],
+      cost: inputs[3],
+      mrp: inputs[4]
+    };
+  }
+
+  function updateLiveSummary(card) {
+    if (!card) return;
+    const rows = Array.from(card.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
+    let totalRows = 0;
+    let totalQty = 0;
+    let totalCost = 0;
+
+    rows.forEach(r => {
+      const f = getRowFields(r);
+      if (!f) return;
+      styleColorInputIndicator(f.colour);
+      const q = parseFloat(f.qty.value) || 0;
+      const c = parseFloat(f.cost.value) || 0;
+      if ((f.code.value || "").trim() !== "" || q > 0) {
+        totalRows++;
+        totalQty += q;
+        totalCost += (q * c);
+      }
+    });
+
+    const rEl = document.getElementById("stat-rows");
+    const qEl = document.getElementById("stat-qty");
+    const cEl = document.getElementById("stat-cost");
+    if (rEl) rEl.textContent = totalRows;
+    if (qEl) qEl.textContent = totalQty + " Pcs";
+    if (cEl) cEl.textContent = "₹" + totalCost.toLocaleString("en-IN");
+  }
+
+  function buildStudioModal() {
     if (document.getElementById("shakya-color-palette")) return;
-    const palette = document.createElement("div");
-    palette.id = "shakya-color-palette";
-    palette.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;font-weight:bold;font-size:14px;color:#1e293b;">
-        <span>🎨 Select Colour</span>
-        <button type="button" id="close-palette-btn" style="border:none;background:#ef4444;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button>
+
+    const backdrop = document.createElement("div");
+    backdrop.id = "shakya-color-backdrop";
+    document.body.appendChild(backdrop);
+
+    const modal = document.createElement("div");
+    modal.id = "shakya-color-palette";
+    modal.innerHTML = `
+      <div class="studio-header">
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#0f172a;">🎨 Select Set Colours & Quantity</div>
+          <div id="studio-item-subtitle" style="font-size:11.5px;color:#64748b;margin-top:2px;">Multiple colours ek sath chunein</div>
+        </div>
+        <button type="button" id="close-studio-btn" style="border:none;background:#f1f5f9;color:#334155;font-weight:800;border-radius:8px;padding:6px 10px;">✕</button>
       </div>
-      <div class="palette-grid">
+
+      <div class="studio-mode-tabs">
+        <button type="button" class="studio-tab-btn active" data-mode="same">1️⃣ Same Qty (Sabhi me barabar)</button>
+        <button type="button" class="studio-tab-btn" data-mode="diff">2️⃣ Different Qty (Har colour alag)</button>
+      </div>
+
+      <div id="same-qty-bar">
+        <span style="font-size:12.5px;font-weight:700;color:#1e1b4b;">Har Selected Colour ki Qty:</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" id="master-qty-minus" class="qty-step-btn" style="width:28px;height:28px;">−</button>
+          <input type="number" id="master-qty-input" value="1" min="1" style="width:48px;height:28px;text-align:center;font-weight:800;border:1px solid #6366f1;border-radius:6px;background:#fff;">
+          <button type="button" id="master-qty-plus" class="qty-step-btn" style="width:28px;height:28px;">+</button>
+        </div>
+      </div>
+
+      <div class="palette-grid" id="studio-color-grid">
         ${SHAKYA_COLORS.map(c => `
-          <button type="button" class="color-swatch-btn" data-color="${c.name}" data-hex="${c.hex}">
-            <span class="color-swatch-circle" style="background:${c.hex}"></span>
-            <span>${c.name}</span>
-          </button>
+          <div class="color-card" data-color="${c.name}">
+            <div class="color-card-top">
+              <span class="color-dot" style="background:${c.hex}"></span>
+              <span class="color-name">${c.name}</span>
+            </div>
+            <div class="per-color-qty-box">
+              <button type="button" class="qty-step-btn c-minus">−</button>
+              <input type="number" class="qty-mini-input c-qty" value="1" min="1">
+              <button type="button" class="qty-step-btn c-plus">+</button>
+            </div>
+          </div>
         `).join("")}
       </div>
-    `;
-    document.body.appendChild(palette);
 
-    palette.addEventListener("click", function(e) {
-      const btn = e.target.closest(".color-swatch-btn");
-      if (btn && activeColorInput) {
-        activeColorInput.value = btn.getAttribute("data-color");
-        activeColorInput.style.borderLeft = "8px solid " + btn.getAttribute("data-hex");
-        activeColorInput.dispatchEvent(new Event("input", { bubbles: true }));
-        activeColorInput.dispatchEvent(new Event("change", { bubbles: true }));
-        palette.style.display = "none";
+      <button type="button" class="studio-apply-btn" id="studio-apply-btn">✅ Apply to Excel Sheet</button>
+    `;
+    document.body.appendChild(modal);
+
+    const closeStudio = () => {
+      modal.style.display = "none";
+      backdrop.style.display = "none";
+    };
+
+    backdrop.addEventListener("click", closeStudio);
+    modal.querySelector("#close-studio-btn").addEventListener("click", closeStudio);
+
+    // Switch Tabs (Same Qty vs Different Qty)
+    modal.querySelectorAll(".studio-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        modal.querySelectorAll(".studio-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        qtyMode = btn.getAttribute("data-mode");
+        document.getElementById("same-qty-bar").style.display = (qtyMode === "same") ? "flex" : "none";
+        modal.querySelectorAll(".color-card").forEach(card => {
+          card.classList.toggle("diff-mode", qtyMode === "diff");
+        });
+        updateApplyButtonLabel();
+      });
+    });
+
+    // Master Qty Plus/Minus
+    const masterInput = document.getElementById("master-qty-input");
+    document.getElementById("master-qty-minus").addEventListener("click", () => {
+      masterInput.value = Math.max(1, (parseInt(masterInput.value) || 1) - 1);
+      if (qtyMode === "same") {
+        Object.keys(selectedColours).forEach(k => selectedColours[k] = parseInt(masterInput.value));
+        updateApplyButtonLabel();
       }
-      if (e.target.id === "close-palette-btn") {
-        palette.style.display = "none";
+    });
+    document.getElementById("master-qty-plus").addEventListener("click", () => {
+      masterInput.value = (parseInt(masterInput.value) || 1) + 1;
+      if (qtyMode === "same") {
+        Object.keys(selectedColours).forEach(k => selectedColours[k] = parseInt(masterInput.value));
+        updateApplyButtonLabel();
       }
+    });
+
+    // Colour Card Clicks & Per-Colour Steppers
+    modal.querySelector("#studio-color-grid").addEventListener("click", (e) => {
+      const card = e.target.closest(".color-card");
+      if (!card) return;
+      const colorName = card.getAttribute("data-color");
+      const qtyInput = card.querySelector(".c-qty");
+
+      if (e.target.classList.contains("c-minus")) {
+        e.stopPropagation();
+        qtyInput.value = Math.max(1, (parseInt(qtyInput.value) || 1) - 1);
+        selectedColours[colorName] = parseInt(qtyInput.value);
+        updateApplyButtonLabel();
+        return;
+      }
+      if (e.target.classList.contains("c-plus")) {
+        e.stopPropagation();
+        qtyInput.value = (parseInt(qtyInput.value) || 1) + 1;
+        selectedColours[colorName] = parseInt(qtyInput.value);
+        updateApplyButtonLabel();
+        return;
+      }
+      if (e.target.classList.contains("c-qty")) {
+        e.stopPropagation();
+        return;
+      }
+
+      // Toggle selection
+      if (selectedColours[colorName]) {
+        delete selectedColours[colorName];
+        card.classList.remove("selected");
+      } else {
+        const defaultQty = (qtyMode === "same") ? (parseInt(masterInput.value) || 1) : (parseInt(qtyInput.value) || 1);
+        selectedColours[colorName] = defaultQty;
+        qtyInput.value = defaultQty;
+        card.classList.add("selected");
+        card.classList.toggle("diff-mode", qtyMode === "diff");
+      }
+      updateApplyButtonLabel();
+    });
+
+    modal.querySelectorAll(".c-qty").forEach(inp => {
+      inp.addEventListener("input", (e) => {
+        const card = e.target.closest(".color-card");
+        const colorName = card.getAttribute("data-color");
+        selectedColours[colorName] = Math.max(1, parseInt(inp.value) || 1);
+        updateApplyButtonLabel();
+      });
+    });
+
+    // Apply Selected Colours & Quantities to Excel Rows
+    document.getElementById("studio-apply-btn").addEventListener("click", () => {
+      const entries = Object.entries(selectedColours);
+      if (entries.length === 0 || !activeRow) {
+        closeStudio();
+        return;
+      }
+
+      const card = activeRow.closest(".excel-fullscreen-card");
+      const baseFields = getRowFields(activeRow);
+      if (!baseFields || !card) return;
+
+      const baseCode = baseFields.code.value;
+      const baseCat = baseFields.category ? baseFields.category.value : "";
+      const baseCost = baseFields.cost.value;
+      const baseMrp = baseFields.mrp.value;
+      const masterQty = parseInt(masterInput.value) || 1;
+
+      // Ensure enough rows exist in the table
+      let allRows = Array.from(card.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
+      let startIdx = allRows.indexOf(activeRow);
+      const addRowBtn = Array.from(card.querySelectorAll("button")).find(b => b.textContent.includes("Row Jodein"));
+
+      while ((allRows.length - startIdx) < entries.length && addRowBtn) {
+        addRowBtn.click();
+        allRows = Array.from(card.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
+      }
+
+      entries.forEach(([colName, colQty], idx) => {
+        const targetRow = allRows[startIdx + idx];
+        if (!targetRow) return;
+        const tf = getRowFields(targetRow);
+        if (!tf) return;
+
+        const finalQty = (qtyMode === "same") ? masterQty : colQty;
+
+        tf.code.value = baseCode;
+        if (tf.category && baseCat) tf.category.value = baseCat;
+        tf.colour.value = colName;
+        tf.qty.value = finalQty;
+        tf.cost.value = baseCost;
+        tf.mrp.value = baseMrp;
+
+        [tf.code, tf.category, tf.colour, tf.qty, tf.cost, tf.mrp].forEach(el => {
+          if (el) {
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+            el.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+        styleColorInputIndicator(tf.colour);
+      });
+
+      updateLiveSummary(card);
+      closeStudio();
     });
   }
 
-  // Detect if an input is a Bulk Stock "Colour" field
-  function isBulkColorInput(el) {
-    if (!el || el.tagName !== "INPUT") return false;
-    const card = el.closest(".excel-fullscreen-card");
-    if (!card) return false;
-    const placeholder = (el.getAttribute("placeholder") || "").toLowerCase();
-    const val = (el.value || "").toLowerCase();
-    if (placeholder.includes("red") || placeholder.includes("col") || val === "red") return true;
-
-    // Also check if it's the 3rd input in its row (Code, Category, Colour)
-    const row = el.closest("tr, div");
-    if (row) {
-      const fields = Array.from(row.querySelectorAll("input, select"));
-      if (fields.indexOf(el) === 1 || fields.filter(f => f.tagName === "INPUT").indexOf(el) === 1) {
-        return true;
-      }
+  function updateApplyButtonLabel() {
+    const btn = document.getElementById("studio-apply-btn");
+    if (!btn) return;
+    const entries = Object.entries(selectedColours);
+    const masterQty = parseInt(document.getElementById("master-qty-input")?.value) || 1;
+    if (entries.length === 0) {
+      btn.textContent = "Select at least 1 Colour";
+      return;
     }
-    return false;
+    const totalPcs = entries.reduce((sum, [_, q]) => sum + (qtyMode === "same" ? masterQty : q), 0);
+    btn.textContent = `✅ Apply ${entries.length} Colour${entries.length > 1 ? 's' : ''} (${totalPcs} Pcs Total)`;
   }
 
-  // Upgrade Bulk Stock Popup to Fullscreen Excel & Check Global Scroll Lock
-  function syncPopupsAndExcel() {
-    createColorPalette();
+  function openStudioForRow(tr) {
+    buildStudioModal();
+    activeRow = tr;
+    const f = getRowFields(tr);
+    if (!f) return;
 
-    // 1. Find "Excel-Style Bulk Stock Entry" heading and convert card to Fullscreen Excel Window
-    const allHeadings = document.querySelectorAll("h1, h2, h3, h4, div, span");
-    allHeadings.forEach(el => {
+    selectedColours = {};
+    const curCol = (f.colour.value || "Red").trim();
+    const curQty = Math.max(1, parseInt(f.qty.value) || 1);
+    selectedColours[curCol] = curQty;
+
+    document.getElementById("master-qty-input").value = curQty;
+    document.getElementById("studio-item-subtitle").textContent =
+      `Design Code: ${f.code.value || 'N/A'} | Cost: ₹${f.cost.value || 0} | MRP: ₹${f.mrp.value || 0}`;
+
+    const modal = document.getElementById("shakya-color-palette");
+    modal.querySelectorAll(".color-card").forEach(card => {
+      const cName = card.getAttribute("data-color");
+      const isSel = (cName.toLowerCase() === curCol.toLowerCase());
+      card.classList.toggle("selected", isSel);
+      card.classList.toggle("diff-mode", qtyMode === "diff");
+      card.querySelector(".c-qty").value = curQty;
+    });
+
+    updateApplyButtonLabel();
+    document.getElementById("shakya-color-backdrop").style.display = "block";
+    modal.style.display = "block";
+  }
+
+  function upgradeExcelWindow() {
+    buildStudioModal();
+
+    const allElements = document.querySelectorAll("h1, h2, h3, h4, div, span");
+    allElements.forEach(el => {
       if (el.textContent && el.textContent.includes("Excel-Style Bulk Stock Entry") && el.children.length <= 2) {
-        const card = el.closest("div[style*='background'], div[class*='modal'], div[class*='popup'], div");
-        if (card && !card.classList.contains("excel-fullscreen-card")) {
-          // Climb up to the white card box
-          let targetCard = el.parentElement;
-          while (targetCard && targetCard !== document.body) {
-            const bg = window.getComputedStyle(targetCard).backgroundColor;
-            if (bg === "rgb(255, 255, 255)" || targetCard.clientWidth > 250) {
-              break;
-            }
-            targetCard = targetCard.parentElement;
-          }
-          if (targetCard && targetCard !== document.body) {
+        let targetCard = el.parentElement;
+        while (targetCard && targetCard !== document.body) {
+          const bg = window.getComputedStyle(targetCard).backgroundColor;
+          if (bg === "rgb(255, 255, 255)" || targetCard.clientWidth > 260) break;
+          targetCard = targetCard.parentElement;
+        }
+        if (targetCard && targetCard !== document.body) {
+          if (!targetCard.classList.contains("excel-fullscreen-card")) {
             targetCard.classList.add("excel-fullscreen-card");
             if (targetCard.parentElement && targetCard.parentElement !== document.body) {
               targetCard.parentElement.classList.add("excel-fullscreen-overlay");
             }
+
+            // Hide old plain heading & subtitle
+            el.style.display = "none";
+            if (el.nextElementSibling && el.nextElementSibling.tagName !== "TABLE") {
+              el.nextElementSibling.style.display = "none";
+            }
+
+            // Inject Professional Top Bar with Live Summary
+            const topbar = document.createElement("div");
+            topbar.id = "shakya-excel-topbar";
+            topbar.innerHTML = `
+              <div class="shakya-topbar-title">
+                <span>📊 Shakya Pro Bulk Stock Sheet</span>
+                <span class="shakya-topbar-badge">🎨 Tap Colour for Multi-Set</span>
+              </div>
+              <div class="shakya-summary-ribbon">
+                <div class="shakya-stat-box">
+                  <span class="shakya-stat-label">Total Rows</span>
+                  <span class="shakya-stat-val" id="stat-rows">0</span>
+                </div>
+                <div class="shakya-stat-box">
+                  <span class="shakya-stat-label">Total Quantity</span>
+                  <span class="shakya-stat-val" id="stat-qty">0 Pcs</span>
+                </div>
+                <div class="shakya-stat-box">
+                  <span class="shakya-stat-label">Total Purchase</span>
+                  <span class="shakya-stat-val" id="stat-cost">₹0</span>
+                </div>
+              </div>
+            `;
+            targetCard.insertBefore(topbar, targetCard.firstChild);
+
+            // Wrap Table inside Scroll Container
+            const table = targetCard.querySelector("table");
+            if (table && !table.parentElement.classList.contains("shakya-table-scroll-wrap")) {
+              const scrollWrap = document.createElement("div");
+              scrollWrap.className = "shakya-table-scroll-wrap";
+              table.parentElement.insertBefore(scrollWrap, table);
+              scrollWrap.appendChild(table);
+            }
+
+            // Pin Bottom Buttons inside Sticky Dock
+            const cancelBtn = Array.from(targetCard.querySelectorAll("button")).find(b => b.textContent.includes("Cancel"));
+            const addRowBtn = Array.from(targetCard.querySelectorAll("button")).find(b => b.textContent.includes("Row Jodein"));
+            if (cancelBtn && cancelBtn.parentElement) {
+              const footerDock = document.createElement("div");
+              footerDock.className = "shakya-sticky-footer";
+              if (addRowBtn) {
+                addRowBtn.style.marginBottom = "8px";
+                footerDock.appendChild(addRowBtn);
+              }
+              footerDock.appendChild(cancelBtn.parentElement);
+              targetCard.appendChild(footerDock);
+            }
           }
+          updateLiveSummary(targetCard);
         }
       }
     });
 
-    // 2. Check if any fixed modal/popup is open on screen -> Lock background scroll
+    // Global Popup Background Scroll Lock
     let anyPopupVisible = false;
     const allDivs = document.querySelectorAll("div");
     for (let i = 0; i < allDivs.length; i++) {
       const d = allDivs[i];
-      if (d.id === "shakya-color-palette") continue;
+      if (d.id === "shakya-color-palette" || d.id === "shakya-color-backdrop") continue;
       const style = window.getComputedStyle(d);
       if (style.position === "fixed" && style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0") {
         if (d.clientWidth >= window.innerWidth * 0.7 && d.clientHeight >= window.innerHeight * 0.4) {
@@ -5418,33 +5945,29 @@
       document.body.classList.remove("popup-scroll-locked");
       document.body.style.top = "";
       window.scrollTo(0, savedScrollY);
-      const palette = document.getElementById("shakya-color-palette");
-      if (palette) palette.style.display = "none";
     }
   }
 
-  // Open Color Palette on tapping Colour field in Bulk Stock
   document.addEventListener("click", function(e) {
-    const palette = document.getElementById("shakya-color-palette");
-    if (isBulkColorInput(e.target)) {
-      activeColorInput = e.target;
-      const rect = e.target.getBoundingClientRect();
-      palette.style.display = "block";
-      let topPos = rect.bottom + 6;
-      if (topPos + 240 > window.innerHeight) {
-        topPos = Math.max(10, rect.top - 240);
+    const tr = e.target.closest(".excel-fullscreen-card tr");
+    if (tr && e.target.tagName === "INPUT") {
+      const f = getRowFields(tr);
+      if (f && e.target === f.colour) {
+        e.preventDefault();
+        e.target.blur();
+        openStudioForRow(tr);
       }
-      palette.style.top = topPos + "px";
-      palette.style.left = Math.min(window.innerWidth - 290, Math.max(10, rect.left - 40)) + "px";
-    } else if (palette && !palette.contains(e.target)) {
-      palette.style.display = "none";
     }
   });
 
-  // Observe DOM changes to catch popups opening/closing & new rows added
+  document.addEventListener("input", function(e) {
+    const card = e.target.closest(".excel-fullscreen-card");
+    if (card) updateLiveSummary(card);
+  });
+
   window.addEventListener("DOMContentLoaded", () => {
-    syncPopupsAndExcel();
-    const observer = new MutationObserver(syncPopupsAndExcel);
+    upgradeExcelWindow();
+    const observer = new MutationObserver(upgradeExcelWindow);
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
   });
 })();
