@@ -5166,315 +5166,282 @@
 
 <!-- === SHAKYA COSMETIC: EXCEL WINDOW, COLOR PALETTE & SCROLL LOCK FIX === -->
 <style>
-  /* 1. Safe Background Scroll Lock */
-  html.shakya-modal-open,
-  body.shakya-modal-open {
+  /* 1. Lock background page scroll whenever any popup is open */
+  html.shakya-lock-bg,
+  body.shakya-lock-bg {
     overflow: hidden !important;
     overscroll-behavior: none !important;
   }
 
-  /* 2. Full-Screen Professional Excel Window */
-  .excel-fullscreen-overlay {
+  /* 2. Fullscreen Backdrop & Card for Bulk Stock */
+  .shakya-excel-backdrop {
     padding: 0 !important;
     margin: 0 !important;
     align-items: stretch !important;
     justify-content: stretch !important;
   }
 
-  .excel-fullscreen-card {
+  .shakya-excel-window {
     width: 100vw !important;
     height: 100dvh !important;
     max-width: 100vw !important;
     max-height: 100dvh !important;
-    border-radius: 0 !important;
     margin: 0 !important;
-    padding: 12px 10px 14px 10px !important;
+    padding: 10px 8px 12px 8px !important;
+    border-radius: 0 !important;
+    background: #f1f5f9 !important;
     display: flex !important;
     flex-direction: column !important;
     box-sizing: border-box !important;
-    background: #f1f5f9 !important;
     overflow: hidden !important;
   }
 
-  /* Make the inner table container expand full height (removes the half-empty white space) */
-  .shakya-table-scroller {
-    flex: 1 1 auto !important;
+  /* Remove height cap on the inner table wrapper so it fills the screen */
+  .shakya-excel-table-wrap {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
     max-height: none !important;
     height: auto !important;
     overflow-y: auto !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 10px !important;
-    margin-bottom: 10px !important;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+    margin-bottom: 8px !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06) !important;
   }
 
-  /* Live Summary Ribbon at the Top */
-  #shakya-live-ribbon {
+  /* Live Top Summary Bar */
+  #shakya-top-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    gap: 6px;
+    background: #1e1b4b;
     color: #ffffff;
-    padding: 10px;
+    padding: 8px 10px;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     flex-shrink: 0;
-    box-shadow: 0 3px 10px rgba(30, 27, 75, 0.2);
   }
 
-  .shakya-ribbon-box {
+  .shakya-sum-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     border-right: 1px solid rgba(255,255,255,0.15);
   }
-  .shakya-ribbon-box:last-child {
-    border-right: none;
-  }
-  .shakya-ribbon-lbl {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #cbd5e1;
-    letter-spacing: 0.4px;
-  }
-  .shakya-ribbon-val {
-    font-size: 14px;
-    font-weight: 800;
-    color: #fbbf24;
-    margin-top: 2px;
-  }
+  .shakya-sum-item:last-child { border-right: none; }
+  .shakya-sum-lbl { font-size: 10px; color: #cbd5e1; text-transform: uppercase; }
+  .shakya-sum-val { font-size: 13.5px; font-weight: 800; color: #fbbf24; margin-top: 1px; }
 
-  /* Clean Spreadsheet Table Grid */
-  .excel-fullscreen-card table {
+  /* 3. Proportional Excel Table Columns (No more squished cells) */
+  .shakya-excel-window table {
     width: 100% !important;
     border-collapse: collapse !important;
     table-layout: fixed !important;
   }
 
-  .excel-fullscreen-card th {
+  /* Exact Column Widths: Code(18%), Category(22%), Colour(24%), Qty(10%), Cost(13%), MRP(13%) */
+  .shakya-excel-window th:nth-child(1), .shakya-excel-window td:nth-child(1) { width: 18% !important; }
+  .shakya-excel-window th:nth-child(2), .shakya-excel-window td:nth-child(2) { width: 22% !important; }
+  .shakya-excel-window th:nth-child(3), .shakya-excel-window td:nth-child(3) { width: 24% !important; }
+  .shakya-excel-window th:nth-child(4), .shakya-excel-window td:nth-child(4) { width: 10% !important; }
+  .shakya-excel-window th:nth-child(5), .shakya-excel-window td:nth-child(5) { width: 13% !important; }
+  .shakya-excel-window th:nth-child(6), .shakya-excel-window td:nth-child(6) { width: 13% !important; }
+
+  .shakya-excel-window th {
     position: sticky !important;
     top: 0 !important;
+    z-index: 15 !important;
     background: #1e293b !important;
     color: #ffffff !important;
-    z-index: 10 !important;
     border: 1px solid #334155 !important;
-    padding: 9px 4px !important;
+    padding: 8px 3px !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    text-transform: uppercase !important;
+    text-align: center !important;
   }
 
-  .excel-fullscreen-card td {
+  .shakya-excel-window td {
     border: 1px solid #cbd5e1 !important;
     padding: 0 !important;
-    height: 40px !important;
+    height: 42px !important;
     background: #ffffff !important;
+    vertical-align: middle !important;
   }
 
-  .excel-fullscreen-card tr:nth-child(even) td {
+  .shakya-excel-window tr:nth-child(even) td {
     background: #f8fafc !important;
   }
 
-  .excel-fullscreen-card input,
-  .excel-fullscreen-card select {
-    border-radius: 0 !important;
-    border: none !important;
-    background: transparent !important;
+  .shakya-excel-window input,
+  .shakya-excel-window select {
     width: 100% !important;
-    height: 40px !important;
+    height: 42px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     box-sizing: border-box !important;
-    padding: 4px 5px !important;
-    font-size: 13px !important;
+    padding: 2px 4px !important;
+    font-size: 12.5px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
   }
 
-  .excel-fullscreen-card input:focus,
-  .excel-fullscreen-card select:focus {
+  /* Center align Qty, Cost, MRP */
+  .shakya-excel-window td:nth-child(4) input,
+  .shakya-excel-window td:nth-child(5) input,
+  .shakya-excel-window td:nth-child(6) input {
+    text-align: center !important;
+  }
+
+  /* Colour Cell Styling with Left Colour Strip */
+  .shakya-excel-window td:nth-child(3) input {
+    cursor: pointer !important;
+    font-weight: 700 !important;
+    padding-left: 6px !important;
+    border-left: 6px solid #ef4444 !important;
+    background-image: linear-gradient(45deg, transparent 50%, #475569 50%), linear-gradient(135deg, #475569 50%, transparent 50%) !important;
+    background-position: calc(100% - 9px) 18px, calc(100% - 5px) 18px !important;
+    background-size: 4px 4px, 4px 4px !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .shakya-excel-window input:focus,
+  .shakya-excel-window select:focus {
     outline: 2px solid #4f46e5 !important;
     outline-offset: -2px !important;
     background: #eef2ff !important;
   }
 
-  /* Style the 3rd column (Colour) like a clickable badge */
-  .excel-fullscreen-card tr td:nth-child(3) input {
-    cursor: pointer !important;
-    color: #1e1b4b !important;
-    font-weight: 700 !important;
-    background-image: linear-gradient(45deg, transparent 50%, #4f46e5 50%), linear-gradient(135deg, #4f46e5 50%, transparent 50%) !important;
-    background-position: calc(100% - 10px) 17px, calc(100% - 6px) 17px !important;
-    background-size: 4px 4px, 4px 4px !important;
-    background-repeat: no-repeat !important;
-    padding-right: 15px !important;
-  }
-
-  /* 3. Bottom-Sheet Colour & Dual-Quantity Studio */
-  #shakya-color-backdrop {
+  /* 4. Colour & Dual-Quantity Studio Bottom Sheet */
+  #shakya-studio-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(15, 23, 42, 0.6);
     z-index: 999998;
     display: none;
   }
 
-  #shakya-color-palette {
+  #shakya-studio-sheet {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 999999;
     background: #ffffff;
-    border-radius: 20px 20px 0 0;
-    padding: 16px 14px 18px 14px;
-    box-shadow: 0 -10px 35px rgba(0,0,0,0.3);
+    border-radius: 18px 18px 0 0;
+    padding: 14px 12px 16px 12px;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.35);
     display: none;
-    max-height: 84dvh;
+    max-height: 82dvh;
     overflow-y: auto;
     font-family: system-ui, -apple-system, sans-serif;
   }
 
-  .studio-mode-tabs {
+  .sh-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
     background: #f1f5f9;
     padding: 4px;
     border-radius: 10px;
-    margin: 12px 0;
+    margin: 10px 0;
   }
 
-  .studio-tab-btn {
+  .sh-tab {
     border: none;
-    padding: 8px 6px;
+    padding: 8px 4px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 700;
     color: #475569;
     background: transparent;
-    cursor: pointer;
   }
 
-  .studio-tab-btn.active {
-    background: #ffffff;
-    color: #1e1b4b;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  .sh-tab.active {
+    background: #1e1b4b;
+    color: #ffffff;
   }
 
-  #same-qty-bar {
+  #sh-same-qty-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: #eef2ff;
     border: 1px solid #c7d2fe;
-    padding: 8px 12px;
-    border-radius: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .sh-color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
     margin-bottom: 12px;
   }
 
-  .palette-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .color-card {
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 8px 6px;
+  .sh-color-item {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 9px;
+    padding: 7px 5px;
     background: #f8fafc;
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
     user-select: none;
   }
 
-  .color-card.selected {
+  .sh-color-item.selected {
     border-color: #4f46e5;
     background: #eef2ff;
     box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
   }
 
-  .color-card-top {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .color-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.25);
-    flex-shrink: 0;
-  }
-
-  .color-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1e293b;
-  }
-
-  .per-color-qty-box {
+  .sh-qty-controls {
     display: none;
     align-items: center;
     gap: 4px;
-    margin-top: 7px;
+    margin-top: 6px;
   }
 
-  .color-card.selected.diff-mode .per-color-qty-box {
+  .sh-color-item.selected.diff-mode .sh-qty-controls {
     display: flex;
   }
 
-  .qty-step-btn {
+  .sh-step-btn {
     width: 24px;
     height: 24px;
-    border-radius: 6px;
-    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    border: 1px solid #94a3b8;
     background: #ffffff;
     font-weight: 800;
     font-size: 14px;
-    color: #1e293b;
     padding: 0;
   }
 
-  .qty-mini-input {
-    width: 34px !important;
+  .sh-step-input {
+    width: 32px !important;
     height: 24px !important;
     text-align: center !important;
-    border: 1px solid #94a3b8 !important;
-    border-radius: 6px !important;
+    border: 1px solid #64748b !important;
+    border-radius: 5px !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     background: #ffffff !important;
     padding: 0 !important;
   }
-
-  .studio-apply-btn {
-    width: 100%;
-    border: none;
-    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 14px;
-    padding: 12px;
-    border-radius: 12px;
-    cursor: pointer;
-  }
 </style>
 
 <script>
 (function() {
-  let activeRow = null;
-  let qtyMode = "same";
-  let selectedColours = {};
+  let activeTr = null;
+  let activeTable = null;
+  let mode = "same";
+  let picked = {};
 
-  const SHAKYA_COLORS = [
+  const PALETTE = [
     { name: "Red", hex: "#ef4444" },
     { name: "Maroon", hex: "#7f1d1d" },
     { name: "Rani Pink", hex: "#db2777" },
@@ -5490,220 +5457,198 @@
     { name: "Purple", hex: "#9333ea" },
     { name: "Wine", hex: "#581c87" },
     { name: "Black", hex: "#0f172a" },
-    { name: "White", hex: "#f8fafc" },
+    { name: "White", hex: "#cbd5e1" },
     { name: "Grey", hex: "#64748b" },
     { name: "Golden", hex: "#d97706" }
   ];
 
-  function getRowFields(tr) {
-    if (!tr) return null;
-    const inputs = tr.querySelectorAll("input");
-    const select = tr.querySelector("select");
-    if (inputs.length < 4) return null;
-    return {
-      code: inputs[0],
-      category: select,
-      colour: inputs[1],
-      qty: inputs[2],
-      cost: inputs[3],
-      mrp: inputs[4]
-    };
+  function colorHex(name) {
+    const item = PALETTE.find(p => p.name.toLowerCase() === (name || "").trim().toLowerCase());
+    return item ? item.hex : "#ef4444";
   }
 
-  function refreshRibbonTotals(card) {
-    if (!card) return;
-    const rows = card.querySelectorAll("tr");
-    let count = 0, pcs = 0, totalCost = 0;
+  function parseRow(tr) {
+    if (!tr) return null;
+    const ins = tr.querySelectorAll("input");
+    const sel = tr.querySelector("select");
+    if (ins.length < 4) return null;
+    return { code: ins[0], cat: sel, col: ins[1], qty: ins[2], cost: ins[3], mrp: ins[4] };
+  }
 
-    rows.forEach(r => {
-      const f = getRowFields(r);
+  function updateSummaryAndSwatches(table) {
+    if (!table) return;
+    let items = 0, pcs = 0, costSum = 0;
+    table.querySelectorAll("tr").forEach(tr => {
+      const f = parseRow(tr);
       if (!f) return;
+      f.col.setAttribute("readonly", "readonly");
+      f.col.style.borderLeftColor = colorHex(f.col.value);
       const q = parseFloat(f.qty.value) || 0;
       const c = parseFloat(f.cost.value) || 0;
       if ((f.code.value || "").trim() !== "" || q > 0) {
-        count++;
+        items++;
         pcs += q;
-        totalCost += (q * c);
+        costSum += (q * c);
       }
     });
-
-    const rEl = document.getElementById("shakya-stat-rows");
-    const qEl = document.getElementById("shakya-stat-qty");
-    const cEl = document.getElementById("shakya-stat-cost");
-    if (rEl) rEl.textContent = count;
-    if (qEl) qEl.textContent = pcs + " Pcs";
-    if (cEl) cEl.textContent = "₹" + totalCost.toLocaleString("en-IN");
+    const elI = document.getElementById("sh-sum-items");
+    const elQ = document.getElementById("sh-sum-qty");
+    const elC = document.getElementById("sh-sum-cost");
+    if (elI) elI.textContent = items;
+    if (elQ) elQ.textContent = pcs + " Pcs";
+    if (elC) elC.textContent = "₹" + costSum.toLocaleString("en-IN");
   }
 
-  function ensureStudioModal() {
-    if (document.getElementById("shakya-color-palette")) return;
+  function initStudioSheet() {
+    if (document.getElementById("shakya-studio-sheet")) return;
 
-    const backdrop = document.createElement("div");
-    backdrop.id = "shakya-color-backdrop";
-    document.body.appendChild(backdrop);
+    const bg = document.createElement("div");
+    bg.id = "shakya-studio-backdrop";
+    document.body.appendChild(bg);
 
-    const modal = document.createElement("div");
-    modal.id = "shakya-color-palette";
-    modal.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #e2e8f0;">
+    const sheet = document.createElement("div");
+    sheet.id = "shakya-studio-sheet";
+    sheet.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
         <div>
-          <div style="font-size:15px;font-weight:800;color:#0f172a;">🎨 Colour & Quantity Studio</div>
-          <div id="studio-subtitle" style="font-size:11px;color:#64748b;margin-top:2px;">Ek set ke saare colours chunein</div>
+          <div style="font-size:15px;font-weight:800;color:#0f172a;">🎨 Select Colours & Quantity</div>
+          <div id="sh-sheet-sub" style="font-size:11px;color:#64748b;">1 ya ek sath kai colours chunein</div>
         </div>
-        <button type="button" id="close-studio-btn" style="border:none;background:#f1f5f9;color:#334155;font-weight:800;border-radius:8px;padding:5px 10px;">✕</button>
+        <button type="button" id="sh-close-btn" style="border:none;background:#e2e8f0;border-radius:6px;padding:4px 9px;font-weight:800;">✕</button>
       </div>
 
-      <div class="studio-mode-tabs">
-        <button type="button" class="studio-tab-btn active" data-mode="same">1️⃣ Same Qty (Sabhi barabar)</button>
-        <button type="button" class="studio-tab-btn" data-mode="diff">2️⃣ Different Qty (Alag-alag)</button>
+      <div class="sh-tabs">
+        <button type="button" class="sh-tab active" data-m="same">1️⃣ Same Qty (Sabhi barabar)</button>
+        <button type="button" class="sh-tab" data-m="diff">2️⃣ Alag-Alag Qty (Per Colour)</button>
       </div>
 
-      <div id="same-qty-bar">
-        <span style="font-size:12px;font-weight:700;color:#1e1b4b;">Har Selected Colour ki Qty:</span>
+      <div id="sh-same-qty-row">
+        <span style="font-size:12px;font-weight:700;color:#1e1b4b;">Har Colour ki Qty:</span>
         <div style="display:flex;align-items:center;gap:6px;">
-          <button type="button" id="m-qty-minus" class="qty-step-btn" style="width:28px;height:28px;">−</button>
-          <input type="number" id="m-qty-input" value="1" min="1" style="width:44px;height:28px;text-align:center;font-weight:800;border:1px solid #6366f1;border-radius:6px;background:#fff;">
-          <button type="button" id="m-qty-plus" class="qty-step-btn" style="width:28px;height:28px;">+</button>
+          <button type="button" id="sh-m-minus" class="sh-step-btn" style="width:28px;height:28px;">−</button>
+          <input type="number" id="sh-m-val" value="1" min="1" style="width:44px;height:28px;text-align:center;font-weight:800;border:1px solid #4f46e5;border-radius:6px;background:#fff;">
+          <button type="button" id="sh-m-plus" class="sh-step-btn" style="width:28px;height:28px;">+</button>
         </div>
       </div>
 
-      <div class="palette-grid" id="studio-grid">
-        ${SHAKYA_COLORS.map(c => `
-          <div class="color-card" data-color="${c.name}">
-            <div class="color-card-top">
-              <span class="color-dot" style="background:${c.hex}"></span>
-              <span class="color-name">${c.name}</span>
+      <div class="sh-color-grid" id="sh-grid">
+        ${PALETTE.map(p => `
+          <div class="sh-color-item" data-name="${p.name}">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span style="width:14px;height:14px;border-radius:50%;background:${p.hex};border:1px solid rgba(0,0,0,0.25);display:inline-block;"></span>
+              <span style="font-size:12px;font-weight:700;color:#0f172a;">${p.name}</span>
             </div>
-            <div class="per-color-qty-box">
-              <button type="button" class="qty-step-btn c-minus">−</button>
-              <input type="number" class="qty-mini-input c-qty" value="1" min="1">
-              <button type="button" class="qty-step-btn c-plus">+</button>
+            <div class="sh-qty-controls">
+              <button type="button" class="sh-step-btn c-dec">−</button>
+              <input type="number" class="sh-step-input c-val" value="1" min="1">
+              <button type="button" class="sh-step-btn c-inc">+</button>
             </div>
           </div>
         `).join("")}
       </div>
 
-      <button type="button" class="studio-apply-btn" id="studio-apply-btn">✅ Apply to Sheet</button>
+      <button type="button" id="sh-apply-btn" style="width:100%;border:none;background:#4f46e5;color:#fff;font-weight:800;font-size:14px;padding:12px;border-radius:10px;">✅ Apply to Excel Sheet</button>
     `;
-    document.body.appendChild(modal);
+    document.body.appendChild(sheet);
 
-    const closeStudio = () => {
-      modal.style.display = "none";
-      backdrop.style.display = "none";
-    };
+    const hide = () => { sheet.style.display = "none"; bg.style.display = "none"; };
+    bg.addEventListener("click", hide);
+    sheet.querySelector("#sh-close-btn").addEventListener("click", hide);
 
-    backdrop.addEventListener("click", closeStudio);
-    modal.querySelector("#close-studio-btn").addEventListener("click", closeStudio);
-
-    modal.querySelectorAll(".studio-tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        modal.querySelectorAll(".studio-tab-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        qtyMode = btn.getAttribute("data-mode");
-        document.getElementById("same-qty-bar").style.display = (qtyMode === "same") ? "flex" : "none";
-        modal.querySelectorAll(".color-card").forEach(c => c.classList.toggle("diff-mode", qtyMode === "diff"));
-        updateApplyText();
+    sheet.querySelectorAll(".sh-tab").forEach(t => {
+      t.addEventListener("click", () => {
+        sheet.querySelectorAll(".sh-tab").forEach(b => b.classList.remove("active"));
+        t.classList.add("active");
+        mode = t.getAttribute("data-m");
+        document.getElementById("sh-same-qty-row").style.display = (mode === "same") ? "flex" : "none";
+        sheet.querySelectorAll(".sh-color-item").forEach(el => el.classList.toggle("diff-mode", mode === "diff"));
+        refreshBtnLabel();
       });
     });
 
-    const mInput = document.getElementById("m-qty-input");
-    document.getElementById("m-qty-minus").addEventListener("click", () => {
-      mInput.value = Math.max(1, (parseInt(mInput.value) || 1) - 1);
-      updateApplyText();
+    const mVal = document.getElementById("sh-m-val");
+    document.getElementById("sh-m-minus").addEventListener("click", () => {
+      mVal.value = Math.max(1, (parseInt(mVal.value) || 1) - 1);
+      refreshBtnLabel();
     });
-    document.getElementById("m-qty-plus").addEventListener("click", () => {
-      mInput.value = (parseInt(mInput.value) || 1) + 1;
-      updateApplyText();
+    document.getElementById("sh-m-plus").addEventListener("click", () => {
+      mVal.value = (parseInt(mVal.value) || 1) + 1;
+      refreshBtnLabel();
     });
 
-    modal.querySelector("#studio-grid").addEventListener("click", (e) => {
-      const card = e.target.closest(".color-card");
-      if (!card) return;
-      const cName = card.getAttribute("data-color");
-      const qInp = card.querySelector(".c-qty");
+    sheet.querySelector("#sh-grid").addEventListener("click", (e) => {
+      const box = e.target.closest(".sh-color-item");
+      if (!box) return;
+      const name = box.getAttribute("data-name");
+      const inp = box.querySelector(".c-val");
 
-      if (e.target.classList.contains("c-minus")) {
+      if (e.target.classList.contains("c-dec")) {
         e.stopPropagation();
-        qInp.value = Math.max(1, (parseInt(qInp.value) || 1) - 1);
-        selectedColours[cName] = parseInt(qInp.value);
-        updateApplyText();
+        inp.value = Math.max(1, (parseInt(inp.value) || 1) - 1);
+        picked[name] = parseInt(inp.value);
+        refreshBtnLabel();
         return;
       }
-      if (e.target.classList.contains("c-plus")) {
+      if (e.target.classList.contains("c-inc")) {
         e.stopPropagation();
-        qInp.value = (parseInt(qInp.value) || 1) + 1;
-        selectedColours[cName] = parseInt(qInp.value);
-        updateApplyText();
+        inp.value = (parseInt(inp.value) || 1) + 1;
+        picked[name] = parseInt(inp.value);
+        refreshBtnLabel();
         return;
       }
-      if (e.target.classList.contains("c-qty")) {
+      if (e.target.classList.contains("c-val")) {
         e.stopPropagation();
         return;
       }
 
-      if (selectedColours[cName]) {
-        delete selectedColours[cName];
-        card.classList.remove("selected");
+      if (picked[name]) {
+        delete picked[name];
+        box.classList.remove("selected");
       } else {
-        const defQ = (qtyMode === "same") ? (parseInt(mInput.value) || 1) : (parseInt(qInp.value) || 1);
-        selectedColours[cName] = defQ;
-        qInp.value = defQ;
-        card.classList.add("selected");
-        card.classList.toggle("diff-mode", qtyMode === "diff");
+        const q = (mode === "same") ? (parseInt(mVal.value) || 1) : (parseInt(inp.value) || 1);
+        picked[name] = q;
+        inp.value = q;
+        box.classList.add("selected");
+        box.classList.toggle("diff-mode", mode === "diff");
       }
-      updateApplyText();
+      refreshBtnLabel();
     });
 
-    modal.querySelectorAll(".c-qty").forEach(inp => {
-      inp.addEventListener("input", (e) => {
-        const card = e.target.closest(".color-card");
-        selectedColours[card.getAttribute("data-color")] = Math.max(1, parseInt(inp.value) || 1);
-        updateApplyText();
-      });
-    });
+    document.getElementById("sh-apply-btn").addEventListener("click", () => {
+      const list = Object.entries(picked);
+      if (!list.length || !activeTr || !activeTable) { hide(); return; }
 
-    document.getElementById("studio-apply-btn").addEventListener("click", () => {
-      const entries = Object.entries(selectedColours);
-      if (entries.length === 0 || !activeRow) {
-        closeStudio();
-        return;
-      }
+      const base = parseRow(activeTr);
+      const win = activeTable.closest(".shakya-excel-window") || document.body;
+      const bCode = base.code.value;
+      const bCat = base.cat ? base.cat.value : "";
+      const bCost = base.cost.value;
+      const bMrp = base.mrp.value;
+      const masterQ = Math.max(1, parseInt(mVal.value) || 1);
 
-      const card = activeRow.closest(".excel-fullscreen-card");
-      const baseF = getRowFields(activeRow);
-      if (!card || !baseF) return;
+      let rows = Array.from(activeTable.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
+      let idx = rows.indexOf(activeTr);
+      const addBtn = Array.from(win.querySelectorAll("button")).find(b => b.textContent.includes("Row Jodein"));
 
-      const bCode = baseF.code.value;
-      const bCat = baseF.category ? baseF.category.value : "";
-      const bCost = baseF.cost.value;
-      const bMrp = baseF.mrp.value;
-      const masterQ = Math.max(1, parseInt(mInput.value) || 1);
-
-      let dataRows = Array.from(card.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
-      let startIdx = dataRows.indexOf(activeRow);
-      const addBtn = Array.from(card.querySelectorAll("button")).find(b => b.textContent.includes("Row Jodein"));
-
-      let safety = 0;
-      while ((dataRows.length - startIdx) < entries.length && addBtn && safety < 15) {
+      let guard = 0;
+      while ((rows.length - idx) < list.length && addBtn && guard < 12) {
         addBtn.click();
-        dataRows = Array.from(card.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
-        safety++;
+        rows = Array.from(activeTable.querySelectorAll("tr")).filter(r => r.querySelectorAll("input").length >= 4);
+        guard++;
       }
 
-      entries.forEach(([colName, colQty], idx) => {
-        const targetRow = dataRows[startIdx + idx];
-        if (!targetRow) return;
-        const tf = getRowFields(targetRow);
-        if (!tf) return;
-
-        tf.code.value = bCode;
-        if (tf.category && bCat) tf.category.value = bCat;
-        tf.colour.value = colName;
-        tf.qty.value = (qtyMode === "same") ? masterQ : colQty;
-        tf.cost.value = bCost;
-        tf.mrp.value = bMrp;
-
-        [tf.code, tf.category, tf.colour, tf.qty, tf.cost, tf.mrp].forEach(el => {
+      list.forEach(([cName, cQty], i) => {
+        const r = rows[idx + i];
+        if (!r) return;
+        const f = parseRow(r);
+        if (!f) return;
+        f.code.value = bCode;
+        if (f.cat && bCat) f.cat.value = bCat;
+        f.col.value = cName;
+        f.qty.value = (mode === "same") ? masterQ : cQty;
+        f.cost.value = bCost;
+        f.mrp.value = bMrp;
+        [f.code, f.cat, f.col, f.qty, f.cost, f.mrp].forEach(el => {
           if (el) {
             el.dispatchEvent(new Event("input", { bubbles: true }));
             el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -5711,149 +5656,121 @@
         });
       });
 
-      refreshRibbonTotals(card);
-      closeStudio();
+      updateSummaryAndSwatches(activeTable);
+      hide();
     });
   }
 
-  function updateApplyText() {
-    const btn = document.getElementById("studio-apply-btn");
+  function refreshBtnLabel() {
+    const btn = document.getElementById("sh-apply-btn");
     if (!btn) return;
-    const entries = Object.entries(selectedColours);
-    const mQ = Math.max(1, parseInt(document.getElementById("m-qty-input")?.value) || 1);
-    if (entries.length === 0) {
-      btn.textContent = "Select at least 1 Colour";
-      return;
-    }
-    const pcs = entries.reduce((sum, [_, q]) => sum + (qtyMode === "same" ? mQ : q), 0);
-    btn.textContent = `✅ Apply ${entries.length} Colour${entries.length > 1 ? 's' : ''} (${pcs} Pcs Total)`;
+    const list = Object.entries(picked);
+    const mQ = Math.max(1, parseInt(document.getElementById("sh-m-val")?.value) || 1);
+    if (!list.length) { btn.textContent = "Select at least 1 Colour"; return; }
+    const total = list.reduce((s, [_, q]) => s + (mode === "same" ? mQ : q), 0);
+    btn.textContent = `✅ Fill ${list.length} Colour${list.length > 1 ? 's' : ''} (${total} Pcs Total)`;
   }
 
-  function openStudio(tr) {
-    ensureStudioModal();
-    activeRow = tr;
-    const f = getRowFields(tr);
+  function openPickerForRow(tr, table) {
+    initStudioSheet();
+    activeTr = tr;
+    activeTable = table;
+    const f = parseRow(tr);
     if (!f) return;
 
-    selectedColours = {};
-    const curCol = (f.colour.value || "Red").trim();
-    const curQty = Math.max(1, parseInt(f.qty.value) || 1);
-    selectedColours[curCol] = curQty;
+    picked = {};
+    const curC = (f.col.value || "Red").trim();
+    const curQ = Math.max(1, parseInt(f.qty.value) || 1);
+    picked[curC] = curQ;
 
-    document.getElementById("m-qty-input").value = curQty;
-    document.getElementById("studio-subtitle").textContent =
+    document.getElementById("sh-m-val").value = curQ;
+    document.getElementById("sh-sheet-sub").textContent =
       `Code: ${f.code.value || 'N/A'} | Cost: ₹${f.cost.value || 0} | MRP: ₹${f.mrp.value || 0}`;
 
-    const modal = document.getElementById("shakya-color-palette");
-    modal.querySelectorAll(".color-card").forEach(card => {
-      const isSel = card.getAttribute("data-color").toLowerCase() === curCol.toLowerCase();
-      card.classList.toggle("selected", isSel);
-      card.classList.toggle("diff-mode", qtyMode === "diff");
-      card.querySelector(".c-qty").value = curQty;
+    const sheet = document.getElementById("shakya-studio-sheet");
+    sheet.querySelectorAll(".sh-color-item").forEach(el => {
+      const match = el.getAttribute("data-name").toLowerCase() === curC.toLowerCase();
+      el.classList.toggle("selected", match);
+      el.classList.toggle("diff-mode", mode === "diff");
+      el.querySelector(".c-val").value = curQ;
     });
 
-    updateApplyText();
-    document.getElementById("shakya-color-backdrop").style.display = "block";
-    modal.style.display = "block";
+    refreshBtnLabel();
+    document.getElementById("shakya-studio-backdrop").style.display = "block";
+    sheet.style.display = "block";
   }
 
-  // Lightweight, One-Time Setup Function (NO Infinite Loop!)
-  function checkAndUpgradeBulkWindow() {
-    const headings = document.querySelectorAll("h1, h2, h3, h4, div, span");
-    for (let i = 0; i < headings.length; i++) {
-      const el = headings[i];
-      if (el.textContent && el.textContent.includes("Excel-Style Bulk Stock Entry") && el.children.length <= 2) {
-        let card = el.parentElement;
+  // Find Bulk Table directly by its column headers (100% reliable)
+  function upgradeBulkModalIfVisible() {
+    const tables = document.querySelectorAll("table");
+    tables.forEach(table => {
+      if (table.offsetWidth === 0) return; // Skip hidden tables
+      const headerText = (table.innerText || "").slice(0, 120);
+      if (headerText.includes("Code") && headerText.includes("Colour") && headerText.includes("MRP")) {
+        // Walk up to find the modal card & fixed backdrop
+        let card = table.parentElement;
         while (card && card !== document.body) {
-          const bg = window.getComputedStyle(card).backgroundColor;
-          if (bg === "rgb(255, 255, 255)" || card.clientWidth > 260) break;
+          const pStyle = window.getComputedStyle(card.parentElement);
+          if (pStyle.position === "fixed" || window.getComputedStyle(card).position === "fixed") {
+            break;
+          }
           card = card.parentElement;
         }
 
         if (card && card !== document.body) {
-          if (!card.classList.contains("excel-fullscreen-card")) {
-            card.classList.add("excel-fullscreen-card");
-            if (card.parentElement && card.parentElement !== document.body) {
-              card.parentElement.classList.add("excel-fullscreen-overlay");
+          card.classList.add("shakya-excel-window");
+          if (card.parentElement && card.parentElement !== document.body) {
+            card.parentElement.classList.add("shakya-excel-backdrop");
+          }
+
+          // Remove max-height on every wrapper between table and card that doesn't hold the Cancel button
+          let wrap = table.parentElement;
+          while (wrap && wrap !== card) {
+            if (!wrap.textContent.includes("Sabhi Save Karein")) {
+              wrap.classList.add("shakya-excel-table-wrap");
             }
+            wrap = wrap.parentElement;
           }
 
-          // Make the table's scroll container expand to fill screen
-          const table = card.querySelector("table");
-          if (table && table.parentElement && table.parentElement !== card) {
-            table.parentElement.classList.add("shakya-table-scroller");
-          }
-
-          // Insert Live Summary Ribbon once
-          if (!card.querySelector("#shakya-live-ribbon") && table) {
-            const ribbon = document.createElement("div");
-            ribbon.id = "shakya-live-ribbon";
-            ribbon.innerHTML = `
-              <div class="shakya-ribbon-box">
-                <span class="shakya-ribbon-lbl">Total Items</span>
-                <span class="shakya-ribbon-val" id="shakya-stat-rows">0</span>
-              </div>
-              <div class="shakya-ribbon-box">
-                <span class="shakya-ribbon-lbl">Total Qty</span>
-                <span class="shakya-ribbon-val" id="shakya-stat-qty">0 Pcs</span>
-              </div>
-              <div class="shakya-ribbon-box">
-                <span class="shakya-ribbon-lbl">Total Cost</span>
-                <span class="shakya-ribbon-val" id="shakya-stat-cost">₹0</span>
-              </div>
+          // Inject Live Top Summary Ribbon once
+          if (!card.querySelector("#shakya-top-summary")) {
+            const sum = document.createElement("div");
+            sum.id = "shakya-top-summary";
+            sum.innerHTML = `
+              <div class="shakya-sum-item"><span class="shakya-sum-lbl">Rows</span><span class="shakya-sum-val" id="sh-sum-items">0</span></div>
+              <div class="shakya-sum-item"><span class="shakya-sum-lbl">Total Qty</span><span class="shakya-sum-val" id="sh-sum-qty">0 Pcs</span></div>
+              <div class="shakya-sum-item"><span class="shakya-sum-lbl">Total Cost</span><span class="shakya-sum-val" id="sh-sum-cost">₹0</span></div>
             `;
-            const scroller = table.parentElement !== card ? table.parentElement : table;
-            card.insertBefore(ribbon, scroller);
+            const wrapEl = card.querySelector(".shakya-excel-table-wrap") || table;
+            wrapEl.parentElement.insertBefore(sum, wrapEl);
           }
 
-          refreshRibbonTotals(card);
-        }
-        break;
-      }
-    }
-
-    // Lock background scroll if any modal is visible
-    let modalOpen = false;
-    const fixedDivs = document.querySelectorAll("div");
-    for (let j = 0; j < fixedDivs.length; j++) {
-      const d = fixedDivs[j];
-      if (d.id === "shakya-color-palette" || d.id === "shakya-color-backdrop") continue;
-      const st = window.getComputedStyle(d);
-      if (st.position === "fixed" && st.display !== "none" && st.visibility !== "hidden" && st.opacity !== "0") {
-        if (d.clientWidth >= window.innerWidth * 0.7 && d.clientHeight >= window.innerHeight * 0.35) {
-          modalOpen = true;
-          break;
+          updateSummaryAndSwatches(table);
         }
       }
-    }
-    document.documentElement.classList.toggle("shakya-modal-open", modalOpen);
-    document.body.classList.toggle("shakya-modal-open", modalOpen);
+    });
   }
 
-  // Trigger ONLY on user actions (Zero CPU freeze)
-  document.addEventListener("click", function(e) {
-    const tr = e.target.closest(".excel-fullscreen-card tr");
-    if (tr && e.target.tagName === "INPUT") {
-      const f = getRowFields(tr);
-      if (f && e.target === f.colour) {
-        e.preventDefault();
-        e.target.blur();
-        openStudio(tr);
-        return;
-      }
+  // Intercept tap on Colour column before keyboard pops up
+  document.addEventListener("pointerdown", function(e) {
+    const td = e.target.closest(".shakya-excel-window td:nth-child(3)");
+    if (td) {
+      e.preventDefault();
+      const tr = td.closest("tr");
+      const table = td.closest("table");
+      if (document.activeElement) document.activeElement.blur();
+      openPickerForRow(tr, table);
     }
-    setTimeout(checkAndUpgradeBulkWindow, 50);
-    setTimeout(checkAndUpgradeBulkWindow, 250);
+  });
+
+  document.addEventListener("click", function() {
+    setTimeout(upgradeBulkModalIfVisible, 40);
+    setTimeout(upgradeBulkModalIfVisible, 200);
   });
 
   document.addEventListener("input", function(e) {
-    const card = e.target.closest(".excel-fullscreen-card");
-    if (card) refreshRibbonTotals(card);
-  });
-
-  window.addEventListener("DOMContentLoaded", () => {
-    ensureStudioModal();
-    setTimeout(checkAndUpgradeBulkWindow, 200);
+    const table = e.target.closest(".shakya-excel-window table");
+    if (table) updateSummaryAndSwatches(table);
   });
 })();
 </script>
