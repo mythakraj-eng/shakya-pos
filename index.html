@@ -6870,5 +6870,510 @@ Instruction: Check context. Question: ${q}` }] }],
 })();
 </script>
 <!-- === END FULL AI VOICE COMMAND & LIVE API PIPELINE === -->
+<!-- === SHAKYA COSMETIC: CLUTTER-FREE EXCEL RIBBON CUSTOMIZER === -->
+<style>
+  /* Compact Single-Row Scrollable Excel Ribbon in Header */
+  header .header-actions {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 5px !important;
+    padding-bottom: 2px !important;
+    scrollbar-width: none !important;
+    align-items: center !important;
+  }
+  header .header-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+  header .header-actions button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 5px 9px !important;
+    font-size: 10.5px !important;
+  }
+  #excelCustomizeBtn {
+    background: linear-gradient(135deg, var(--gold), #fbbf24) !important;
+    color: #111827 !important;
+    font-weight: 900 !important;
+    border: none !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+  }
+
+  /* Full-App Customizer Bottom Sheet */
+  #shakyaCustomizerModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.74);
+    z-index: 999999;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .sh-cust-sheet {
+    background: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px 20px 0 0;
+    padding: 14px 12px 18px;
+    max-height: 88dvh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.35);
+    border-top: 4px solid var(--maroon);
+  }
+  .sh-cust-cat-tabs {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .sh-cust-cat-tabs::-webkit-scrollbar { display: none; }
+  .sh-cat-pill {
+    flex: 0 0 auto;
+    padding: 6px 11px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    width: auto !important;
+    margin: 0 !important;
+  }
+  .sh-cat-pill.active {
+    background: var(--maroon);
+    color: #ffffff;
+    border-color: var(--maroon-dark);
+  }
+  .sh-cust-scroll-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 6px 2px 10px;
+  }
+  .sh-cust-group-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #1e293b;
+    background: #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 10px 0 6px;
+    letter-spacing: 0.4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sh-cust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .sh-cust-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 9px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    user-select: none;
+    margin: 0 !important;
+  }
+  .sh-cust-item.active {
+    border-color: var(--maroon);
+    background: var(--maroon-light);
+    color: var(--maroon-dark);
+  }
+  .sh-cust-item input[type="checkbox"] {
+    width: 15px !important;
+    height: 15px !important;
+    margin: 0 !important;
+    accent-color: var(--maroon);
+    flex-shrink: 0;
+  }
+</style>
+
+<script>
+(function() {
+  const DEFAULT_LAYOUT = {
+    // 1. Header & Navigation Tabs
+    hdr_banner: true,
+    hdr_cost: true,
+    hdr_printer: true,
+    hdr_theme: false,
+    hdr_sound: false,
+    hdr_swipe: false,
+    hdr_exit: true,
+    tab_stock: true,
+    tab_stats: true,
+    tab_cust: true,
+    tab_backup: true,
+
+    // 2. Billing Section (Including Red-Circled Area except Scanner)
+    bill_galla_strip: true,
+    bill_scan_title: false,     // "1. Scan / Code / Gorilla Short-Code" title
+    bill_manual_code: true,     // Code Input + "+ Add" button (Scanner always stays!)
+    bill_fallpico: false,       // "+ Fall-Pico (Rs.50)" chip
+    bill_gorilla: false,        // Gorilla yellow hint box
+    bill_quick_strip: false,    // Quick Saree catalog pills
+    bill_loose_box: false,      // Futtkar / Bina code box
+    bill_cust_row: true,        // Customer Name + Gaon row
+    bill_mob_mode_row: true,    // Mobile Number + Payment Mode row
+    bill_upi_btn: true,         // UPI QR button next to Bill Banayein
+
+    // 3. Stock Section
+    stk_add_card: true,         // "+ Nayi Saree / Set Stock Mein Jodein" full card
+    stk_bulk_btn: true,         // "Excel Bulk Add" button
+    stk_palette: true,          // Colour chips & Colour Finder
+    stk_mandi_tags_btns: true,  // Mandi List & Tags Print buttons
+    stk_filter_box: true,       // Search & Category filter box
+    stk_summary_bar: true,      // Items / Kul Pcs / Kharid Value bar
+
+    // 4. Insights (Stats) Section
+    ins_verify_card: true,      // "Verify / Exchange Bill" card
+    ins_galla_card: true,       // "Galla & Business Insights" card
+    ins_7day_chart: true,       // "Pichhle 7 Dinon ki Bikri" chart
+    ins_expense_card: true,     // "Rozana Dukaan Kharcha" card
+    ins_history_card: true,     // "Top Bikne Wale Colours & Bill History" card
+
+    // 5. Khata/Cust & Printer/UI Sections
+    cust_search_card: true,     // "Customer Khata Book & Contact Directory" search card
+    cust_list_card: true,       // "Sabhi Customers & Udhaar List" table card
+    set_theme_card: true,       // "App Colour UI Theme Chunein" card
+    set_printer_card: true,     // "Universal Printer Hub" card
+    set_upi_card: true,         // "Dynamic UPI QR Code Setup" card
+    set_pin_card: true,         // "Owner Security PIN & Startup Lock" card
+    set_backup_card: true       // "Surakshit Hybrid Backup & Excel" card
+  };
+
+  let layoutPrefs = Object.assign({}, DEFAULT_LAYOUT, JSON.parse(localStorage.getItem("sc_ui_customizer_v2") || "{}"));
+  let activeCatFilter = "ALL";
+
+  function showEl(el, visible, displayVal = "") {
+    if (!el) return;
+    el.style.display = visible ? displayVal : "none";
+  }
+
+  function applyWholeAppLayout() {
+    localStorage.setItem("sc_ui_customizer_v2", JSON.stringify(layoutPrefs));
+
+    // Remove any stray scanner close button outside modals
+    document.querySelectorAll("button").forEach(btn => {
+      if (btn.textContent && btn.textContent.includes("Band Karein (Close)") && !btn.closest("#scannerModal") && !btn.closest("#billModal")) {
+        btn.remove();
+      }
+    });
+
+    // --- 1. HEADER & TABS ---
+    showEl(document.querySelector("header .banner-board"), layoutPrefs.hdr_banner, "block");
+    showEl(document.getElementById("ownerLockBtn"), layoutPrefs.hdr_cost, "inline-block");
+    showEl(document.getElementById("printerHeaderBtn"), layoutPrefs.hdr_printer, "inline-block");
+    showEl(document.getElementById("themeCycleBtn"), layoutPrefs.hdr_theme, "inline-block");
+    showEl(document.getElementById("soundToggleBtn"), layoutPrefs.hdr_sound, "inline-block");
+    showEl(document.getElementById("swipeLockBtn"), layoutPrefs.hdr_swipe, "inline-block");
+    showEl(document.querySelector("header .shutdown-btn"), layoutPrefs.hdr_exit, "inline-block");
+
+    showEl(document.getElementById("tab-stock"), layoutPrefs.tab_stock, "block");
+    showEl(document.getElementById("tab-stats"), layoutPrefs.tab_stats, "block");
+    showEl(document.getElementById("tab-cust"), layoutPrefs.tab_cust, "block");
+    showEl(document.getElementById("tab-backup"), layoutPrefs.tab_backup, "block");
+
+    // --- 2. BILLING SECTION (Red-Circled Area + All Widgets) ---
+    const billingCard = document.querySelector("#billing .card");
+    if (billingCard) {
+      showEl(document.querySelector("#billing .mini-galla-strip"), layoutPrefs.bill_galla_strip, "flex");
+
+      const h3 = billingCard.querySelector("h3");
+      const titleSpan = h3 ? h3.querySelector("span:first-child") : null;
+      const fallPicoChip = billingCard.querySelector("[onclick*='quickAddFallPico']");
+
+      showEl(titleSpan, layoutPrefs.bill_scan_title, "inline");
+      showEl(fallPicoChip, layoutPrefs.bill_fallpico, "inline-flex");
+      if (h3) {
+        h3.style.display = (layoutPrefs.bill_scan_title || layoutPrefs.bill_fallpico) ? "flex" : "none";
+      }
+
+      // Red-circled Scan / Code input row: keep "📷 Scan" always visible!
+      const scanInput = document.getElementById("scanInput");
+      if (scanInput) {
+        const scanRow = scanInput.closest(".row");
+        if (scanRow && scanRow.children.length >= 3) {
+          const codeWrapDiv = scanRow.children[0]; // Input box
+          const addBtnDiv = scanRow.children[1];   // + Add button
+          const scanBtnDiv = scanRow.children[2];  // 📷 Scan button (ALWAYS KEPT)
+          showEl(codeWrapDiv, layoutPrefs.bill_manual_code, "block");
+          showEl(addBtnDiv, layoutPrefs.bill_manual_code, "block");
+          scanBtnDiv.style.flex = layoutPrefs.bill_manual_code ? "0.9" : "1";
+        }
+      }
+
+      showEl(billingCard.querySelector(".gorilla-hint"), layoutPrefs.bill_gorilla, "flex");
+      showEl(document.getElementById("quickCatalogStrip"), layoutPrefs.bill_quick_strip, "flex");
+      showEl(billingCard.querySelector(".loose-box"), layoutPrefs.bill_loose_box, "block");
+
+      const custNameInp = document.getElementById("custName");
+      if (custNameInp) showEl(custNameInp.closest(".row"), layoutPrefs.bill_cust_row, "flex");
+
+      const custMobInp = document.getElementById("custMobile");
+      if (custMobInp) showEl(custMobInp.closest(".row"), layoutPrefs.bill_mob_mode_row, "flex");
+
+      const upiBtn = billingCard.querySelector("button[onclick*='showLiveCounterUpiQr']");
+      if (upiBtn && upiBtn.parentElement) {
+        showEl(upiBtn.parentElement, layoutPrefs.bill_upi_btn, "block");
+      }
+    }
+
+    // --- 3. STOCK SECTION ---
+    const stockCards = document.querySelectorAll("#stock > .card");
+    if (stockCards.length >= 2) {
+      const addCard = stockCards[0];
+      const listCard = stockCards[1];
+      showEl(addCard, layoutPrefs.stk_add_card, "block");
+
+      const bulkBtn = addCard.querySelector("button[onclick*='openBulkStockModal']");
+      showEl(bulkBtn, layoutPrefs.stk_bulk_btn, "inline-block");
+
+      const paletteGrid = document.getElementById("colorPaletteGrid");
+      if (paletteGrid && paletteGrid.parentElement) {
+        showEl(paletteGrid.parentElement, layoutPrefs.stk_palette, "block");
+      }
+
+      const mandiBtn = listCard.querySelector("button[onclick*='shareLowStockMandiList']");
+      if (mandiBtn && mandiBtn.parentElement) {
+        showEl(mandiBtn.parentElement, layoutPrefs.stk_mandi_tags_btns, "block");
+      }
+      showEl(listCard.querySelector(".filter-box"), layoutPrefs.stk_filter_box, "block");
+      showEl(document.getElementById("stockSummaryBar"), layoutPrefs.stk_summary_bar, "flex");
+    }
+
+    // --- 4. INSIGHTS (STATS) SECTION ---
+    const statsCards = document.querySelectorAll("#stats > .card");
+    if (statsCards.length >= 4) {
+      showEl(statsCards[0], layoutPrefs.ins_verify_card, "block");
+      showEl(statsCards[1], layoutPrefs.ins_galla_card, "block");
+      const chartEl = document.getElementById("sevenDayChart");
+      if (chartEl && chartEl.parentElement) {
+        showEl(chartEl.parentElement, layoutPrefs.ins_7day_chart, "block");
+      }
+      showEl(statsCards[2], layoutPrefs.ins_expense_card, "block");
+      showEl(statsCards[3], layoutPrefs.ins_history_card, "block");
+    }
+
+    // --- 5. KHATA/CUST & PRINTER/UI SECTIONS ---
+    const custCards = document.querySelectorAll("#cust > .card");
+    if (custCards.length >= 2) {
+      showEl(custCards[0], layoutPrefs.cust_search_card, "block");
+      showEl(custCards[1], layoutPrefs.cust_list_card, "block");
+    }
+
+    const backupCards = document.querySelectorAll("#backup > .card");
+    if (backupCards.length >= 5) {
+      showEl(backupCards[0], layoutPrefs.set_theme_card, "block");
+      showEl(backupCards[1], layoutPrefs.set_printer_card, "block");
+      showEl(backupCards[2], layoutPrefs.set_upi_card, "block");
+      showEl(backupCards[3], layoutPrefs.set_pin_card, "block");
+      showEl(backupCards[4], layoutPrefs.set_backup_card, "block");
+    }
+  }
+
+  const GROUPS = [
+    { cat: "HEADER", title: "1. Top Header & Navigation Tabs", items: [
+      { key: "hdr_banner", label: "🏪 Top Shop Banner" },
+      { key: "hdr_cost", label: "🔒 Cost ON/OFF Button" },
+      { key: "hdr_printer", label: "🖨️ Printer Status Btn" },
+      { key: "hdr_theme", label: "🎨 Theme Switch Btn" },
+      { key: "hdr_sound", label: "🔊 Beep Sound Btn" },
+      { key: "hdr_swipe", label: "👆 Slide Lock Btn" },
+      { key: "hdr_exit", label: "🛑 Exit Button" },
+      { key: "tab_stock", label: "📦 Stock Tab" },
+      { key: "tab_stats", label: "📊 Insights Tab" },
+      { key: "tab_cust", label: "👥 Khata/Cust Tab" },
+      { key: "tab_backup", label: "🖨️ Printer/UI Tab" }
+    ]},
+    { cat: "BILLING", title: "2. Billing Tab (📷 Scanner Always Active)", items: [
+      { key: "bill_manual_code", label: "⌨️ Code Input & +Add" },
+      { key: "bill_scan_title", label: "📝 '1. Scan/Code' Heading" },
+      { key: "bill_galla_strip", label: "💵 Mini Galla & Hold" },
+      { key: "bill_fallpico", label: "🧵 + Fall-Pico (₹50) Chip" },
+      { key: "bill_gorilla", label: "🦍 Gorilla Hint Box" },
+      { key: "bill_quick_strip", label: "⚡ Quick Saree Strip" },
+      { key: "bill_loose_box", label: "🛍️ Futtkar / Loose Box" },
+      { key: "bill_cust_row", label: "👤 Customer & Gaon Row" },
+      { key: "bill_mob_mode_row", label: "📱 Mobile & Pay Mode" },
+      { key: "bill_upi_btn", label: "📲 UPI QR Button" }
+    ]},
+    { cat: "STOCK", title: "3. Stock Management Tab", items: [
+      { key: "stk_add_card", label: "➕ Add New Stock Card" },
+      { key: "stk_bulk_btn", label: "📊 Excel Bulk Button" },
+      { key: "stk_palette", label: "🎨 Colour Chips Palette" },
+      { key: "stk_mandi_tags_btns", label: "📝 Mandi & Tags Buttons" },
+      { key: "stk_filter_box", label: "🔍 Search & Filter Box" },
+      { key: "stk_summary_bar", label: "📋 Stock Summary Bar" }
+    ]},
+    { cat: "INSIGHTS", title: "4. Insights & Galla Tab", items: [
+      { key: "ins_verify_card", label: "🔍 Verify/Exchange Bill" },
+      { key: "ins_galla_card", label: "📊 Galla & Profit Stats" },
+      { key: "ins_7day_chart", label: "📈 7-Day Sales Chart" },
+      { key: "ins_expense_card", label: "☕ Rozana Kharcha Card" },
+      { key: "ins_history_card", label: "🧾 Bill History Table" }
+    ]},
+    { cat: "MORE", title: "5. Khata & Printer/UI Tabs", items: [
+      { key: "cust_search_card", label: "🔍 Khata Search Box" },
+      { key: "cust_list_card", label: "📋 All Customers List" },
+      { key: "set_theme_card", label: "🎨 Colour Theme Card" },
+      { key: "set_printer_card", label: "🖨️ Printer Hub Card" },
+      { key: "set_upi_card", label: "📱 UPI Setup Card" },
+      { key: "set_pin_card", label: "🔐 Security PIN Card" },
+      { key: "set_backup_card", label: "💾 Cloud & CSV Backup" }
+    ]}
+  ];
+
+  function buildWholeAppCustomizer() {
+    const headerActions = document.querySelector("header .header-actions");
+    if (headerActions && !document.getElementById("excelCustomizeBtn")) {
+      const btn = document.createElement("button");
+      btn.id = "excelCustomizeBtn";
+      btn.className = "slide-lock-btn";
+      btn.innerHTML = "⚙️ Customize";
+      btn.onclick = openCustomizerModal;
+      headerActions.insertBefore(btn, headerActions.firstChild);
+    }
+
+    let modal = document.getElementById("shakyaCustomizerModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "shakyaCustomizerModal";
+      modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="sh-cust-sheet">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;">
+          <div>
+            <div style="font-size:15px;font-weight:900;color:var(--maroon);">⚙️ Full-App Excel Customizer</div>
+            <div style="font-size:11px;color:#64748b;">Pure App mein jo chahiye rakhein, baaki uncheck karke chhupayein:</div>
+          </div>
+          <button type="button" id="closeCustSheetBtn" style="width:auto;margin:0;padding:5px 10px;background:#e2e8f0;color:#1e293b;">✕</button>
+        </div>
+
+        <div class="sh-cust-cat-tabs">
+          <button type="button" class="sh-cat-pill active" data-cat="ALL">📋 All App</button>
+          <button type="button" class="sh-cat-pill" data-cat="BILLING">🧾 Billing</button>
+          <button type="button" class="sh-cat-pill" data-cat="HEADER">🔝 Header/Tabs</button>
+          <button type="button" class="sh-cat-pill" data-cat="STOCK">📦 Stock</button>
+          <button type="button" class="sh-cat-pill" data-cat="INSIGHTS">📊 Insights</button>
+          <button type="button" class="sh-cat-pill" data-cat="MORE">⚙️ Khata/Setup</button>
+        </div>
+
+        <div class="sh-cust-scroll-body" id="shCustBody">
+          ${GROUPS.map(g => `
+            <div class="sh-cust-group-wrap" data-group-cat="${g.cat}">
+              <div class="sh-cust-group-title">
+                <span>${g.title}</span>
+              </div>
+              <div class="sh-cust-grid">
+                ${g.items.map(item => `
+                  <label class="sh-cust-item ${layoutPrefs[item.key] ? 'active' : ''}" data-key="${item.key}">
+                    <input type="checkbox" ${layoutPrefs[item.key] ? 'checked' : ''}>
+                    <span>${item.label}</span>
+                  </label>
+                `).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="row" style="margin-top:8px;flex-shrink:0;">
+          <div><button type="button" class="dark" style="margin:0;padding:9px;font-size:11.5px;" id="custScannerOnlyPreset">📷 Scanner-Only Fast Mode</button></div>
+          <div><button type="button" class="gold" style="margin:0;padding:9px;font-size:11.5px;" id="custShowAllPreset">📋 Show All Options</button></div>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector("#closeCustSheetBtn").onclick = () => modal.style.display = "none";
+
+    // Category filter pills inside modal
+    modal.querySelectorAll(".sh-cat-pill").forEach(pill => {
+      pill.onclick = () => {
+        modal.querySelectorAll(".sh-cat-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        activeCatFilter = pill.getAttribute("data-cat");
+        modal.querySelectorAll(".sh-cust-group-wrap").forEach(wrap => {
+          const c = wrap.getAttribute("data-group-cat");
+          wrap.style.display = (activeCatFilter === "ALL" || activeCatFilter === c) ? "block" : "none";
+        });
+      };
+    });
+
+    // Individual checkboxes
+    modal.querySelectorAll(".sh-cust-item").forEach(lbl => {
+      const chk = lbl.querySelector("input");
+      chk.addEventListener("change", () => {
+        const k = lbl.getAttribute("data-key");
+        layoutPrefs[k] = chk.checked;
+        lbl.classList.toggle("active", chk.checked);
+        applyWholeAppLayout();
+      });
+    });
+
+    // Preset 1: Scanner-Only Ultra Clean Counter Mode
+    modal.querySelector("#custScannerOnlyPreset").onclick = () => {
+      Object.assign(layoutPrefs, {
+        hdr_banner: false, hdr_cost: true, hdr_printer: true, hdr_theme: false, hdr_sound: false, hdr_swipe: false, hdr_exit: false,
+        bill_galla_strip: true, bill_scan_title: false, bill_manual_code: false, bill_fallpico: false,
+        bill_gorilla: false, bill_quick_strip: false, bill_loose_box: false,
+        bill_cust_row: true, bill_mob_mode_row: true, bill_upi_btn: true
+      });
+      syncModalCheckboxes(modal);
+      applyWholeAppLayout();
+    };
+
+    // Preset 2: Show All Options across the entire app
+    modal.querySelector("#custShowAllPreset").onclick = () => {
+      Object.keys(layoutPrefs).forEach(k => layoutPrefs[k] = true);
+      syncModalCheckboxes(modal);
+      applyWholeAppLayout();
+    };
+  }
+
+  function syncModalCheckboxes(modal) {
+    if (!modal) return;
+    modal.querySelectorAll(".sh-cust-item").forEach(lbl => {
+      const k = lbl.getAttribute("data-key");
+      const chk = lbl.querySelector("input");
+      chk.checked = !!layoutPrefs[k];
+      lbl.classList.toggle("active", !!layoutPrefs[k]);
+    });
+  }
+
+  function openCustomizerModal() {
+    buildWholeAppCustomizer();
+    const modal = document.getElementById("shakyaCustomizerModal");
+    syncModalCheckboxes(modal);
+    modal.style.display = "flex";
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    buildWholeAppCustomizer();
+    applyWholeAppLayout();
+  });
+  setTimeout(() => {
+    buildWholeAppCustomizer();
+    applyWholeAppLayout();
+  }, 150);
+})();
+</script>
+<!-- === END CLUTTER-FREE CUSTOMIZER === -->
 </body>
 </html>
