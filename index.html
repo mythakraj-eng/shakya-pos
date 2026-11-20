@@ -6341,4 +6341,534 @@
             <div class="fluent-sheet-subtitle">Organize app layout smoothly.</div>
           </div>
           <button type="button" style="background:#f1f5f9;border:none;border-radius:20px;padding:6px 12px;font-weight:bold;color:#475569;" onclick="document.getElementById('fluentSettingsModal').style.display='none'">Done</button>
-     
+        </div>
+        <div class="fluent-cat-tabs">
+          ${Object.keys(SETTINGS_MAP).map(k => `
+            <button class="f-cat-btn ${k === activeCat ? 'active' : ''}" data-cat="${k}">${k.charAt(0) + k.slice(1).toLowerCase()}</button>
+          `).join("")}
+        </div>
+        <div class="fluent-settings-body" id="fSettingsBody">
+          ${renderBody()}
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const bindSwitches = () => {
+      modal.querySelectorAll("input[type='checkbox']").forEach(chk => {
+        chk.onchange = () => {
+          prefs[chk.getAttribute("data-key")] = chk.checked;
+          applyUI();
+        };
+      };
+    };
+    bindSwitches();
+
+    modal.querySelectorAll(".f-cat-btn").forEach(btn => {
+      btn.onclick = () => {
+        modal.querySelectorAll(".f-cat-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeCat = btn.getAttribute("data-cat");
+        document.getElementById("fSettingsBody").innerHTML = renderBody();
+        bindSwitches();
+      };
+    };
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    buildSettingsUI();
+    applyUI();
+  });
+  setTimeout(() => {
+    buildSettingsUI();
+    applyUI();
+  }, 150);
+})();
+</script>
+<!-- === END STABLE NON-SLIDING FLUENT UI === -->
+<!-- === SHAKYA COSMETIC: FULL AI VOICE COMMAND & LIVE API PIPELINE === -->
+<style>
+  #liveVoiceFab {
+    position: fixed;
+    right: 16px;
+    bottom: 20px;
+    z-index: 950;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 10px 16px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #1e1b4b, #4338ca) !important;
+    color: #fde68a !important;
+    border: 2px solid #f59e0b !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  #liveVoiceFab:active { transform: scale(0.94); }
+  #liveVoiceFab.live-active {
+    background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+    color: #ffffff !important;
+    border-color: #fca5a5 !important;
+    animation: glPulse 1.5s infinite;
+  }
+  @keyframes glPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
+    100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+  }
+
+  #geminiLiveDrawer {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999998;
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 14px 24px;
+    max-width: 520px;
+    margin: 0 auto;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+    border-top: 4px solid var(--maroon);
+  }
+  #geminiLiveDrawer.open { display: block !important; }
+  
+  .gl-status-pill {
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #e2e8f0;
+    color: #475569;
+  }
+  .gl-status-pill.active {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #10b981;
+  }
+  
+  .gl-log-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    max-height: 160px;
+    overflow-y: auto;
+    margin-top: 10px;
+    color: #1e293b;
+    scroll-behavior: smooth;
+  }
+  .gl-log-box b { color: var(--maroon); }
+  .gl-command-toast {
+    display: inline-block;
+    background: #f59e0b;
+    color: #111827;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 5px;
+    font-weight: 800;
+  }
+</style>
+
+<button type="button" id="liveVoiceFab" onclick="toggleGeminiLiveDrawer()">
+  <span style="font-size:16px;">🎙️</span> AI Assistant
+</button>
+
+<div id="geminiLiveDrawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+    <div>
+      <div style="font-size:15px;font-weight:900;color:var(--maroon-dark);">🎙️ Shakya AI Assistant</div>
+      <div style="font-size:11px;color:#64748b;">Voice commands & live stock/galla grounding</div>
+    </div>
+    <span id="glConnStatus" class="gl-status-pill">Idle</span>
+    <button type="button" class="small dark" style="margin:0;padding:6px 10px;border-radius:8px;" onclick="closeGeminiLiveDrawer()">✕</button>
+  </div>
+
+  <div class="row" style="margin-top:12px;">
+    <div style="flex:2.2;">
+      <input type="password" id="glApiKeyInput" placeholder="Gemini API Key (AIza...)" style="margin:0;padding:8px 10px;font-size:12px;border-radius:8px;">
+    </div>
+    <div style="flex:1;">
+      <button type="button" class="small" style="width:100%;margin:0;padding:8px;border-radius:8px;background:#334155;color:#fff;" onclick="saveGeminiLiveKey()">Save Key</button>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:10px;">
+    <div>
+      <button type="button" id="glStartSessionBtn" class="gold" style="margin:0;padding:10px;font-size:13px;border-radius:8px;" onclick="startGeminiLiveSession()">▶️ Start Voice Chat</button>
+    </div>
+    <div>
+      <button type="button" class="dark" style="margin:0;padding:10px;font-size:13px;border-radius:8px;" onclick="stopGeminiLiveSession()">⏹️ Stop</button>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:10px;">
+    <div style="flex:2.4;">
+      <input type="text" id="glTextPrompt" placeholder="Text command (Ex: Aaj net cash? ya UPI dikhao)" style="margin:0;padding:8px 10px;font-size:12px;border-radius:8px;" onkeydown="if(event.key==='Enter') sendGroundedTurn()">
+    </div>
+    <div style="flex:1;">
+      <button type="button" class="small gold" style="width:100%;margin:0;padding:8px;border-radius:8px;" onclick="sendGroundedTurn()">Send</button>
+    </div>
+  </div>
+
+  <div id="glTranscriptLog" class="gl-log-box">
+    Ready. API key save karein. Aap pooch sakte hain: <i>"Aaj ki bikri?"</i>, <i>"Red saree ka stock?"</i> ya command dein: <i>"UPI dikhao"</i>, <i>"Stock tab kholo"</i>.
+  </div>
+</div>
+
+<script>
+(function() {
+  const LIVE_MODEL = "models/gemini-2.5-flash";
+  const LIVE_WS_BASE = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent";
+
+  let glWs = null;
+  let glAudioCtx = null;
+  let glMicStream = null;
+  let glProcessor = null;
+  let glNextPlayTime = 0;
+  let glActive = false;
+
+  function appendGlLog(htmlLine) {
+    const box = document.getElementById("glTranscriptLog");
+    if (!box) return;
+    box.innerHTML += `<div>${htmlLine}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function setGlStatus(label, isActive = false) {
+    const el = document.getElementById("glConnStatus");
+    if (el) {
+      el.textContent = label;
+      el.classList.toggle("active", isActive);
+    }
+    const fab = document.getElementById("liveVoiceFab");
+    if (fab) {
+      fab.classList.toggle("live-active", isActive);
+      fab.innerHTML = isActive ? `<span style="font-size:16px;">🔴</span> Listening...` : `<span style="font-size:16px;">🎙️</span> AI Assistant`;
+    }
+  }
+
+  // --- POS ACTION EXECUTOR ---
+  // Reads command tags from Gemini and clicks UI buttons
+  function executeAiCommand(cmdTag) {
+    let actionDone = false;
+    let actName = "";
+    
+    if(cmdTag === "TAB_BILLING") { document.getElementById('tab-billing')?.click(); actName = "Billing Kholi"; actionDone = true; }
+    else if(cmdTag === "TAB_STOCK") { document.getElementById('tab-stock')?.click(); actName = "Stock Khola"; actionDone = true; }
+    else if(cmdTag === "TAB_INSIGHTS") { document.getElementById('tab-stats')?.click(); actName = "Insights Khola"; actionDone = true; }
+    else if(cmdTag === "TAB_CUST") { document.getElementById('tab-cust')?.click(); actName = "Khata Khola"; actionDone = true; }
+    else if(cmdTag === "SHOW_UPI") { 
+      if(typeof showLiveCounterUpiQr === "function") { showLiveCounterUpiQr(); actName = "UPI QR Dikhaya"; actionDone = true; }
+    }
+    else if(cmdTag === "HOLD_BILL") { 
+      if(typeof toggleHoldCart === "function") { toggleHoldCart(); actName = "Bill Hold Kiya"; actionDone = true; }
+    }
+    else if(cmdTag === "ADD_FALL_PICO") { 
+      if(typeof quickAddFallPico === "function") { quickAddFallPico(); actName = "Fall Pico Joda"; actionDone = true; }
+    }
+
+    if (actionDone) {
+      playPosBeep(1200, 0.08);
+      return `<span class="gl-command-toast">⚡ ${actName}</span>`;
+    }
+    return "";
+  }
+
+  // --- DATA GROUNDING ---
+  function getGroundedPosSnapshot() {
+    const todayStr = new Date().toLocaleDateString("hi-IN");
+    const todayIso = typeof getLocalIsoDate === "function" ? getLocalIsoDate() : new Date().toISOString().slice(0, 10);
+
+    const inv = Array.isArray(window.inventory) ? window.inventory : [];
+    const sls = Array.isArray(window.sales) ? window.sales : [];
+    const exps = Array.isArray(window.expenses) ? window.expenses : [];
+    const custs = typeof getCustomerDirectory === "function" ? getCustomerDirectory() : [];
+    const unlocked = typeof window.ownerUnlocked !== "undefined" && !!window.ownerUnlocked;
+
+    const todaySales = sls.filter(s => s && !s.exchanged && (s.date === todayStr || s.isoDate === todayIso));
+    const todaySaleAcc = todaySales.reduce((acc, s) => acc + (Number(s.acc) || 0), 0);
+    const todayExpSum = exps
+      .filter(e => e && (e.date === todayStr || e.isoDate === todayIso))
+      .reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+
+    let todayCash = 0, todayUpi = 0;
+    todaySales.forEach(s => {
+      const paid = s.paid !== undefined ? Number(s.paid) : Number(s.acc) || 0;
+      if (s.mode === "Split") {
+        todayCash += Number(s.splitCash) || 0;
+        todayUpi += Number(s.splitUpi) || 0;
+      } else if (s.mode === "UPI") {
+        todayUpi += paid;
+      } else if (s.mode !== "AEPS Cash") {
+        todayCash += paid;
+      }
+    });
+
+    return {
+      shop: "Shakya Cosmetic (Didi Ki Dukan)",
+      date: todayStr,
+      todayStats: {
+        bills: todaySales.length,
+        totalSale: todaySaleAcc,
+        cashReceived: todayCash,
+        upiReceived: todayUpi,
+        expenses: todayExpSum,
+        netCashInHand: todayCash - todayExpSum
+      },
+      dueCustomers: custs.filter(c => (Number(c.due) || 0) > 0).slice(0, 15).map(c => ({ name: c.name, due: c.due })),
+      stockSample: inv.slice(0, 40).map(i => ({ code: i.code, color: i.color, qty: i.qty, mrp: i.mrp }))
+    };
+  }
+
+  function buildSystemInstruction() {
+    const snap = getGroundedPosSnapshot();
+    return [
+      "You are the voice AI for Shakya Cosmetic POS (Didi Ki Dukan). Speak in concise Hinglish.",
+      "Base your answers STRICTLY on this live data: " + JSON.stringify(snap),
+      "CRITICAL: If the user asks you to perform a UI action (e.g. open stock, show upi, hold bill, add fall pico, open billing, open insights), you MUST append exactly ONE of these tags at the very end of your response: [CMD:TAB_BILLING], [CMD:TAB_STOCK], [CMD:TAB_INSIGHTS], [CMD:TAB_CUST], [CMD:SHOW_UPI], [CMD:HOLD_BILL], [CMD:ADD_FALL_PICO].",
+      "Example User: 'UPI QR dikhao'",
+      "Example You: 'Ji, maine UPI QR code screen par khol diya hai. [CMD:SHOW_UPI]'"
+    ].join(" ");
+  }
+
+  function float32ToPcm16Base64(float32Arr) {
+    const pcm16 = new Int16Array(float32Arr.length);
+    for (let i = 0; i < float32Arr.length; i++) {
+      const s = Math.max(-1, Math.min(1, float32Arr[i]));
+      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    const bytes = new Uint8Array(pcm16.buffer);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+
+  function playPcm24kBase64(base64Str) {
+    try {
+      if (!glAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        glAudioCtx = new Ctx({ sampleRate: 24000 });
+      }
+      const bin = atob(base64Str);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const samples = new Int16Array(bytes.buffer);
+      const audioBuf = glAudioCtx.createBuffer(1, samples.length, 24000);
+      const chData = audioBuf.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) chData[i] = samples[i] / 32768;
+
+      const src = glAudioCtx.createBufferSource();
+      src.buffer = audioBuf;
+      src.connect(glAudioCtx.destination);
+      const startAt = Math.max(glAudioCtx.currentTime, glNextPlayTime);
+      src.start(startAt);
+      glNextPlayTime = startAt + audioBuf.duration;
+    } catch (e) {}
+  }
+
+  function speakFallback(text) {
+    try {
+      if (!("speechSynthesis" in window) || !text) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/[*#_`]/g, ""));
+      u.lang = "hi-IN";
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  // Check text for commands, execute them, and strip the tag for display
+  function processAiResponse(text) {
+    let cleanText = text;
+    let toastHtml = "";
+    const cmdRegex = /\[CMD:([A-Z_]+)\]/g;
+    let match;
+    while ((match = cmdRegex.exec(text)) !== null) {
+      const tag = match[1];
+      toastHtml += executeAiCommand(tag);
+      cleanText = cleanText.replace(match[0], "");
+    }
+    return { text: cleanText.trim(), toast: toastHtml };
+  }
+
+  function sendGroundedTurn() {
+    const inp = document.getElementById("glTextPrompt");
+    const q = (inp ? inp.value : "").trim();
+    if (!q) return;
+    if (inp) inp.value = "";
+    appendGlLog(`<b>Aap:</b> ${escapeHtml(q)}`);
+
+    const apiKey = (localStorage.getItem("sc_gemini_api_key") || "").trim();
+    if (!apiKey) {
+      appendGlLog(`⚠️ <i>Pehle Gemini API Key save karein.</i>`);
+      return;
+    }
+
+    // Check if WebSocket is open for Live Audio stream
+    if (glWs && glWs.readyState === WebSocket.OPEN) {
+      glWs.send(JSON.stringify({
+        clientContent: {
+          turns: [{ role: "user", parts: [{ text: `[Live Context: ${JSON.stringify(getGroundedPosSnapshot())}]
+Instruction: Check context. Question: ${q}` }] }],
+          turnComplete: true
+        }
+      }));
+      return;
+    }
+
+    // REST fallback (Text chat)
+    setGlStatus("Thinking...", true);
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: buildSystemInstruction() }] },
+        contents: [{ role: "user", parts: [{ text: q }] }]
+      })
+    })
+      .then(r => r.json())
+      .then(d => {
+        const rawReply = d?.candidates?.[0]?.content?.parts?.[0]?.text || "Jawab nahi mila.";
+        const processed = processAiResponse(rawReply);
+        appendGlLog(`<b>AI:</b> ${escapeHtml(processed.text)} ${processed.toast}`);
+        speakFallback(processed.text);
+        setGlStatus("Idle", false);
+      })
+      .catch(err => {
+        appendGlLog(`❌ Error: ${escapeHtml(err.message || "Network")}`);
+        setGlStatus("Idle", false);
+      });
+  }
+
+  async function startGeminiLiveSession() {
+    const apiKey = (localStorage.getItem("sc_gemini_api_key") || "").trim();
+    if (!apiKey) {
+      appendGlLog(`⚠️ <i>API Key daal kar Save Key dabayein.</i>`);
+      return;
+    }
+    stopGeminiLiveSession();
+    glActive = true;
+    setGlStatus("Connecting...", true);
+
+    const wsUrl = `${LIVE_WS_BASE}?key=${encodeURIComponent(apiKey)}`;
+    glWs = new WebSocket(wsUrl);
+
+    glWs.onopen = async () => {
+      setGlStatus("Live Mic", true);
+      glWs.send(JSON.stringify({
+        setup: {
+          model: LIVE_MODEL,
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
+          },
+          systemInstruction: { parts: [{ text: buildSystemInstruction() }] }
+        }
+      }));
+
+      try {
+        glMicStream = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, sampleRate: 16000, echoCancellation: true, noiseSuppression: true }
+        });
+        const MicCtx = window.AudioContext || window.webkitAudioContext;
+        const micCtx = new MicCtx({ sampleRate: 16000 });
+        const source = micCtx.createMediaStreamSource(glMicStream);
+        glProcessor = micCtx.createScriptProcessor(4096, 1, 1);
+        source.connect(glProcessor);
+        glProcessor.connect(micCtx.destination);
+
+        glProcessor.onaudioprocess = (ev) => {
+          if (!glWs || glWs.readyState !== WebSocket.OPEN) return;
+          const pcmB64 = float32ToPcm16Base64(ev.inputBuffer.getChannelData(0));
+          glWs.send(JSON.stringify({
+            realtimeInput: { mediaChunks: [{ mimeType: "audio/pcm;rate=16000", data: pcmB64 }] }
+          }));
+        };
+        appendGlLog(`🎙️ <i>Live conversation chalu hai—boliyega! (Ex: "Stock kholo" ya "Aaj ki bikri?")</i>`);
+      } catch (micErr) {
+        appendGlLog(`⚠️ Mic stream error (${escapeHtml(micErr.message || "permission")}). Text mode active.`);
+      }
+    };
+
+    glWs.onmessage = async (event) => {
+      try {
+        const raw = event.data instanceof Blob ? await event.data.text() : event.data;
+        const msg = JSON.parse(raw);
+        const parts = msg?.serverContent?.modelTurn?.parts || [];
+        
+        let fullText = "";
+        parts.forEach(p => {
+          if (p.inlineData && p.inlineData.data) {
+            playPcm24kBase64(p.inlineData.data);
+          }
+          if (p.text) {
+            fullText += p.text;
+          }
+        });
+
+        if (fullText) {
+          const processed = processAiResponse(fullText);
+          if (processed.text || processed.toast) {
+            appendGlLog(`<b>AI:</b> ${escapeHtml(processed.text)} ${processed.toast}`);
+          }
+        }
+      } catch (e) {}
+    };
+
+    glWs.onerror = () => {
+      setGlStatus("Fallback", false);
+      appendGlLog(`ℹ️ Live socket unavailable—type karke poochein.`);
+    };
+
+    glWs.onclose = () => {
+      glActive = false;
+      setGlStatus("Idle", false);
+    };
+  }
+
+  function stopGeminiLiveSession() {
+    glActive = false;
+    if (glProcessor) { try { glProcessor.disconnect(); } catch (e) {} glProcessor = null; }
+    if (glMicStream) { try { glMicStream.getTracks().forEach(t => t.stop()); } catch (e) {} glMicStream = null; }
+    if (glWs) { try { glWs.close(); } catch (e) {} glWs = null; }
+    glNextPlayTime = 0;
+    setGlStatus("Idle", false);
+  }
+
+  window.toggleGeminiLiveDrawer = function() {
+    const dr = document.getElementById("geminiLiveDrawer");
+    const inp = document.getElementById("glApiKeyInput");
+    if (inp) inp.value = localStorage.getItem("sc_gemini_api_key") || "";
+    if (dr) dr.classList.toggle("open");
+  };
+
+  window.closeGeminiLiveDrawer = function() {
+    stopGeminiLiveSession();
+    const dr = document.getElementById("geminiLiveDrawer");
+    if (dr) dr.classList.remove("open");
+  };
+
+  window.saveGeminiLiveKey = function() {
+    const inp = document.getElementById("glApiKeyInput");
+    const key = (inp ? inp.value : "").trim();
+    localStorage.setItem("sc_gemini_api_key", key);
+    appendGlLog(key ? `✅ API Key save ho gayi. Ab "Start Voice Chat" dabayein.` : `⚠️ API Key khali hai.`);
+  };
+
+  window.startGeminiLiveSession = startGeminiLiveSession;
+  window.stopGeminiLiveSession = stopGeminiLiveSession;
+  window.sendGroundedTurn = sendGroundedTurn;
+})();
+</script>
+<!-- === END FULL AI VOICE COMMAND & LIVE API PIPELINE === -->
+</body>
+</html>
